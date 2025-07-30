@@ -4,13 +4,20 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.manga.server.scrapers.Scraper;
+
+import lombok.RequiredArgsConstructor;
+
 @RestController("/")
 @CrossOrigin("*")
+@RequiredArgsConstructor
 public class MainController {
+
+  final Scraper leercapituloScraper;
 
   @GetMapping
   String getMain() {
-    return "Welcome to the Manga Server API. Use /api/v1/manga to access the manga resources.";
+    return leercapituloScraper.getNewChapter();
   }
 
 }
