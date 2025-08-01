@@ -28,6 +28,7 @@
   </scm>
   <properties>
     <java.version>21</java.version>
+    <org.mapstruct.version>1.6.3</org.mapstruct.version>
   </properties>
   <dependencies>
     <dependency>
@@ -60,6 +61,11 @@
       <artifactId>jsoup</artifactId>
       <version>1.17.2</version>
     </dependency>
+    <dependency>
+      <groupId>org.mapstruct</groupId>
+      <artifactId>mapstruct</artifactId>
+      <version>${org.mapstruct.version}</version>
+    </dependency>
   </dependencies>
   <build>
     <plugins>
@@ -68,6 +74,13 @@
         <artifactId>maven-compiler-plugin</artifactId>
         <configuration>
           <annotationProcessorPaths>
+            <!-- MapStruct processor -->
+            <path>
+              <groupId>org.mapstruct</groupId>
+              <artifactId>mapstruct-processor</artifactId>
+              <version>${org.mapstruct.version}</version>
+            </path>
+            <!-- Lombok processor -->
             <path>
               <groupId>org.projectlombok</groupId>
               <artifactId>lombok</artifactId>
