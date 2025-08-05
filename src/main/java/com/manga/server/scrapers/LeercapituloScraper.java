@@ -16,11 +16,7 @@ public class LeercapituloScraper implements Scraper {
 
   @Override
   public List<MangaModel> getNewChapter() {
-    return List.of(
-        new MangaModel(1, "One Piece"),
-        new MangaModel(2, "Naruto"),
-        new MangaModel(3, "Bleach"),
-        new MangaModel(4, "Attack on Titan"));
+    return List.of();
   }
 
 }
