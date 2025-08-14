@@ -10,4 +10,5 @@ public interface Scraper {
 
   public List<MangaModel> getNewChapter();
 
+  public List<MangaModel> searchMangas(String query);
 }
