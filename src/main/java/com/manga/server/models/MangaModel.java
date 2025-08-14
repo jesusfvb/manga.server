@@ -18,4 +18,10 @@ public class MangaModel {
 
   final String name;
 
+  final String url;
+
+  final String thumbnail;
+
+  final double  numberOfChapters;
+
 }
