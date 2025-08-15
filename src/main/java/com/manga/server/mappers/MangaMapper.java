@@ -6,6 +6,7 @@ import org.mapstruct.Mapper;
 
 import com.manga.server.dtos.MangaDTO;
 import com.manga.server.dtos.NewMangaDTO;
+import com.manga.server.dtos.SearchMangaDTO;
 import com.manga.server.models.MangaModel;
 
 @Mapper(componentModel = "spring")
@@ -18,4 +19,8 @@ public interface MangaMapper {
   List<NewMangaDTO> mangasToNewMangaDTOs(List<MangaModel> mangas);
 
   NewMangaDTO mangaToNewMangaDTO(MangaModel manga);
+
+  SearchMangaDTO mangaToSearchMangaDTO(MangaModel manga);
+
+  List<SearchMangaDTO> mangasToSearchMangaDTOs(List<MangaModel> mangas);
 }

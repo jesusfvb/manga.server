@@ -1,4 +1,6 @@
 package com.manga.server.dtos;
 
-public record NewMangaDTO(String name, String url, String thumbnail,double numberOfChapters) {
+import java.util.UUID;
+
+public record NewMangaDTO(UUID id, String name, String thumbnail,double numberOfChapters) {
 }

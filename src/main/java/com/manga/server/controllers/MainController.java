@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.manga.server.dtos.NewMangaDTO;
+import com.manga.server.dtos.SearchMangaDTO;
 import com.manga.server.mappers.MangaMapper;
 import com.manga.server.models.MangaModel;
 import com.manga.server.scrapers.Scraper;
@@ -34,9 +35,9 @@ public class MainController {
   }
 
   @PostMapping("/search")
-  ResponseEntity<List<NewMangaDTO>> searchMangas(@RequestParam String query) {
+  ResponseEntity<List<SearchMangaDTO>> searchMangas(@RequestParam String query) {
     List<MangaModel> mangas = leercapituloScraper.searchMangas(query);
-    return ResponseEntity.ok((mangaMapper.mangasToNewMangaDTOs(mangas)));
+    return ResponseEntity.ok((mangaMapper.mangasToSearchMangaDTOs(mangas)));
   }
 
 }
