@@ -1,43 +1,55 @@
 package com.manga.server.services;
 
-import java.util.LinkedList;
-import java.util.List;
-
-import org.springframework.data.domain.Example;
-import org.springframework.stereotype.Service;
-
+import com.manga.server.enums.ScrappersEnum;
 import com.manga.server.models.MangaModel;
 import com.manga.server.repository.MangaRepository;
 import com.manga.server.scrapers.Scraper;
-
 import lombok.AllArgsConstructor;
+import lombok.extern.java.Log;
+import org.springframework.data.domain.Example;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 @AllArgsConstructor
+@Log
 public class MangaService {
 
-  final Scraper leerCapituloScraper;
-  final MangaRepository mangaRepository;
+    final Scraper leerCapituloScraper;
+    final MangaRepository mangaRepository;
+    final NewListMangaService newListMangaService;
 
-  public List<MangaModel> newMangas() {
-    var scraperMangas = leerCapituloScraper.getNewChapter();
-    exitOfSave(scraperMangas);
-    return List.of();
-  };
-
-  public List<MangaModel> searchManga(String query) {
-    List<MangaModel> mangas = new LinkedList<>();
-
-    return mangas;
-  };
-
-  private void exitOfSave(List<MangaModel> listManga) {
-    for (var manga : listManga) {
-      var exmaple = new MangaModel(null, manga.getName(), manga.getUrl(), null, null);
-      var exit = mangaRepository.exists(Example.of(exmaple));
-      if (!exit) {
-        manga = mangaRepository.save(manga);
-      }
+    public List<MangaModel> newMangas() {
+        var scrapper = ScrappersEnum.leerCapitulo;
+        if (newListMangaService.isTimeCheck(scrapper)) {
+            var mangas = leerCapituloScraper.getNewChapter();
+            exitOfSave(mangas);
+            newListMangaService.saveListNewMangas(mangas,scrapper);
+            log.info("Es new");
+            return mangas;
+        } else {
+            return newListMangaService.getLastListNewManga(scrapper);
+        }
     }
-  }
+
+    public List<MangaModel> searchManga(String query) {
+        var mangas = leerCapituloScraper.searchMangas(query);
+        exitOfSave(mangas);
+        return mangas;
+    }
+
+
+    private void exitOfSave(List<MangaModel> listManga) {
+        for (var manga : listManga) {
+            var exmaple = MangaModel.builder().name(manga.getName()).url(manga.getUrl()).build();
+            var exit = mangaRepository.findOne(Example.of(exmaple));
+            if (exit.isEmpty()) {
+                var id = mangaRepository.save(manga).getId();
+                manga.setId(id);
+            } else {
+                manga.setId(exit.get().getId());
+            }
+        }
+    }
 }

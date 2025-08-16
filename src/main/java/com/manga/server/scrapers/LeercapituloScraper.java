@@ -17,8 +17,8 @@ import com.manga.server.models.MangaModel;
 
 import lombok.extern.java.Log;
 
-@Service
 @Log
+@Service
 public class LeercapituloScraper implements Scraper {
 
   List<MangaModel> newMangasList = null;
@@ -46,8 +46,9 @@ public class LeercapituloScraper implements Scraper {
         String thumbnail = element.select("div > div.media-left.cover-manga > a > img").attr("data-src");
         String numberOfChapters = element.select("div.media-body > div > div > div > span:nth-child(1) > a")
             .text().replace("Capitulo", "").trim();
-        mangas.add(new MangaModel(null, name, baseURl() + url, baseURl() + thumbnail,
-            Double.parseDouble(numberOfChapters)));
+
+        mangas.add(MangaModel.builder().name(name).url(baseURl() + url).thumbnail(baseURl() + thumbnail)
+            .numberOfChapters(Double.parseDouble(numberOfChapters)).build());
       }
     } catch (IOException e) {
       e.printStackTrace();
@@ -77,8 +78,8 @@ public class LeercapituloScraper implements Scraper {
           });
       list.forEach(manga -> {
         mangas.add(
-            new MangaModel(null, manga.label(), baseURl() + manga.link(), baseURl() + manga.thumbnail(),
-                null));
+            MangaModel.builder().name(manga.label()).url(baseURl() + manga.link())
+                .thumbnail(baseURl() + manga.thumbnail()).build());
       });
     } catch (Exception e) {
       e.printStackTrace();

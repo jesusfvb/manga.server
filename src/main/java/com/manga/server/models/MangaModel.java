@@ -4,26 +4,24 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Builder;
+import lombok.Data;
 
-@AllArgsConstructor
-@Setter
-@Getter
+@Data
+@Builder
 @Document(collection = "manga")
 public class MangaModel {
 
   @Id
-  final String id;
+ private String id;
 
   @Indexed(unique = true)
-  final String name;
+ private String name;
 
-  final String url;
+ private String url;
 
-  final String thumbnail;
+ private String thumbnail;
 
-  final Double numberOfChapters;
+ private Double numberOfChapters;
 
 }
