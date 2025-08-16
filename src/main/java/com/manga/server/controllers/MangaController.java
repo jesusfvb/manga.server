@@ -13,22 +13,22 @@ import com.manga.server.dtos.NewMangaDTO;
 import com.manga.server.dtos.SearchMangaDTO;
 import com.manga.server.mappers.MangaMapper;
 import com.manga.server.models.MangaModel;
-import com.manga.server.scrapers.Scraper;
+import com.manga.server.services.MangaService;
 
 import lombok.RequiredArgsConstructor;
 
 @RestController("/")
 @CrossOrigin("*")
 @RequiredArgsConstructor
-public class MainController {
+public class MangaController {
 
-  final Scraper leercapituloScraper;
+  final MangaService mangaService;
   final MangaMapper mangaMapper;
 
   @GetMapping
   ResponseEntity<List<NewMangaDTO>> getNewMangas() {
 
-    List<MangaModel> mangas = leercapituloScraper.getNewChapter();
+    List<MangaModel> mangas = mangaService.newMangas();
     List<NewMangaDTO> newMangaDTOList = mangaMapper.mangasToNewMangaDTOs(mangas);
 
     return ResponseEntity.ok(newMangaDTOList);
@@ -36,7 +36,7 @@ public class MainController {
 
   @PostMapping("/search")
   ResponseEntity<List<SearchMangaDTO>> searchMangas(@RequestParam String query) {
-    List<MangaModel> mangas = leercapituloScraper.searchMangas(query);
+    List<MangaModel> mangas = mangaService.searchManga(query);
     return ResponseEntity.ok((mangaMapper.mangasToSearchMangaDTOs(mangas)));
   }
 

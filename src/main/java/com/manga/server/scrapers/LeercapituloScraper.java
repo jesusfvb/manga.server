@@ -3,7 +3,6 @@ package com.manga.server.scrapers;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.UUID;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -47,7 +46,7 @@ public class LeercapituloScraper implements Scraper {
         String thumbnail = element.select("div > div.media-left.cover-manga > a > img").attr("data-src");
         String numberOfChapters = element.select("div.media-body > div > div > div > span:nth-child(1) > a")
             .text().replace("Capitulo", "").trim();
-        mangas.add(new MangaModel(UUID.randomUUID(), name, baseURl() + url, baseURl() + thumbnail,
+        mangas.add(new MangaModel(null, name, baseURl() + url, baseURl() + thumbnail,
             Double.parseDouble(numberOfChapters)));
       }
     } catch (IOException e) {
@@ -78,7 +77,7 @@ public class LeercapituloScraper implements Scraper {
           });
       list.forEach(manga -> {
         mangas.add(
-            new MangaModel(UUID.randomUUID(), manga.label(), baseURl() + manga.link(), baseURl() + manga.thumbnail(),
+            new MangaModel(null, manga.label(), baseURl() + manga.link(), baseURl() + manga.thumbnail(),
                 null));
       });
     } catch (Exception e) {
