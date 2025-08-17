@@ -18,7 +18,6 @@ import java.util.List;
 public class NewListMangaService {
 
     final NewListMangaRepository newListMangaRepository;
-    private final MangaRepository mangaRepository;
 
     Boolean isTimeCheck(ScrappersEnum scrappersEnum) {
         var example = NewListMangaModel.builder().scraper(scrappersEnum).build();
@@ -52,7 +51,7 @@ public class NewListMangaService {
     }
 
     private boolean isMoreThanMinutes(LocalDateTime date) {
-        int MINUTES = 5;
+        int MINUTES = 30;
 
         Duration duration = Duration.between(date,LocalDateTime.now());
         Duration fiveMinutes = Duration.ofMinutes(MINUTES);

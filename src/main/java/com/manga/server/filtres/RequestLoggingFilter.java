@@ -1,6 +1,7 @@
 package com.manga.server.filtres;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
@@ -28,7 +29,7 @@ public class RequestLoggingFilter extends OncePerRequestFilter {
       filterChain.doFilter(request, response);
     } finally {
       long duration = System.currentTimeMillis() - startTime;
-      log.info("{} {} - {} ms", request.getMethod(), request.getRequestURI(), duration);
+      log.info("{} {} - {} ms in {}", request.getMethod(), request.getRequestURI(), duration, LocalDateTime.now());
     }
   }
 }

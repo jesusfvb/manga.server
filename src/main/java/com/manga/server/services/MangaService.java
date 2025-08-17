@@ -26,9 +26,10 @@ public class MangaService {
             var mangas = leerCapituloScraper.getNewChapter();
             exitOfSave(mangas);
             newListMangaService.saveListNewMangas(mangas,scrapper);
-            log.info("Es new");
+            log.info("Is for:" + scrapper);
             return mangas;
         } else {
+            log.info("Is for: data base" );
             return newListMangaService.getLastListNewManga(scrapper);
         }
     }
