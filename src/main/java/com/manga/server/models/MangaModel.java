@@ -24,4 +24,5 @@ public class MangaModel {
 
  private Double numberOfChapters;
 
+ private String description;
 }

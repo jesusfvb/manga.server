@@ -21,70 +21,75 @@ import lombok.extern.java.Log;
 @Service
 public class LeercapituloScraper implements Scraper {
 
-  List<MangaModel> newMangasList = null;
-
-  @Override
-  public String baseURl() {
-    return "https://www.leercapitulo.co";
-  }
-
-  @Override
-  public List<MangaModel> getNewChapter() {
-
-    if (newMangasList != null) {
-      return newMangasList;
+    @Override
+    public String baseURl() {
+        return "https://www.leercapitulo.co";
     }
 
-    List<MangaModel> mangas = new LinkedList<>();
-    try {
-      Document document = Jsoup.connect(baseURl()).get();
+    @Override
+    public List<MangaModel> getNewChapter() {
 
-      Elements elements = document.select("body > section > div > div > div.col-md-8 > div > div > div");
-      for (var element : elements) {
-        String name = element.select("div.media-body > a > h4").text();
-        String url = element.select("div.media-body > a").attr("href");
-        String thumbnail = element.select("div > div.media-left.cover-manga > a > img").attr("data-src");
-        String numberOfChapters = element.select("div.media-body > div > div > div > span:nth-child(1) > a")
-            .text().replace("Capitulo", "").trim();
+        List<MangaModel> mangas = new LinkedList<>();
+        try {
+            Document document = Jsoup.connect(baseURl()).get();
 
-        mangas.add(MangaModel.builder().name(name).url(baseURl() + url).thumbnail(baseURl() + thumbnail)
-            .numberOfChapters(Double.parseDouble(numberOfChapters)).build());
-      }
-    } catch (IOException e) {
-      e.printStackTrace();
+            Elements elements = document.select("body > section > div > div > div.col-md-8 > div > div > div");
+            for (var element : elements) {
+                String name = element.select("div.media-body > a > h4").text();
+                String url = element.select("div.media-body > a").attr("href");
+                String thumbnail = element.select("div > div.media-left.cover-manga > a > img").attr("data-src");
+                String numberOfChapters = element.select("div.media-body > div > div > div > span:nth-child(1) > a")
+                        .text().replace("Capitulo", "").trim();
+
+                mangas.add(MangaModel.builder().name(name).url(baseURl() + url).thumbnail(baseURl() + thumbnail)
+                        .numberOfChapters(Double.parseDouble(numberOfChapters)).build());
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return mangas;
     }
-    newMangasList = mangas;
-    return mangas;
-  }
 
-  @Override
-  public List<MangaModel> searchMangas(String query) {
-    if (query == null || query.isEmpty()) {
-      return List.of();
+    @Override
+    public List<MangaModel> searchMangas(String query) {
+        if (query == null || query.isEmpty()) {
+            return List.of();
+        }
+        List<MangaModel> mangas = new LinkedList<>();
+        try {
+            RestClient restClient = RestClient.create();
+            String uri = baseURl() + "/search-autocomplete?term=" + query;
+            String result = restClient.get()
+                    .uri(uri)
+                    .retrieve()
+                    .body(String.class);
+
+            ObjectMapper objectMapper = new ObjectMapper();
+
+            List<LeerCapituloSearchDTO> list = objectMapper.readValue(result,
+                    new TypeReference<List<LeerCapituloSearchDTO>>() {
+                    });
+            list.forEach(manga -> {
+                mangas.add(
+                        MangaModel.builder().name(manga.label()).url(baseURl() + manga.link())
+                                .thumbnail(baseURl() + manga.thumbnail()).build());
+            });
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return mangas;
     }
-    List<MangaModel> mangas = new LinkedList<>();
-    try {
-      RestClient restClient = RestClient.create();
-      String uri = baseURl() + "/search-autocomplete?term=" + query;
-      String result = restClient.get()
-          .uri(uri)
-          .retrieve()
-          .body(String.class);
 
-      ObjectMapper objectMapper = new ObjectMapper();
-
-      List<LeerCapituloSearchDTO> list = objectMapper.readValue(result,
-          new TypeReference<List<LeerCapituloSearchDTO>>() {
-          });
-      list.forEach(manga -> {
-        mangas.add(
-            MangaModel.builder().name(manga.label()).url(baseURl() + manga.link())
-                .thumbnail(baseURl() + manga.thumbnail()).build());
-      });
-    } catch (Exception e) {
-      e.printStackTrace();
+    @Override
+    public String getMangaDescription(String url) {
+        if (!url.contains(baseURl())) url = baseURl() + url;
+        try {
+            Document document = Jsoup.connect(url).get();
+            return document.select("#example2").text();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
-    return mangas;
-  }
 
 }

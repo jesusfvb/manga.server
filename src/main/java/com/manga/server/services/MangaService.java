@@ -40,6 +40,20 @@ public class MangaService {
         return mangas;
     }
 
+    public String mangaDescription(String id){
+        var mangaOptional = mangaRepository.findById(id);
+        if(mangaOptional.isPresent()){
+         var manga = mangaOptional.get();
+         if(manga.getDescription()== null){
+           var description =  leerCapituloScraper.getMangaDescription(manga.getUrl());
+           manga.setDescription(description);
+           mangaRepository.save(manga);
+           return  description;
+         }
+         return  manga.getDescription();
+        }
+        return  null;
+    }
 
     private void exitOfSave(List<MangaModel> listManga) {
         for (var manga : listManga) {
