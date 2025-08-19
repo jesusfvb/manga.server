@@ -1,17 +1,18 @@
 package com.manga.server.services;
 
-import com.manga.server.enums.ScrappersEnum;
-import com.manga.server.models.MangaModel;
-import com.manga.server.models.NewListMangaModel;
-import com.manga.server.repository.MangaRepository;
-import com.manga.server.repository.NewListMangaRepository;
-import lombok.AllArgsConstructor;
-import org.springframework.data.domain.Example;
-import org.springframework.stereotype.Service;
-
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
+
+import org.springframework.data.domain.Example;
+import org.springframework.stereotype.Service;
+
+import com.manga.server.enums.ScrappersEnum;
+import com.manga.server.models.MangaModel;
+import com.manga.server.models.NewListMangaModel;
+import com.manga.server.repository.NewListMangaRepository;
+
+import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
 @Service
