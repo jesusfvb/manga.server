@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 
+import com.manga.server.models.ChapterModel;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
@@ -86,6 +87,34 @@ public class LeercapituloScraper implements Scraper {
         try {
             Document document = Jsoup.connect(url).get();
             return document.select("#example2").text();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    @Override
+    public List<ChapterModel> getChapters(String url) {
+        if (!url.contains(baseURl())) url = baseURl() + url;
+        try {
+            Document document = Jsoup.connect(url).get();
+            var chapters = document.select("#examples > div > div > ul > li > div > h4 > a");
+            List<ChapterModel> chapterModels = new LinkedList<>();
+            for (var chapter : chapters) {
+                String chapterUrl = chapter.attr("href");
+                String number = chapter.text().split(" ")[1];
+
+                if(number.contains(":")) {
+                    number = number.split(":")[0];
+                }
+                chapterModels.add(ChapterModel.builder()
+                        .url(baseURl() + chapterUrl)
+                        .number(Double.parseDouble(number))
+                        .mangaId(url)
+                        .build());
+            }
+            return  chapterModels;
+
         } catch (IOException e) {
             e.printStackTrace();
         }

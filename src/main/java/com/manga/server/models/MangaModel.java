@@ -13,16 +13,16 @@ import lombok.Data;
 public class MangaModel {
 
   @Id
- private String id;
+  private String id;
 
   @Indexed(unique = true)
- private String name;
+  private String name;
 
- private String url;
+  private String url;
 
- private String thumbnail;
+  private String thumbnail;
 
- private Double numberOfChapters;
+  private Double numberOfChapters;
 
- private String description;
+  private String description;
 }

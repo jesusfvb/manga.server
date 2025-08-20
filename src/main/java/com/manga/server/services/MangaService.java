@@ -21,6 +21,16 @@ public class MangaService {
     final MangaRepository mangaRepository;
     final NewListMangaService newListMangaService;
 
+    public MangaModel getMangaById(String mangaId) {
+        var mangaOptional = mangaRepository.findById(mangaId);
+        if (mangaOptional.isPresent()) {
+            return mangaOptional.get();
+        } else {
+            log.warning("Manga not found with id: " + mangaId);
+            return null;
+        }
+    }
+
     public List<MangaModel> newMangas() {
         var scrapper = ScrappersEnum.leerCapitulo;
         if (newListMangaService.isTimeCheck(scrapper)) {
@@ -47,11 +57,12 @@ public class MangaService {
         if (mangas.size() <= 3) {
             var mangasScrapper = leerCapituloScraper.searchMangas(query);
             for (var magaScraper : mangasScrapper) {
-                if(mangas.stream().noneMatch(m-> m.getName().equals(magaScraper.getName()))){
+                if (mangas.stream().noneMatch(m -> m.getName().equals(magaScraper.getName()))) {
                     exitOfSave(magaScraper);
                     mangas.add(magaScraper);
-                    logMessage = "Is search for:" +leerCapituloScraper.toString();
-                };
+                    logMessage = "Is search for:" + leerCapituloScraper.toString();
+                }
+                ;
             }
         }
         log.info(logMessage);
@@ -75,7 +86,7 @@ public class MangaService {
         return null;
     }
 
-    private void exitOfSave(MangaModel manga){
+    private void exitOfSave(MangaModel manga) {
         var example = MangaModel.builder().name(manga.getName()).url(manga.getUrl()).build();
         var exit = mangaRepository.findOne(Example.of(example));
         if (exit.isEmpty()) {
@@ -91,4 +102,5 @@ public class MangaService {
             exitOfSave(manga);
         }
     }
+
 }
