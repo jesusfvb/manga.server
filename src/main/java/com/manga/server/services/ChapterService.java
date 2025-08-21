@@ -1,5 +1,7 @@
 package com.manga.server.services;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import com.manga.server.enums.ScrappersEnum;
@@ -18,26 +20,26 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 public class ChapterService {
 
-    final MangaService mangaService;
-    final ScrapperService scrapperService;
+  final MangaService mangaService;
+  final ScrapperService scrapperService;
 
-    final ChapterRepository chapterRepository;
+  final ChapterRepository chapterRepository;
 
-
-    public List<ChapterModel> getChapters(String mangaId) {
-//        TODO hacer que de aqui un tiempo se actualice la base de datos
-        var example = Example.of(ChapterModel.builder().mangaId(mangaId).build());
-        var chapters = chapterRepository.findAll(example);
-        var logMessage = "Is chapter for DataBase";
-        if (chapters.isEmpty()) {
-            MangaModel manga = mangaService.getMangaById(mangaId);
-            chapters = scrapperService.getChapters(ScrappersEnum.leerCapitulo, manga.getUrl());
-            chapters.forEach(chapter -> chapter.setMangaId(mangaId));
-            chapters = chapterRepository.saveAll(chapters);
-            logMessage = "Is chapter for Scrapper";
-        }
-        log.info(logMessage);
-        return chapters;
+  public List<ChapterModel> getChapters(String mangaId) {
+    // TODO hacer que de aqui un tiempo se actualice la base de datos
+    var example = Example.of(ChapterModel.builder().mangaId(mangaId).build());
+    var chapters = chapterRepository.findAll(example);
+    var logMessage = "Is chapter for DataBase";
+    if (chapters.isEmpty()) {
+      MangaModel manga = mangaService.getMangaById(mangaId);
+      chapters = scrapperService.getChapters(ScrappersEnum.leerCapitulo, manga.getUrl());
+      chapters.forEach(chapter -> chapter.setMangaId(mangaId));
+      chapters = chapterRepository.saveAll(chapters);
+      logMessage = "Is chapter for Scrapper";
     }
+    log.info(logMessage);
+    Collections.sort(chapters, Comparator.comparingDouble(ChapterModel::getNumber));
+    return chapters;
+  }
 
 }

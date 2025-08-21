@@ -4,7 +4,6 @@ import com.manga.server.dtos.ChapterDTO;
 import com.manga.server.mappers.ChapterMapper;
 import com.manga.server.services.ChapterService;
 import lombok.AllArgsConstructor;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -14,11 +13,11 @@ import java.util.List;
 @CrossOrigin("*")
 @AllArgsConstructor
 public class ChapterController {
-    final ChapterService chapterService;
-    final ChapterMapper chapterMapper;
+  final ChapterService chapterService;
+  final ChapterMapper chapterMapper;
 
-    @GetMapping
-    List<ChapterDTO> getChapters(@RequestParam String mangaId) {
-        return chapterMapper.chaptersToChapterDTOs(chapterService.getChapters(mangaId));
-    }
+  @GetMapping
+  List<ChapterDTO> getChapters(@RequestParam String mangaId) {
+    return chapterMapper.chaptersToChapterDTOs(chapterService.getChapters(mangaId));
+  }
 }
