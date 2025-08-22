@@ -3,7 +3,6 @@ package com.manga.server.services;
 import com.manga.server.enums.ScrappersEnum;
 import com.manga.server.models.MangaModel;
 import com.manga.server.repository.MangaRepository;
-import com.manga.server.scrapers.Scraper;
 import lombok.AllArgsConstructor;
 import lombok.extern.java.Log;
 import org.springframework.data.domain.Example;
@@ -17,7 +16,7 @@ import java.util.List;
 @Log
 public class MangaService {
 
-  final Scraper leerCapituloScraper;
+  final ScrapperService scrapperService;
   final MangaRepository mangaRepository;
   final NewListMangaService newListMangaService;
 
@@ -34,7 +33,7 @@ public class MangaService {
   public List<MangaModel> newMangas() {
     var scrapper = ScrappersEnum.leerCapitulo;
     if (newListMangaService.isTimeCheck(scrapper)) {
-      var mangas = leerCapituloScraper.getNewChapter();
+      var mangas = scrapperService.getNewMangas();
       exitOfSave(mangas);
       newListMangaService.saveListNewMangas(mangas, scrapper);
       log.info("Is new mangas for:" + scrapper);
@@ -55,12 +54,12 @@ public class MangaService {
 
     // TODO Actualizar este numero en un futuro
     if (mangas.size() <= 3) {
-      var mangasScrapper = leerCapituloScraper.searchMangas(query);
+      var mangasScrapper = scrapperService.searchManga(ScrappersEnum.leerCapitulo,query);
       for (var magaScraper : mangasScrapper) {
         if (mangas.stream().noneMatch(m -> m.getName().equals(magaScraper.getName()))) {
           exitOfSave(magaScraper);
           mangas.add(magaScraper);
-          logMessage = "Is search for:" + leerCapituloScraper.toString();
+          logMessage = "Is search for:" + scrapperService.toString();
         }
         ;
       }
@@ -74,7 +73,7 @@ public class MangaService {
     if (mangaOptional.isPresent()) {
       var manga = mangaOptional.get();
       if (manga.getDescription() == null) {
-        var description = leerCapituloScraper.getMangaDescription(manga.getUrl());
+        var description = scrapperService.getMangaDescription(ScrappersEnum.leerCapitulo,manga.getUrl());
         manga.setDescription(description);
         mangaRepository.save(manga);
         log.info("Is description for:" + ScrappersEnum.leerCapitulo);
