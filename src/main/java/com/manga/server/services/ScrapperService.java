@@ -2,6 +2,7 @@ package com.manga.server.services;
 
 import com.manga.server.enums.ScrappersEnum;
 import com.manga.server.models.ChapterModel;
+import com.manga.server.models.ImgModel;
 import com.manga.server.models.MangaModel;
 import com.manga.server.scrapers.LeercapituloScraper;
 import lombok.AllArgsConstructor;
@@ -35,6 +36,14 @@ public class ScrapperService {
     public List<ChapterModel> getChapters(ScrappersEnum scrapper, String url) {
         return switch (scrapper) {
             case leerCapitulo -> leercapituloScraper.getChapters(url);
+            default -> throw new IllegalArgumentException("Scraper not implemented: " + scrapper);
+        };
+    }
+
+
+    public List<ImgModel> getImg(ScrappersEnum scrapper, String url) {
+        return switch (scrapper) {
+            case leerCapitulo -> leercapituloScraper.gteImg(url);
             default -> throw new IllegalArgumentException("Scraper not implemented: " + scrapper);
         };
     }

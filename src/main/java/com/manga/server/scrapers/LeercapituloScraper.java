@@ -1,10 +1,17 @@
 package com.manga.server.scrapers;
 
 import java.io.IOException;
+import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 
 import com.manga.server.models.ChapterModel;
+import com.manga.server.models.ImgModel;
+
+import com.microsoft.playwright.Browser;
+import com.microsoft.playwright.BrowserContext;
+import com.microsoft.playwright.Page;
+import com.microsoft.playwright.Playwright;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
@@ -104,7 +111,7 @@ public class LeercapituloScraper implements Scraper {
                 String chapterUrl = chapter.attr("href");
                 String number = chapter.text().split(" ")[1];
 
-                if(number.contains(":")) {
+                if (number.contains(":")) {
                     number = number.split(":")[0];
                 }
                 chapterModels.add(ChapterModel.builder()
@@ -113,12 +120,40 @@ public class LeercapituloScraper implements Scraper {
                         .mangaId(url)
                         .build());
             }
-            return  chapterModels;
+            return chapterModels;
 
         } catch (IOException e) {
             e.printStackTrace();
         }
         return null;
+    }
+
+    @Override
+    public List<ImgModel> gteImg(String url) {
+        if (!url.contains(baseURl())) url = baseURl() + url;
+        List<ImgModel> imgModels = new LinkedList<>();
+        try (Playwright playwright = Playwright.create()) {
+            Browser browser = playwright.chromium().launch();
+            BrowserContext context = browser.newContext();
+            context.addInitScript("localStorage.setItem('display_mode', '1')");
+            Page page = context.newPage();
+            page.navigate(url);
+            page.waitForLoadState();
+            var images = page.querySelectorAll(".comic_wraCon > a");
+            for (var image : images) {
+                String img = image.querySelector("img").getAttribute("data-src");
+                String number = image.getAttribute("name");
+                if (img != null && !img.isEmpty()) {
+                    imgModels.add(ImgModel.builder().number(Integer.parseInt(number)).url(img).build());
+                }
+            }
+
+            browser.close();
+        }
+        if(imgModels.size() >=1){
+            imgModels.sort(Comparator.comparingInt(ImgModel::getNumber));
+        }
+        return imgModels;
     }
 
 }

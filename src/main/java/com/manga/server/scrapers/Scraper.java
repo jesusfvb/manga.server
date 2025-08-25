@@ -3,6 +3,7 @@ package com.manga.server.scrapers;
 import java.util.List;
 
 import com.manga.server.models.ChapterModel;
+import com.manga.server.models.ImgModel;
 import com.manga.server.models.MangaModel;
 
 public interface Scraper {
@@ -16,4 +17,6 @@ public interface Scraper {
    String getMangaDescription(String url);
 
    List<ChapterModel> getChapters(String url);
+
+   List<ImgModel> gteImg(String url);
 }
