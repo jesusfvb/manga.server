@@ -13,6 +13,7 @@ import java.util.List;
 
 @Service
 @AllArgsConstructor
+// TODO Hacer que erede de scrapper
 public class ScrapperService {
     final LeercapituloScraper leercapituloScraper;
 

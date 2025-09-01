@@ -1,19 +1,17 @@
 package com.manga.server.features.chapter.services;
 
+import java.util.Comparator;
+import java.util.List;
+
+import org.springframework.data.domain.Example;
+import org.springframework.stereotype.Service;
+
 import com.manga.server.features.chapter.models.ImgModel;
 import com.manga.server.features.chapter.repository.ImgRepository;
 import com.manga.server.features.scrapper.enums.ScrappersEnum;
 import com.manga.server.features.scrapper.services.ScrapperService;
 
-import org.apache.commons.lang3.function.Consumers;
-import org.springframework.data.domain.Example;
-import org.springframework.stereotype.Service;
-
 import lombok.AllArgsConstructor;
-
-import java.util.Comparator;
-import java.util.List;
-import java.util.function.Consumer;
 
 @Service
 @AllArgsConstructor
