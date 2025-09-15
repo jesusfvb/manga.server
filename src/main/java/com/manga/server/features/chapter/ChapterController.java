@@ -17,6 +17,7 @@ import java.util.List;
 @CrossOrigin("*")
 @AllArgsConstructor
 public class ChapterController {
+
   final ChapterService chapterService;
   final ChapterMapper chapterMapper;
 

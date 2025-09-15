@@ -10,14 +10,14 @@ import lombok.Data;
 @Builder
 @Document("chapters")
 public class ChapterModel {
-    @Id
-    String id;
+  @Id
+  String id;
 
-    Double number;
+  Double number;
 
-    String[] images;
+  String[] images;
 
-    String url;
+  String url;
 
-    String mangaId;
+  String mangaId;
 }
