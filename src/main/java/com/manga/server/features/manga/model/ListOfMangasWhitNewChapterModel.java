@@ -12,8 +12,8 @@ import java.util.List;
 
 @Data
 @Builder
-@Document(collection = "new_mangas_list")
-public class NewListMangaModel {
+@Document(collection = "list_of_mangas_whit_new_chapter")
+public class ListOfMangasWhitNewChapterModel {
 
     @Id
     private String id;

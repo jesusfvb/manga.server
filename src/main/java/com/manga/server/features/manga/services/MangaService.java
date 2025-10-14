@@ -21,7 +21,7 @@ public class MangaService {
 
   final ScrapperService scrapperService;
   final MangaRepository mangaRepository;
-  final NewListMangaService newListMangaService;
+  final ListOfMangasWhitNewChapterService newListMangaService;
   final ChapterService chapterService;
 
   public List<MangaModel> getMangasByIds(List<String> ids) {
@@ -38,7 +38,7 @@ public class MangaService {
     }
   }
 
-  public List<MangaModel> newMangas() {
+  public List<MangaModel> mangasWhirNewChapters() {
     var scrapper = ScrappersEnum.leerCapitulo;
     if (newListMangaService.isTimeCheck(scrapper)) {
       var newMangas = scrapperService.getNewMangas();
@@ -116,7 +116,7 @@ public class MangaService {
   }
 
   public void starApp() {
-    newMangas();
+    mangasWhirNewChapters();
   }
 
 }

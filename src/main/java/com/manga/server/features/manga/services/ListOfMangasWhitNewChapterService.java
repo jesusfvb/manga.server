@@ -8,20 +8,20 @@ import org.springframework.data.domain.Example;
 import org.springframework.stereotype.Service;
 
 import com.manga.server.features.manga.model.MangaModel;
-import com.manga.server.features.manga.model.NewListMangaModel;
-import com.manga.server.features.manga.repository.NewListMangaRepository;
+import com.manga.server.features.manga.model.ListOfMangasWhitNewChapterModel;
+import com.manga.server.features.manga.repository.ListOfMangasWhitNewChapterRepository;
 import com.manga.server.features.scrapper.enums.ScrappersEnum;
 
 import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
 @Service
-public class NewListMangaService {
+public class ListOfMangasWhitNewChapterService {
 
-    final NewListMangaRepository newListMangaRepository;
+    final ListOfMangasWhitNewChapterRepository newListMangaRepository;
 
     Boolean isTimeCheck(ScrappersEnum scrappersEnum) {
-        var example = NewListMangaModel.builder().scraper(scrappersEnum).build();
+        var example = ListOfMangasWhitNewChapterModel.builder().scraper(scrappersEnum).build();
         var newListManga = newListMangaRepository.findOne(Example.of(example));
         if (newListManga.isPresent()) {
             return isMoreThanMinutes(newListManga.get().getDateTime());
@@ -30,14 +30,14 @@ public class NewListMangaService {
     }
 
     List<MangaModel> getLastListNewManga(ScrappersEnum scrappersEnum) {
-        var example = NewListMangaModel.builder().scraper(scrappersEnum).build();
+        var example = ListOfMangasWhitNewChapterModel.builder().scraper(scrappersEnum).build();
         var newListManga = newListMangaRepository.findOne(Example.of(example));
         if (newListManga.isPresent()) return newListManga.get().getMangas();
         return null;
     }
 
     void saveListNewMangas(List<MangaModel> mangas, ScrappersEnum scrappersEnum) {
-        var example = NewListMangaModel.builder().scraper(scrappersEnum).build();
+        var example = ListOfMangasWhitNewChapterModel.builder().scraper(scrappersEnum).build();
         var newListManga = newListMangaRepository.findOne(Example.of(example));
         if(newListManga.isPresent()){
             newListManga.get().setMangas(mangas);

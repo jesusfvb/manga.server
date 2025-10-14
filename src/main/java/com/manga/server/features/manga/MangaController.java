@@ -27,7 +27,7 @@ public class MangaController {
 
   @GetMapping
   public ResponseEntity<List<MangaDTO>> getMangasWhitNewChapters() {
-    List<MangaModel> mangas = mangaService.newMangas();
+    List<MangaModel> mangas = mangaService.mangasWhirNewChapters();
     return ResponseEntity.ok((mangaMapper.mangasToMangaDTOs(mangas)));
   }
 
