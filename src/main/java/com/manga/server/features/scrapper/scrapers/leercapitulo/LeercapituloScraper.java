@@ -51,7 +51,7 @@ public class LeercapituloScraper implements Scraper {
             .text().replace("Capitulo", "").trim();
 
         mangas.add(MangaModel.builder().name(name).url(baseURl() + url).thumbnail(baseURl() + thumbnail)
-            .numberOfChapters(Double.parseDouble(numberOfChapters)).build());
+            .lastChapter(Double.parseDouble(numberOfChapters)).build());
       }
     } catch (IOException e) {
       e.printStackTrace();
