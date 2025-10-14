@@ -1,5 +1,6 @@
 package com.manga.server.features.manga.services;
 
+import com.manga.server.features.chapter.services.ChapterService;
 import com.manga.server.features.manga.model.MangaModel;
 import com.manga.server.features.manga.repository.MangaRepository;
 import com.manga.server.features.scrapper.enums.ScrappersEnum;
@@ -21,6 +22,11 @@ public class MangaService {
   final ScrapperService scrapperService;
   final MangaRepository mangaRepository;
   final NewListMangaService newListMangaService;
+  final ChapterService chapterService;
+
+  public List<MangaModel> getMangasByIds(List<String> ids) {
+    return mangaRepository.findAllById(ids);
+  }
 
   public MangaModel getMangaById(String mangaId) {
     var mangaOptional = mangaRepository.findById(mangaId);
@@ -35,14 +41,19 @@ public class MangaService {
   public List<MangaModel> newMangas() {
     var scrapper = ScrappersEnum.leerCapitulo;
     if (newListMangaService.isTimeCheck(scrapper)) {
-      var mangas = scrapperService.getNewMangas();
-      exitOfSave(mangas);
-      newListMangaService.saveListNewMangas(mangas, scrapper);
-      log.info("Is new mangas for:" + scrapper);
-      return mangas;
+      var newMangas = scrapperService.getNewMangas();
+      exitOfSave(newMangas);
+      newListMangaService.saveListNewMangas(newMangas, scrapper);
+      return newMangas;
+
     } else {
+      var newMangas = newListMangaService.getLastListNewManga(scrapper);
+      newMangas.forEach(manga -> {
+        var lastChapterNumber = chapterService.getLastChapterNumber(manga.getId());
+        manga.setLastChapter(lastChapterNumber);
+      });
       log.info("Is new mangas for: data base");
-      return newListMangaService.getLastListNewManga(scrapper);
+      return newMangas;
     }
   }
 
@@ -56,7 +67,7 @@ public class MangaService {
 
     // TODO Actualizar este numero en un futuro
     if (mangas.size() <= 3) {
-      var mangasScrapper = scrapperService.searchManga(ScrappersEnum.leerCapitulo,query);
+      var mangasScrapper = scrapperService.searchManga(ScrappersEnum.leerCapitulo, query);
       for (var magaScraper : mangasScrapper) {
         if (mangas.stream().noneMatch(m -> m.getName().equals(magaScraper.getName()))) {
           exitOfSave(magaScraper);
@@ -75,7 +86,7 @@ public class MangaService {
     if (mangaOptional.isPresent()) {
       var manga = mangaOptional.get();
       if (manga.getDescription() == null) {
-        var description = scrapperService.getMangaDescription(ScrappersEnum.leerCapitulo,manga.getUrl());
+        var description = scrapperService.getMangaDescription(ScrappersEnum.leerCapitulo, manga.getUrl());
         manga.setDescription(description);
         mangaRepository.save(manga);
         log.info("Is description for:" + ScrappersEnum.leerCapitulo);
@@ -102,6 +113,10 @@ public class MangaService {
     for (var manga : listManga) {
       exitOfSave(manga);
     }
+  }
+
+  public void starApp() {
+    newMangas();
   }
 
 }
