@@ -1,7 +1,8 @@
 package com.manga.server.features.manga.model;
 
+import java.time.LocalDateTime;
+
 import org.springframework.data.annotation.Id;
-import org.springframework.data.annotation.Transient;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -10,8 +11,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
-
 @Data
 @Builder
 @NoArgsConstructor
@@ -19,21 +18,19 @@ import java.time.LocalDateTime;
 @Document(collection = "manga")
 public class MangaModel {
 
-        @Id
-        private String id;
+  @Id
+  private String id;
 
-        @Indexed(unique = true)
-        private String name;
+  @Indexed(unique = true)
+  private String name;
 
-        private String url;
+  private String url;
 
-        private String thumbnail;
+  private String thumbnail;
 
-        private String description;
+  private String description;
 
-        private LocalDateTime lastUpdated;
+  private LocalDateTime lastUpdated;
 
-        @Transient
-        @Builder.Default
-        private Double lastChapter = null;
+  private Double lastChapter;
 }
