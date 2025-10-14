@@ -21,38 +21,52 @@ import org.springframework.stereotype.Service;
 @Service
 public class ChapterService {
 
-  @Autowired
-  private MangaService mangaService;
-  @Autowired
-  private ScrapperService scrapperService;
+    @Lazy
+    @Autowired
+    private MangaService mangaService;
+    @Autowired
+    private ScrapperService scrapperService;
 
-  @Lazy
-  @Autowired
-  private ImgService imgService;
+    @Lazy
+    @Autowired
+    private ImgService imgService;
 
-  @Autowired
-  ChapterRepository chapterRepository;
+    @Autowired
+    ChapterRepository chapterRepository;
 
-  public List<ChapterModel> getChapters(String mangaId) {
-    // TODO hacer que de aqui un tiempo se actualice la base de datos
-    var example = Example.of(ChapterModel.builder().mangaId(mangaId).build());
-    var chapters = chapterRepository.findAll(example);
-    var logMessage = "Is chapter for DataBase";
-    if (chapters.isEmpty()) {
-      MangaModel manga = mangaService.getMangaById(mangaId);
-      chapters = scrapperService.getChapters(ScrappersEnum.leerCapitulo, manga.getUrl());
-      chapters.forEach(chapter -> chapter.setMangaId(mangaId));
-      chapters = chapterRepository.saveAll(chapters);
-      logMessage = "Is chapter for Scrapper";
+    public List<ChapterModel> getChapters(String mangaId) {
+        // TODO hacer que de aqui un tiempo se actualice la base de datos
+        var example = Example.of(ChapterModel.builder().mangaId(mangaId).build());
+        var chapters = chapterRepository.findAll(example);
+        var logMessage = "Is chapter for DataBase";
+        if (chapters.isEmpty()) {
+            MangaModel manga = mangaService.getMangaById(mangaId);
+            chapters = scrapperService.getChapters(ScrappersEnum.leerCapitulo, manga.getUrl());
+            chapters.forEach(chapter -> chapter.setMangaId(mangaId));
+            chapters = chapterRepository.saveAll(chapters);
+            logMessage = "Is chapter for Scrapper";
+        }
+        log.info(logMessage);
+        chapters.sort(Comparator.comparingDouble(ChapterModel::getNumber));
+        // imgService.preLoadImages(chapters);
+        return chapters;
     }
-    log.info(logMessage);
-    chapters.sort(Comparator.comparingDouble(ChapterModel::getNumber));
-    // imgService.preLoadImages(chapters);
-    return chapters;
-  }
 
-  public ChapterModel getChapterById(String chapterId) {
-    // TODO manejar el error
-    return chapterRepository.findById(chapterId).orElseThrow();
-  }
+    public ChapterModel getChapterById(String chapterId) {
+        // TODO manejar el error
+        return chapterRepository.findById(chapterId).orElseThrow();
+    }
+
+    public Double getLastChapterNumber(String mangaId) {
+        var example = Example.of(ChapterModel.builder().mangaId(mangaId).build());
+        var chapters = chapterRepository.findAll(example);
+        if (chapters.isEmpty()) {
+            chapters = getChapters(mangaId);
+        }
+
+        if (chapters.isEmpty()) {
+            return 0.0;
+        }
+        return chapters.stream().max(Comparator.comparingDouble(ChapterModel::getNumber)).get().getNumber();
+    }
 }
