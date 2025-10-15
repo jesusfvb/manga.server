@@ -16,8 +16,8 @@ import java.util.List;
 public class ScrapperService {
   final LeercapituloScraper leercapituloScraper;
 
-  public List<MangaModel> getNewMangas() {
-    return leercapituloScraper.getNewChapter();
+  public List<MangaModel> getMangasWithNewChapters() {
+    return leercapituloScraper.getMangasWithNewChapters();
   }
 
   public List<MangaModel> searchManga(ScrappersEnum scrapper, String query) {

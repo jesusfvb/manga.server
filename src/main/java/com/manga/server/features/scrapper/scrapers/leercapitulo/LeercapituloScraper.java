@@ -36,7 +36,7 @@ public class LeercapituloScraper implements Scraper {
   }
 
   @Override
-  public List<MangaModel> getNewChapter() {
+  public List<MangaModel> getMangasWithNewChapters() {
 
     List<MangaModel> mangas = new LinkedList<>();
     try {

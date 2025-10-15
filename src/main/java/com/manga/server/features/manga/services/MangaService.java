@@ -21,7 +21,7 @@ public class MangaService {
 
   final ScrapperService scrapperService;
   final MangaRepository mangaRepository;
-  final ListOfMangasWhitNewChapterService newListMangaService;
+  final ListOfMangasWhitNewChapterService listOfMangasWhitNewChapterService;
   final ChapterService chapterService;
 
   public List<MangaModel> getMangasByIds(List<String> ids) {
@@ -38,22 +38,22 @@ public class MangaService {
     }
   }
 
-  public List<MangaModel> mangasWhirNewChapters() {
+  public List<MangaModel> mangasWithNewChapters() {
     var scrapper = ScrappersEnum.leerCapitulo;
-    if (newListMangaService.isTimeCheck(scrapper)) {
-      var newMangas = scrapperService.getNewMangas();
-      exitOfSave(newMangas);
-      newListMangaService.saveListNewMangas(newMangas, scrapper);
-      return newMangas;
+    if (listOfMangasWhitNewChapterService.isTimeCheck(scrapper)) {
+      var mangasWhitNewChapters = scrapperService.getMangasWithNewChapters();
+      exitOfSave(mangasWhitNewChapters);
+      listOfMangasWhitNewChapterService.save(mangasWhitNewChapters, scrapper);
+      return mangasWhitNewChapters;
 
     } else {
-      var newMangas = newListMangaService.getLastListNewManga(scrapper);
-      newMangas.forEach(manga -> {
+      var mangasWhitNewChapters = listOfMangasWhitNewChapterService.getLastListNewManga(scrapper);
+      mangasWhitNewChapters.forEach(manga -> {
         var lastChapterNumber = chapterService.getLastChapterNumber(manga.getId());
         manga.setLastChapter(lastChapterNumber);
       });
       log.info("Is new mangas for: data base");
-      return newMangas;
+      return mangasWhitNewChapters;
     }
   }
 
@@ -116,7 +116,7 @@ public class MangaService {
   }
 
   public void starApp() {
-    mangasWhirNewChapters();
+    mangasWithNewChapters();
   }
 
 }

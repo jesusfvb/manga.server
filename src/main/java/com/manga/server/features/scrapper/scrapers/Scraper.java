@@ -10,7 +10,7 @@ public interface Scraper {
 
   String baseURl();
 
-  List<MangaModel> getNewChapter();
+  List<MangaModel> getMangasWithNewChapters();
 
   List<MangaModel> searchMangas(String query);
 

@@ -36,7 +36,7 @@ public class ListOfMangasWhitNewChapterService {
         return null;
     }
 
-    void saveListNewMangas(List<MangaModel> mangas, ScrappersEnum scrappersEnum) {
+    void save(List<MangaModel> mangas, ScrappersEnum scrappersEnum) {
         var example = ListOfMangasWhitNewChapterModel.builder().scraper(scrappersEnum).build();
         var newListManga = newListMangaRepository.findOne(Example.of(example));
         if(newListManga.isPresent()){
