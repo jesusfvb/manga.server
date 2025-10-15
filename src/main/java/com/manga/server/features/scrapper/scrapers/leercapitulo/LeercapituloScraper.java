@@ -56,6 +56,11 @@ public class LeercapituloScraper implements Scraper {
     } catch (IOException e) {
       e.printStackTrace();
     }
+
+    mangas.forEach(manga -> {
+      var description = getMangaDescription(manga.getUrl());
+      manga.setDescription(description);
+    });
     return mangas;
   }
 
