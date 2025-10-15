@@ -1,28 +1,39 @@
 package com.manga.server.features.manga.services;
 
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
+
+import org.springframework.data.domain.Example;
+import org.springframework.data.domain.ExampleMatcher;
+import org.springframework.stereotype.Service;
+
 import com.manga.server.features.chapter.services.ChapterService;
 import com.manga.server.features.manga.model.MangaModel;
 import com.manga.server.features.manga.repository.MangaRepository;
 import com.manga.server.features.scrapper.enums.ScrappersEnum;
 import com.manga.server.features.scrapper.services.ScrapperService;
 
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
-import org.springframework.data.domain.Example;
-import org.springframework.data.domain.ExampleMatcher;
-import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 @Log
 public class MangaService {
 
-  final ScrapperService scrapperService;
-  final MangaRepository mangaRepository;
-  final ListOfMangasWhitNewChapterService listOfMangasWhitNewChapterService;
-  final ChapterService chapterService;
+  private final ScrapperService scrapperService;
+  private final MangaRepository mangaRepository;
+  private final ListOfMangasWhitNewChapterService listOfMangasWhitNewChapterService;
+  private final ChapterService chapterService;
+
+  private final Executor executor;
+
+  private volatile boolean isUpdatingMangas = false;
+
+  public void starApp() {
+    getMangasWithNewChapters();
+  }
 
   public List<MangaModel> getMangasByIds(List<String> ids) {
     return mangaRepository.findAllById(ids);
@@ -39,22 +50,10 @@ public class MangaService {
   }
 
   public List<MangaModel> mangasWithNewChapters() {
+    CompletableFuture.runAsync(this::getMangasWithNewChapters, executor);
     var scrapper = ScrappersEnum.leerCapitulo;
-    if (listOfMangasWhitNewChapterService.isTimeCheck(scrapper)) {
-      var mangasWhitNewChapters = scrapperService.getMangasWithNewChapters();
-      exitOfSave(mangasWhitNewChapters);
-      listOfMangasWhitNewChapterService.save(mangasWhitNewChapters, scrapper);
-      return mangasWhitNewChapters;
-
-    } else {
-      var mangasWhitNewChapters = listOfMangasWhitNewChapterService.getLastListNewManga(scrapper);
-      mangasWhitNewChapters.forEach(manga -> {
-        var lastChapterNumber = chapterService.getLastChapterNumber(manga.getId());
-        manga.setLastChapter(lastChapterNumber);
-      });
-      log.info("Is new mangas for: data base");
-      return mangasWhitNewChapters;
-    }
+    var mangasWhitNewChapters = listOfMangasWhitNewChapterService.getLastListNewManga(scrapper);
+    return mangasWhitNewChapters;
   }
 
   public List<MangaModel> searchManga(String query) {
@@ -115,8 +114,25 @@ public class MangaService {
     }
   }
 
-  public void starApp() {
-    mangasWithNewChapters();
+  private void getMangasWithNewChapters() {
+    if (isUpdatingMangas) {
+      log.info("getMangasWithNewChapters ya se está ejecutando, se omite la llamada.");
+      return;
+    }
+    isUpdatingMangas = true;
+    try {
+      var scrapper = ScrappersEnum.leerCapitulo;
+      log.info("Ejecutando getMangasWithNewChapters");
+      if (listOfMangasWhitNewChapterService.isTimeCheck(scrapper)) {
+        var mangasWhitNewChapters = scrapperService.getMangasWithNewChapters();
+        exitOfSave(mangasWhitNewChapters);
+        listOfMangasWhitNewChapterService.save(mangasWhitNewChapters, scrapper);
+        log.info("Ejecutado getMangasWithNewChapters");
+      }
+    } catch (Exception e) {
+      log.severe("Error en getMangasWithNewChapters: " + e.getMessage());
+    } finally {
+      isUpdatingMangas = false;
+    }
   }
-
 }
