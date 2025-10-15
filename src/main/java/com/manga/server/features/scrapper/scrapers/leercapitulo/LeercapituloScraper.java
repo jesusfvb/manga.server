@@ -47,11 +47,11 @@ public class LeercapituloScraper implements Scraper {
         String name = element.select("div.media-body > a > h4").text();
         String url = element.select("div.media-body > a").attr("href");
         String thumbnail = element.select("div > div.media-left.cover-manga > a > img").attr("data-src");
-        String numberOfChapters = element.select("div.media-body > div > div > div > span:nth-child(1) > a")
+        String lastChapter = element.select("div.media-body > div > div > div > span:nth-child(1) > a")
             .text().replace("Capitulo", "").trim();
 
         mangas.add(MangaModel.builder().name(name).url(baseURl() + url).thumbnail(baseURl() + thumbnail)
-            .lastChapter(Double.parseDouble(numberOfChapters)).build());
+            .lastChapter(Double.parseDouble(lastChapter)).build());
       }
     } catch (IOException e) {
       e.printStackTrace();
