@@ -32,7 +32,7 @@ public class MangaService {
   private volatile boolean isUpdatingMangas = false;
 
   public void starApp() {
-    getMangasWithNewChapters();
+    CompletableFuture.runAsync(this::getMangasWithNewChapters, executor);
   }
 
   public List<MangaModel> getMangasByIds(List<String> ids) {
