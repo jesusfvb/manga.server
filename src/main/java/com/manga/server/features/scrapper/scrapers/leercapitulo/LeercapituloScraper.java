@@ -84,9 +84,10 @@ public class LeercapituloScraper implements Scraper {
           new TypeReference<List<LeerCapituloSearchDTO>>() {
           });
       list.forEach(manga -> {
-        mangas.add(
-            MangaModel.builder().name(manga.label()).url(baseURl() + manga.link())
-                .thumbnail(baseURl() + manga.thumbnail()).build());
+        var mangaModel = MangaModel.builder().name(manga.label()).url(baseURl() + manga.link())
+            .thumbnail(baseURl() + manga.thumbnail()).build();
+        getDescriptionAndLastChapter(mangaModel);
+        mangas.add(mangaModel);
       });
     } catch (Exception e) {
       e.printStackTrace();
@@ -136,38 +137,6 @@ public class LeercapituloScraper implements Scraper {
     return null;
   }
 
-  // @Override
-  // @UsePlaywright(initScript = "localStorage.setItem('display_mode', '1')")
-  // public List<ImgModel> gteImg(String url) {
-  // if (!url.contains(baseURl()))
-  // url = baseURl() + url;
-  // List<ImgModel> imgModels = new LinkedList<>();
-  // try {
-  // PlaywrightManager.acquireBrowser();
-  // BrowserContext context = PlaywrightManager.acquireContext();
-  // context.addInitScript("localStorage.setItem('display_mode', '1')");
-  // Page page = context.newPage();
-  // page.navigate(url);
-  // page.waitForLoadState();
-  // var images = page.querySelectorAll(".comic_wraCon > a");
-  // for (var image : images) {
-  // String img = image.querySelector("img").getAttribute("data-src");
-  // String number = image.getAttribute("name");
-  // if (img != null && !img.isEmpty()) {
-  // imgModels.add(ImgModel.builder().number(Integer.parseInt(number)).url(img).build());
-  // }
-  // }
-  // PlaywrightManager.release();
-  //
-  // } catch (Exception e) {
-  // log.warning(e.getMessage());
-  // }
-  // if (imgModels.size() >= 1) {
-  // imgModels.sort(Comparator.comparingInt(ImgModel::getNumber));
-  // }
-  // return imgModels;
-  // }
-
   @Override
   public List<ImgModel> getImg(String url) {
     final String finalUrl = url.contains(baseURl()) ? url : baseURl() + url;
@@ -197,6 +166,44 @@ public class LeercapituloScraper implements Scraper {
       imgModels.sort(Comparator.comparingInt(ImgModel::getNumber));
     }
     return imgModels;
+  }
+
+  private void getDescriptionAndLastChapter(MangaModel mangaModel) {
+    var url = mangaModel.getUrl();
+    if (!url.contains(baseURl()))
+      url = baseURl() + url;
+    try {
+      Document document = Jsoup.connect(url).get();
+      var description = getMangaDescription(document);
+      var lastChapter = getLastChapter(document);
+      mangaModel.setDescription(description);
+      mangaModel.setLastChapter(lastChapter);
+    } catch (IOException e) {
+
+    }
+  }
+
+  private String getMangaDescription(Document document) {
+    try {
+      return document.select("#example2").text();
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+    return null;
+  }
+
+  private Double getLastChapter(Document document) {
+    try {
+      var chapter = document.selectFirst("#examples > div > div > ul > li:nth-child(1) > div > h4 > a");
+      String number = chapter.text().split(" ")[1];
+      if (number.contains(":")) {
+        number = number.split(":")[0];
+      }
+      return Double.parseDouble(number);
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+    return null;
   }
 
 }
