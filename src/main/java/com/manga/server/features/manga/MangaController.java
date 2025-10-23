@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.manga.server.features.manga.dtos.DescriptionDTO;
 import com.manga.server.features.manga.dtos.MangaDTO;
-import com.manga.server.features.manga.dtos.SearchMangaDTO;
 import com.manga.server.features.manga.mapper.MangaMapper;
 import com.manga.server.features.manga.model.MangaModel;
 import com.manga.server.features.manga.services.MangaService;
@@ -32,9 +31,9 @@ public class MangaController {
   }
 
   @GetMapping("/search")
-  public ResponseEntity<List<SearchMangaDTO>> searchMangas(@RequestParam String query) {
+  public ResponseEntity<List<MangaDTO>> searchMangas(@RequestParam String query) {
     List<MangaModel> mangas = mangaService.searchManga(query);
-    return ResponseEntity.ok((mangaMapper.mangasToSearchMangaDTOs(mangas)));
+    return ResponseEntity.ok((mangaMapper.mangasToMangaDTOs(mangas)));
   }
 
   @GetMapping("/description")
