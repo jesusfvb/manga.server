@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.manga.server.features.manga.dtos.DescriptionDTO;
 import com.manga.server.features.manga.dtos.MangaDTO;
 import com.manga.server.features.manga.mapper.MangaMapper;
 import com.manga.server.features.manga.model.MangaModel;
@@ -34,11 +33,6 @@ public class MangaController {
   public ResponseEntity<List<MangaDTO>> searchMangas(@RequestParam String query) {
     List<MangaModel> mangas = mangaService.searchManga(query);
     return ResponseEntity.ok((mangaMapper.mangasToMangaDTOs(mangas)));
-  }
-
-  @GetMapping("/description")
-  public ResponseEntity<DescriptionDTO> mangaDescription(@RequestParam String id) {
-    return ResponseEntity.ok(new DescriptionDTO(mangaService.mangaDescription(id)));
   }
 
   @GetMapping("/ids")

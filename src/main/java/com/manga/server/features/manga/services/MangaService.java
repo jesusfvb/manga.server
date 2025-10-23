@@ -8,7 +8,6 @@ import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.stereotype.Service;
 
-import com.manga.server.features.chapter.services.ChapterService;
 import com.manga.server.features.manga.model.MangaModel;
 import com.manga.server.features.manga.repository.MangaRepository;
 import com.manga.server.features.scrapper.enums.ScrappersEnum;
@@ -25,7 +24,6 @@ public class MangaService {
   private final ScrapperService scrapperService;
   private final MangaRepository mangaRepository;
   private final ListOfMangasWhitNewChapterService listOfMangasWhitNewChapterService;
-  private final ChapterService chapterService;
 
   private final Executor executor;
 
@@ -78,23 +76,6 @@ public class MangaService {
     }
     log.info(logMessage);
     return mangas;
-  }
-
-  public String mangaDescription(String id) {
-    var mangaOptional = mangaRepository.findById(id);
-    if (mangaOptional.isPresent()) {
-      var manga = mangaOptional.get();
-      if (manga.getDescription() == null) {
-        var description = scrapperService.getMangaDescription(ScrappersEnum.leerCapitulo, manga.getUrl());
-        manga.setDescription(description);
-        mangaRepository.save(manga);
-        log.info("Is description for:" + ScrappersEnum.leerCapitulo);
-        return description;
-      }
-      log.info("Is description for: data base");
-      return manga.getDescription();
-    }
-    return null;
   }
 
   private void exitOfSave(MangaModel manga) {
