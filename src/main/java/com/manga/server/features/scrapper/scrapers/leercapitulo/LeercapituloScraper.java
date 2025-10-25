@@ -52,15 +52,11 @@ public class LeercapituloScraper implements Scraper {
 
         mangas.add(MangaModel.builder().name(name).url(baseURl() + url).thumbnail(baseURl() + thumbnail)
             .lastChapter(Double.parseDouble(lastChapter)).build());
+        buildManga(mangas);
       }
     } catch (IOException e) {
       e.printStackTrace();
     }
-
-    mangas.forEach(manga -> {
-      var description = getMangaDescription(manga.getUrl());
-      manga.setDescription(description);
-    });
     return mangas;
   }
 
@@ -86,26 +82,13 @@ public class LeercapituloScraper implements Scraper {
       list.forEach(manga -> {
         var mangaModel = MangaModel.builder().name(manga.label()).url(baseURl() + manga.link())
             .thumbnail(baseURl() + manga.thumbnail()).build();
-        getDescriptionAndLastChapter(mangaModel);
+        buildManga(mangaModel);
         mangas.add(mangaModel);
       });
     } catch (Exception e) {
       e.printStackTrace();
     }
     return mangas;
-  }
-
-  @Override
-  public String getMangaDescription(String url) {
-    if (!url.contains(baseURl()))
-      url = baseURl() + url;
-    try {
-      Document document = Jsoup.connect(url).get();
-      return document.select("#example2").text();
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
-    return null;
   }
 
   @Override
@@ -168,16 +151,25 @@ public class LeercapituloScraper implements Scraper {
     return imgModels;
   }
 
-  private void getDescriptionAndLastChapter(MangaModel mangaModel) {
+  private void buildManga(List<MangaModel> mangaModelList) {
+    mangaModelList.forEach((mangaModel) -> {
+      buildManga(mangaModel);
+    });
+  }
+
+  private void buildManga(MangaModel mangaModel) {
     var url = mangaModel.getUrl();
     if (!url.contains(baseURl()))
       url = baseURl() + url;
     try {
       Document document = Jsoup.connect(url).get();
       var description = getMangaDescription(document);
-      var lastChapter = getLastChapter(document);
+
       mangaModel.setDescription(description);
-      mangaModel.setLastChapter(lastChapter);
+      if (mangaModel.getLastChapter() == null) {
+        var lastChapter = getLastChapter(document);
+        mangaModel.setLastChapter(lastChapter);
+      }
     } catch (IOException e) {
 
     }

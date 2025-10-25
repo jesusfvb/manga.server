@@ -14,8 +14,6 @@ public interface Scraper {
 
   List<MangaModel> searchMangas(String query);
 
-  String getMangaDescription(String url);
-
   List<ChapterModel> getChapters(String url);
 
   List<ImgModel> getImg(String url);

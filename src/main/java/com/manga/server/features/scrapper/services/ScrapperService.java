@@ -27,13 +27,6 @@ public class ScrapperService {
     };
   }
 
-  public String getMangaDescription(ScrappersEnum scrapper, String url) {
-    return switch (scrapper) {
-      case leerCapitulo -> leercapituloScraper.getMangaDescription(url);
-      default -> throw new IllegalArgumentException("Scraper not implemented: " + scrapper);
-    };
-  }
-
   public List<ChapterModel> getChapters(ScrappersEnum scrapper, String url) {
     return switch (scrapper) {
       case leerCapitulo -> leercapituloScraper.getChapters(url);
