@@ -30,7 +30,7 @@ public class ChapterController {
   }
 
   @GetMapping("/img")
-  public List<ImgDTO> getImg(String chapterId) {
+  public List<ImgDTO> getImg(@RequestParam String chapterId) {
     var images = imgService.getImg(chapterId);
     return imgMapper.imgModelsToImgDTOs(images);
   }
