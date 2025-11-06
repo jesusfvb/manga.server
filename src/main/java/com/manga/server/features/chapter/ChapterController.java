@@ -8,6 +8,8 @@ import com.manga.server.features.chapter.services.ChapterService;
 import com.manga.server.features.chapter.services.ImgService;
 
 import lombok.AllArgsConstructor;
+
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -33,5 +35,11 @@ public class ChapterController {
   public List<ImgDTO> getImg(@RequestParam String chapterId) {
     var images = imgService.getImg(chapterId);
     return imgMapper.imgModelsToImgDTOs(images);
+  }
+
+  @GetMapping("/img/preload")
+  public ResponseEntity<Void> preloadImages(@RequestParam List<String> chapterIds) {
+    imgService.preloadImages(chapterIds);
+    return ResponseEntity.ok().build();
   }
 }

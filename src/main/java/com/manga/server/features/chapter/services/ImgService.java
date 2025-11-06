@@ -2,54 +2,72 @@ package com.manga.server.features.chapter.services;
 
 import java.util.Comparator;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Example;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
-import com.manga.server.features.chapter.models.ChapterModel;
 import com.manga.server.features.chapter.models.ImgModel;
 import com.manga.server.features.chapter.repository.ImgRepository;
 import com.manga.server.features.scrapper.enums.ScrappersEnum;
 import com.manga.server.features.scrapper.services.ScrapperService;
 
-import lombok.AllArgsConstructor;
-import lombok.extern.java.Log;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
-@AllArgsConstructor
-@Log
+@RequiredArgsConstructor
+@Slf4j
 public class ImgService {
-    final private ScrapperService scrapperService;
-    final private ImgRepository repository;
-    final private ChapterService chapterService;
+
+    private final ScrapperService scrapperService;
+    private final ImgRepository repository;
+    private final ChapterService chapterService;
+    
+    @Lazy
+    @Autowired
+    private ImgPreloadService imgPreloadService;
+
 
     public List<ImgModel> getImg(String chapterId) {
+        if (chapterId == null || chapterId.isEmpty()) {
+            log.warn("getImg llamado con chapterId nulo o vacío");
+            return List.of();
+        }
+
         var example = Example.of(ImgModel.builder().chapterId(chapterId).build());
         var imgs = repository.findAll(example);
+
         if (imgs.isEmpty()) {
             var chapter = chapterService.getChapterById(chapterId);
-            imgs = scrapperService.getImg(ScrappersEnum.leerCapitulo, chapter.getUrl());
-            imgs.forEach(img -> img.setChapterId(chapterId));
-            repository.saveAll(imgs);
+            if (chapter == null) {
+                log.warn("No se encontró el capítulo con ID: {}", chapterId);
+                return List.of();
+            }
+
+            var scrapedImgs = scrapperService.getImg(ScrappersEnum.leerCapitulo, chapter.getUrl());
+            if (scrapedImgs != null && !scrapedImgs.isEmpty()) {
+                scrapedImgs.forEach(img -> img.setChapterId(chapterId));
+                imgs = repository.saveAll(scrapedImgs);
+            } else {
+                log.warn("No se pudieron obtener imágenes del capítulo con ID: {}", chapterId);
+                return List.of();
+            }
         }
-        imgs.sort(Comparator.comparingInt(ImgModel::getNumber));
-        return imgs;
+
+        if (imgs != null && !imgs.isEmpty()) {
+            imgs.sort(Comparator.comparingInt(ImgModel::getNumber));
+        }
+        return imgs != null ? imgs : List.of();
     }
 
-
-    @Async
-    public void preLoadImages(List<ChapterModel> chapters) {
-        ExecutorService executor = Executors.newFixedThreadPool(5);
-        List<CompletableFuture<Void>> tasks = chapters.stream()
-                .map(chapter -> CompletableFuture.runAsync(() -> {
-                    getImg(chapter.getId());
-                    log.info("Preloaded images for chapter " + chapter.getNumber());
-                },executor))
-                .toList();
-        CompletableFuture.allOf(tasks.toArray(new CompletableFuture[0])).join();
+    /**
+     * Precarga imágenes de los capítulos especificados de forma asíncrona.
+     * 
+     * @param chapterIds Lista de IDs de capítulos a precargar
+     */
+    public void preloadImages(List<String> chapterIds) {
+        imgPreloadService.preloadImages(chapterIds);
     }
 }
