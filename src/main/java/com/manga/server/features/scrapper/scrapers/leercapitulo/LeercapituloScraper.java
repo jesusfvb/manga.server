@@ -298,12 +298,6 @@ public class LeercapituloScraper implements Scraper {
     return imgModels;
   }
 
-  private void buildManga(List<MangaModel> mangaModelList) {
-    mangaModelList.forEach((mangaModel) -> {
-      buildManga(mangaModel);
-    });
-  }
-
   private void buildManga(MangaModel mangaModel) {
     var url = mangaModel.getUrl();
     if (!url.contains(baseURl()))

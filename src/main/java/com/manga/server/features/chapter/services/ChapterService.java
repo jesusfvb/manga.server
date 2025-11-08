@@ -36,43 +36,74 @@ public class ChapterService {
     ChapterRepository chapterRepository;
 
     public List<ChapterModel> getChapters(String mangaId) {
+        if (mangaId == null || mangaId.isEmpty()) {
+            log.warning("getChapters llamado con mangaId nulo o vacío");
+            return List.of();
+        }
+
         // TODO hacer que de aqui un tiempo se actualice la base de datos
+        // mangaId ya está validado arriba, el builder es seguro
+        @SuppressWarnings("null")
         var example = Example.of(ChapterModel.builder().mangaId(mangaId).build());
         var chapters = chapterRepository.findAll(example);
         var logMessage = "Is chapter for DataBase";
         if (chapters.isEmpty()) {
             MangaModel manga = mangaService.getMangaById(mangaId);
-            chapters = scrapperService.getChapters(ScrappersEnum.leerCapitulo, manga.getUrl());
-            chapters.forEach(chapter -> {
-                chapter.setMangaId(mangaId);
-                if (chapter.getLastUpdated() == null) {
-                    chapter.setLastUpdated(LocalDateTime.now());
-                }
-            });
-            chapters = chapterRepository.saveAll(chapters);
-            logMessage = "Is chapter for Scrapper";
+            if (manga == null || manga.getUrl() == null) {
+                log.warning("No se encontró el manga con ID: " + mangaId + " o no tiene URL");
+                return List.of();
+            }
+            var scrapedChapters = scrapperService.getChapters(ScrappersEnum.leerCapitulo, manga.getUrl());
+            if (scrapedChapters != null && !scrapedChapters.isEmpty()) {
+                scrapedChapters.forEach(chapter -> {
+                    if (chapter != null) {
+                        chapter.setMangaId(mangaId);
+                        if (chapter.getLastUpdated() == null) {
+                            chapter.setLastUpdated(LocalDateTime.now());
+                        }
+                    }
+                });
+                chapters = chapterRepository.saveAll(scrapedChapters);
+                logMessage = "Is chapter for Scrapper";
+            }
         }
         log.info(logMessage);
-        chapters.sort(Comparator.comparingDouble(ChapterModel::getNumber));
+        if (chapters != null && !chapters.isEmpty()) {
+            chapters.sort(Comparator.comparingDouble(ChapterModel::getNumber));
+        }
         // imgService.preLoadImages(chapters);
-        return chapters;
+        return chapters != null ? chapters : List.of();
     }
 
     public ChapterModel getChapterById(String chapterId) {
-        // TODO manejar el error
-        return chapterRepository.findById(chapterId).orElseThrow();
+        if (chapterId == null || chapterId.isEmpty()) {
+            log.warning("getChapterById llamado con chapterId nulo o vacío");
+            return null;
+        }
+        return chapterRepository.findById(chapterId).orElse(null);
     }
 
     public Double getLastChapterNumber(String mangaId) {
+        if (mangaId == null || mangaId.isEmpty()) {
+            return 0.0;
+        }
+
+        // mangaId ya está validado arriba, el builder es seguro
+        @SuppressWarnings("null")
         var example = Example.of(ChapterModel.builder().mangaId(mangaId).build());
         var chapters = chapterRepository.findAll(example);
         if (chapters.isEmpty()) {
             chapters = getChapters(mangaId);
         }
 
-        if (chapters.isEmpty()) {
+        if (chapters == null || chapters.isEmpty()) {
             return 0.0;
         }
-        return chapters.stream().max(Comparator.comparingDouble(ChapterModel::getNumber)).get().getNumber();
+        
+        return chapters.stream()
+                .filter(chapter -> chapter != null && chapter.getNumber() != null)
+                .max(Comparator.comparingDouble(ChapterModel::getNumber))
+                .map(ChapterModel::getNumber)
+                .orElse(0.0);
     }
 }

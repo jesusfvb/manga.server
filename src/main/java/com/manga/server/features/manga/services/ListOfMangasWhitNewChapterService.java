@@ -21,28 +21,57 @@ public class ListOfMangasWhitNewChapterService {
     final ListOfMangasWhitNewChapterRepository newListMangaRepository;
 
     Boolean isTimeCheck(ScrappersEnum scrappersEnum) {
+        if (scrappersEnum == null) {
+            return true;
+        }
         var example = ListOfMangasWhitNewChapterModel.builder().scraper(scrappersEnum).build();
+        // scrappersEnum ya está validado arriba, el builder es seguro
+        @SuppressWarnings("null")
         var newListManga = newListMangaRepository.findOne(Example.of(example));
         if (newListManga.isPresent()) {
-            return isMoreThanMinutes(newListManga.get().getDateTime());
+            var listModel = newListManga.get();
+            if (listModel != null && listModel.getDateTime() != null) {
+                return isMoreThanMinutes(listModel.getDateTime());
+            }
         }
         return true;
     }
 
     List<MangaModel> getLastListNewManga(ScrappersEnum scrappersEnum) {
+        if (scrappersEnum == null) {
+            return null;
+        }
         var example = ListOfMangasWhitNewChapterModel.builder().scraper(scrappersEnum).build();
+        // scrappersEnum ya está validado arriba, el builder es seguro
+        @SuppressWarnings("null")
         var newListManga = newListMangaRepository.findOne(Example.of(example));
-        if (newListManga.isPresent()) return newListManga.get().getMangas();
+        if (newListManga.isPresent()) {
+            var listModel = newListManga.get();
+            if (listModel != null) {
+                return listModel.getMangas();
+            }
+        }
         return null;
     }
 
     void save(List<MangaModel> mangas, ScrappersEnum scrappersEnum) {
+        if (scrappersEnum == null) {
+            return;
+        }
+        if (mangas == null) {
+            mangas = List.of();
+        }
         var example = ListOfMangasWhitNewChapterModel.builder().scraper(scrappersEnum).build();
+        // scrappersEnum ya está validado arriba, el builder es seguro
+        @SuppressWarnings("null")
         var newListManga = newListMangaRepository.findOne(Example.of(example));
         if(newListManga.isPresent()){
-            newListManga.get().setMangas(mangas);
-            newListManga.get().setDateTime(LocalDateTime.now());
-            newListMangaRepository.save(newListManga.get());
+            var existingModel = newListManga.get();
+            if (existingModel != null) {
+                existingModel.setMangas(mangas);
+                existingModel.setDateTime(LocalDateTime.now());
+                newListMangaRepository.save(existingModel);
+            }
         }
         else {
             example.setDateTime(LocalDateTime.now());

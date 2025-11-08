@@ -93,12 +93,21 @@ public class GlobalExceptionHandler {
         log.warning("Tipo de argumento no coincide: " + ex.getName() + " - " + ex.getMessage());
 
         String typeName = "desconocido";
-        if (ex.getRequiredType() != null) {
-            typeName = ex.getRequiredType().getSimpleName();
+        try {
+            Class<?> requiredType = ex.getRequiredType();
+            if (requiredType != null) {
+                String simpleName = requiredType.getSimpleName();
+                if (simpleName != null && !simpleName.isEmpty()) {
+                    typeName = simpleName;
+                }
+            }
+        } catch (Exception e) {
+            log.warning("Error al obtener el nombre del tipo requerido: " + e.getMessage());
         }
 
+        String paramName = ex.getName() != null ? ex.getName() : "desconocido";
         String message = String.format("El parámetro '%s' debe ser de tipo '%s'", 
-                ex.getName(), typeName);
+                paramName, typeName);
 
         ErrorResponse error = ErrorResponse.builder()
                 .timestamp(LocalDateTime.now())

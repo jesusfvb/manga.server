@@ -34,17 +34,18 @@ public class MangaService {
   }
 
   public List<MangaModel> getMangasByIds(List<String> ids) {
+    if (ids == null || ids.isEmpty()) {
+      return List.of();
+    }
     return mangaRepository.findAllById(ids);
   }
 
   public MangaModel getMangaById(String mangaId) {
-    var mangaOptional = mangaRepository.findById(mangaId);
-    if (mangaOptional.isPresent()) {
-      return mangaOptional.get();
-    } else {
-      log.warning("Manga not found with id: " + mangaId);
+    if (mangaId == null || mangaId.isEmpty()) {
+      log.warning("getMangaById llamado con mangaId nulo o vacío");
       return null;
     }
+    return mangaRepository.findById(mangaId).orElse(null);
   }
 
   public List<MangaModel> mangasWithNewChapters() {
@@ -55,9 +56,15 @@ public class MangaService {
   }
 
   public List<MangaModel> searchManga(String query) {
+    if (query == null || query.isEmpty()) {
+      return List.of();
+    }
+
     ExampleMatcher matcher = ExampleMatcher.matching().withMatcher("name",
         ExampleMatcher.GenericPropertyMatchers.contains().ignoreCase());
 
+    // query ya está validado arriba, el builder es seguro
+    @SuppressWarnings("null")
     var example = Example.of(MangaModel.builder().name(query).build(), matcher);
     var mangas = mangaRepository.findAll(example);
     var logMessage = "Is search for: data base";
@@ -65,13 +72,15 @@ public class MangaService {
     // TODO Actualizar este numero en un futuro
     if (mangas.size() <= 3) {
       var mangasScrapper = scrapperService.searchManga(ScrappersEnum.leerCapitulo, query);
-      for (var magaScraper : mangasScrapper) {
-        if (mangas.stream().noneMatch(m -> m.getName().equals(magaScraper.getName()))) {
-          exitOfSave(magaScraper);
-          mangas.add(magaScraper);
-          logMessage = "Is search for:" + scrapperService.toString();
+      if (mangasScrapper != null) {
+        for (var magaScraper : mangasScrapper) {
+          if (magaScraper != null && mangas.stream().noneMatch(m -> 
+              m != null && m.getName() != null && m.getName().equals(magaScraper.getName()))) {
+            exitOfSave(magaScraper);
+            mangas.add(magaScraper);
+            logMessage = "Is search for:" + scrapperService.toString();
+          }
         }
-        ;
       }
     }
     log.info(logMessage);
@@ -79,13 +88,26 @@ public class MangaService {
   }
 
   private void exitOfSave(MangaModel manga) {
-    var example = MangaModel.builder().name(manga.getName()).url(manga.getUrl()).build();
+    if (manga == null) {
+      return;
+    }
+    var example = MangaModel.builder()
+        .name(manga.getName() != null ? manga.getName() : "")
+        .url(manga.getUrl() != null ? manga.getUrl() : "")
+        .build();
+    // El builder es seguro, los campos null son manejados correctamente por Spring Data
+    @SuppressWarnings("null")
     var exit = mangaRepository.findOne(Example.of(example));
     if (exit.isEmpty()) {
-      var id = mangaRepository.save(manga).getId();
-      manga.setId(id);
+      var savedManga = mangaRepository.save(manga);
+      if (savedManga != null && savedManga.getId() != null) {
+        manga.setId(savedManga.getId());
+      }
     } else {
-      manga.setId(exit.get().getId());
+      var existingManga = exit.get();
+      if (existingManga != null && existingManga.getId() != null) {
+        manga.setId(existingManga.getId());
+      }
     }
   }
 

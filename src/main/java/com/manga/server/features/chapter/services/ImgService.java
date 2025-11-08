@@ -37,7 +37,11 @@ public class ImgService {
             return List.of();
         }
 
-        var example = Example.of(ImgModel.builder().chapterId(chapterId).build());
+        // chapterId ya está validado arriba, así que no puede ser null aquí
+        var exampleModel = ImgModel.builder().chapterId(chapterId).build();
+        // El builder es seguro, los campos null son manejados correctamente por Spring Data
+        @SuppressWarnings("null")
+        var example = Example.of(exampleModel);
         var imgs = repository.findAll(example);
 
         if (imgs.isEmpty()) {
@@ -47,12 +51,20 @@ public class ImgService {
                 return List.of();
             }
 
-            var scrapedImgs = scrapperService.getImg(ScrappersEnum.leerCapitulo, chapter.getUrl());
+            String chapterUrl = chapter.getUrl();
+            if (chapterUrl == null || chapterUrl.isEmpty()) {
+                log.warn("El capítulo con ID {} no tiene URL", chapterId);
+                return List.of();
+            }
+
+            var scrapedImgs = scrapperService.getImg(ScrappersEnum.leerCapitulo, chapterUrl);
             if (scrapedImgs != null && !scrapedImgs.isEmpty()) {
                 scrapedImgs.forEach(img -> {
-                    img.setChapterId(chapterId);
-                    if (img.getLastUpdated() == null) {
-                        img.setLastUpdated(LocalDateTime.now());
+                    if (img != null) {
+                        img.setChapterId(chapterId);
+                        if (img.getLastUpdated() == null) {
+                            img.setLastUpdated(LocalDateTime.now());
+                        }
                     }
                 });
                 imgs = repository.saveAll(scrapedImgs);
