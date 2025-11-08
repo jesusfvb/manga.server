@@ -1,9 +1,9 @@
 package com.manga.server.features.manga.services;
 
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executor;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.stereotype.Service;
@@ -24,13 +24,14 @@ public class MangaService {
   private final ScrapperService scrapperService;
   private final MangaRepository mangaRepository;
   private final ListOfMangasWhitNewChapterService listOfMangasWhitNewChapterService;
+  private final MangaSaveService mangaSaveService;
 
-  private final Executor executor;
-
-  private volatile boolean isUpdatingMangas = false;
+  @Lazy
+  @Autowired
+  private MangaUpdateService mangaUpdateService;
 
   public void starApp() {
-    CompletableFuture.runAsync(this::getMangasWithNewChapters, executor);
+    mangaUpdateService.updateMangasWithNewChapters();
   }
 
   public List<MangaModel> getMangasByIds(List<String> ids) {
@@ -49,10 +50,10 @@ public class MangaService {
   }
 
   public List<MangaModel> mangasWithNewChapters() {
-    CompletableFuture.runAsync(this::getMangasWithNewChapters, executor);
+    mangaUpdateService.updateMangasWithNewChapters();
     var scrapper = ScrappersEnum.leerCapitulo;
     var mangasWhitNewChapters = listOfMangasWhitNewChapterService.getLastListNewManga(scrapper);
-    return mangasWhitNewChapters;
+    return mangasWhitNewChapters != null ? mangasWhitNewChapters : List.of();
   }
 
   public List<MangaModel> searchManga(String query) {
@@ -76,7 +77,7 @@ public class MangaService {
         for (var magaScraper : mangasScrapper) {
           if (magaScraper != null && mangas.stream().noneMatch(m -> 
               m != null && m.getName() != null && m.getName().equals(magaScraper.getName()))) {
-            exitOfSave(magaScraper);
+            mangaSaveService.saveIfNotExists(magaScraper);
             mangas.add(magaScraper);
             logMessage = "Is search for:" + scrapperService.toString();
           }
@@ -87,57 +88,4 @@ public class MangaService {
     return mangas;
   }
 
-  private void exitOfSave(MangaModel manga) {
-    if (manga == null) {
-      return;
-    }
-    var example = MangaModel.builder()
-        .name(manga.getName() != null ? manga.getName() : "")
-        .url(manga.getUrl() != null ? manga.getUrl() : "")
-        .build();
-    // El builder es seguro, los campos null son manejados correctamente por Spring Data
-    @SuppressWarnings("null")
-    var exit = mangaRepository.findOne(Example.of(example));
-    if (exit.isEmpty()) {
-      var savedManga = mangaRepository.save(manga);
-      if (savedManga != null && savedManga.getId() != null) {
-        manga.setId(savedManga.getId());
-      }
-    } else {
-      var existingManga = exit.get();
-      if (existingManga != null && existingManga.getId() != null) {
-        manga.setId(existingManga.getId());
-      }
-    }
-  }
-
-  private void exitOfSave(List<MangaModel> listManga) {
-    for (var manga : listManga) {
-      exitOfSave(manga);
-    }
-  }
-
-  private void getMangasWithNewChapters() {
-    if (isUpdatingMangas) {
-      log.info("getMangasWithNewChapters ya se está ejecutando, se omite la llamada.");
-      return;
-    }
-    isUpdatingMangas = true;
-    try {
-      var scrapper = ScrappersEnum.leerCapitulo;
-      log.info("Ejecutando getMangasWithNewChapters");
-      if (listOfMangasWhitNewChapterService.isTimeCheck(scrapper)) {
-        var mangasWhitNewChapters = scrapperService.getMangasWithNewChapters();
-        exitOfSave(mangasWhitNewChapters);
-        listOfMangasWhitNewChapterService.save(mangasWhitNewChapters, scrapper);
-        log.info("Ejecutado getMangasWithNewChapters");
-      } else {
-        log.info("No se ha ejecutado getMangasWithNewChapters porque ya se ha ejecutado en las últimas 30 minutos");
-      }
-    } catch (Exception e) {
-      log.severe("Error en getMangasWithNewChapters: " + e.getMessage());
-    } finally {
-      isUpdatingMangas = false;
-    }
-  }
 }
