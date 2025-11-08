@@ -1,6 +1,7 @@
 package com.manga.server.features.scrapper.scrapers.leercapitulo;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
@@ -174,6 +175,7 @@ public class LeercapituloScraper implements Scraper {
             .url(baseURl() + chapterUrl)
             .number(Double.parseDouble(number))
             .mangaId(url)
+            .lastUpdated(LocalDateTime.now())
             .build());
       }
       return chapterModels;
@@ -236,7 +238,11 @@ public class LeercapituloScraper implements Scraper {
           if (img != null && !img.isEmpty() && number != null && !number.isEmpty()) {
             try {
               int imgNumber = Integer.parseInt(number);
-              imgModels.add(ImgModel.builder().number(imgNumber).url(img).build());
+              imgModels.add(ImgModel.builder()
+                  .number(imgNumber)
+                  .url(img)
+                  .lastUpdated(LocalDateTime.now())
+                  .build());
               processedCount++;
               log.fine("Imagen agregada - Número: " + imgNumber + ", URL: " + img);
             } catch (NumberFormatException e) {

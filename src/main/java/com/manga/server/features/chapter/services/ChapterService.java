@@ -1,5 +1,6 @@
 package com.manga.server.features.chapter.services;
 
+import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
 
@@ -42,7 +43,12 @@ public class ChapterService {
         if (chapters.isEmpty()) {
             MangaModel manga = mangaService.getMangaById(mangaId);
             chapters = scrapperService.getChapters(ScrappersEnum.leerCapitulo, manga.getUrl());
-            chapters.forEach(chapter -> chapter.setMangaId(mangaId));
+            chapters.forEach(chapter -> {
+                chapter.setMangaId(mangaId);
+                if (chapter.getLastUpdated() == null) {
+                    chapter.setLastUpdated(LocalDateTime.now());
+                }
+            });
             chapters = chapterRepository.saveAll(chapters);
             logMessage = "Is chapter for Scrapper";
         }

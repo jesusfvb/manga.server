@@ -1,5 +1,7 @@
 package com.manga.server.features.chapter.models;
 
+import java.time.LocalDateTime;
+
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -18,5 +20,7 @@ public class ImgModel {
 
     public Integer number;
 
-    public  String chapterId;
+    public String chapterId;
+
+    public LocalDateTime lastUpdated;
 }

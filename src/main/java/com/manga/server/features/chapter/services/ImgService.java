@@ -1,5 +1,6 @@
 package com.manga.server.features.chapter.services;
 
+import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
 
@@ -48,7 +49,12 @@ public class ImgService {
 
             var scrapedImgs = scrapperService.getImg(ScrappersEnum.leerCapitulo, chapter.getUrl());
             if (scrapedImgs != null && !scrapedImgs.isEmpty()) {
-                scrapedImgs.forEach(img -> img.setChapterId(chapterId));
+                scrapedImgs.forEach(img -> {
+                    img.setChapterId(chapterId);
+                    if (img.getLastUpdated() == null) {
+                        img.setLastUpdated(LocalDateTime.now());
+                    }
+                });
                 imgs = repository.saveAll(scrapedImgs);
             } else {
                 log.warn("No se pudieron obtener imágenes del capítulo con ID: {}", chapterId);
