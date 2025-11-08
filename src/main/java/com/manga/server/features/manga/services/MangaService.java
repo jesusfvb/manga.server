@@ -109,6 +109,8 @@ public class MangaService {
         exitOfSave(mangasWhitNewChapters);
         listOfMangasWhitNewChapterService.save(mangasWhitNewChapters, scrapper);
         log.info("Ejecutado getMangasWithNewChapters");
+      } else {
+        log.info("No se ha ejecutado getMangasWithNewChapters porque ya se ha ejecutado en las últimas 30 minutos");
       }
     } catch (Exception e) {
       log.severe("Error en getMangasWithNewChapters: " + e.getMessage());

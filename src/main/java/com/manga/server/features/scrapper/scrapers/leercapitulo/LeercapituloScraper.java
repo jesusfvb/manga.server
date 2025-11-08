@@ -37,26 +37,90 @@ public class LeercapituloScraper implements Scraper {
 
   @Override
   public List<MangaModel> getMangasWithNewChapters() {
-
+    long startTime = System.currentTimeMillis();
+    log.info("Iniciando getMangasWithNewChapters - Thread: " + Thread.currentThread().getName());
+    
     List<MangaModel> mangas = new LinkedList<>();
+    String baseUrl = baseURl();
+    
     try {
-      Document document = Jsoup.connect(baseURl()).get();
+      log.info("Conectando a la URL base: " + baseUrl);
+      Document document = Jsoup.connect(baseUrl).get();
+      log.info("Conexión exitosa a " + baseUrl);
 
-      Elements elements = document.select("body > section > div > div > div.col-md-8 > div > div > div");
+      String selector = "body > section > div > div > div.col-md-8 > div > div > div";
+      log.fine("Buscando elementos con selector: " + selector);
+      Elements elements = document.select(selector);
+      log.info("Elementos encontrados: " + elements.size());
+
+      int processedCount = 0;
+      int errorCount = 0;
+      
       for (var element : elements) {
-        String name = element.select("div.media-body > a > h4").text();
-        String url = element.select("div.media-body > a").attr("href");
-        String thumbnail = element.select("div > div.media-left.cover-manga > a > img").attr("data-src");
-        String lastChapter = element.select("div.media-body > div > div > div > span:nth-child(1) > a")
-            .text().replace("Capitulo", "").trim();
+        try {
+          String name = element.select("div.media-body > a > h4").text();
+          String url = element.select("div.media-body > a").attr("href");
+          String thumbnail = element.select("div > div.media-left.cover-manga > a > img").attr("data-src");
+          String lastChapterText = element.select("div.media-body > div > div > div > span:nth-child(1) > a")
+              .text().replace("Capitulo", "").trim();
 
-        mangas.add(MangaModel.builder().name(name).url(baseURl() + url).thumbnail(baseURl() + thumbnail)
-            .lastChapter(Double.parseDouble(lastChapter)).build());
-        buildManga(mangas);
+          log.fine("Procesando manga - Nombre: " + name + ", URL: " + url + ", Último capítulo: " + lastChapterText);
+
+          if (name == null || name.isEmpty()) {
+            log.warning("Manga sin nombre encontrado, omitiendo");
+            errorCount++;
+            continue;
+          }
+
+          if (url == null || url.isEmpty()) {
+            log.warning("Manga '" + name + "' sin URL, omitiendo");
+            errorCount++;
+            continue;
+          }
+
+          try {
+            double lastChapter = Double.parseDouble(lastChapterText);
+            MangaModel manga = MangaModel.builder()
+                .name(name)
+                .url(baseUrl + url)
+                .thumbnail(baseUrl + thumbnail)
+                .lastChapter(lastChapter)
+                .build();
+            
+            mangas.add(manga);
+            log.fine("Manga agregado: " + name + " (Capítulo " + lastChapter + ")");
+            
+            // Construir detalles del manga
+            log.fine("Construyendo detalles para manga: " + name);
+            buildManga(manga);
+            processedCount++;
+            
+          } catch (NumberFormatException e) {
+            log.warning("Error al parsear último capítulo '" + lastChapterText + "' para manga '" + name + "': " + e.getMessage());
+            errorCount++;
+          }
+
+        } catch (Exception e) {
+          log.warning("Error al procesar elemento de manga: " + e.getMessage());
+          errorCount++;
+        }
       }
+
+      long duration = System.currentTimeMillis() - startTime;
+      log.info(String.format("getMangasWithNewChapters completado - Mangas procesados: %d, Errores: %d, Total: %d, Duración: %d ms", 
+          processedCount, errorCount, mangas.size(), duration));
+
     } catch (IOException e) {
+      long duration = System.currentTimeMillis() - startTime;
+      log.severe("Error de IO en getMangasWithNewChapters después de " + duration + " ms: " + e.getMessage());
+      e.printStackTrace();
+    } catch (Exception e) {
+      long duration = System.currentTimeMillis() - startTime;
+      log.severe("Error inesperado en getMangasWithNewChapters después de " + duration + " ms: " + e.getMessage());
       e.printStackTrace();
     }
+    
+    log.info("Finalizando getMangasWithNewChapters - Retornando " + mangas.size() + " mangas");
     return mangas;
   }
 
@@ -122,32 +186,109 @@ public class LeercapituloScraper implements Scraper {
 
   @Override
   public List<ImgModel> getImg(String url) {
+    long startTime = System.currentTimeMillis();
+    log.info("Iniciando getImg - URL: " + url + ", Thread: " + Thread.currentThread().getName());
+    
     final String finalUrl = url.contains(baseURl()) ? url : baseURl() + url;
     List<ImgModel> imgModels = new LinkedList<>();
-    var context = playwrightManager.getContext();
-    context.addInitScript("localStorage.setItem('display_mode', '1')");
-    Page page = context.newPage();
+    Page page = null;
+    
     try {
+      log.fine("Obteniendo contexto de Playwright para URL: " + finalUrl);
+      var context = playwrightManager.getContext();
+      
+      if (context == null) {
+        log.severe("El contexto de Playwright es null para URL: " + finalUrl);
+        return imgModels;
+      }
+      
+      log.fine("Contexto de Playwright obtenido. Agregando script de inicialización");
+      try {
+        context.addInitScript("localStorage.setItem('display_mode', '1')");
+        log.fine("Script de inicialización agregado exitosamente");
+      } catch (Exception e) {
+        log.warning("Error al agregar script de inicialización (contexto puede estar cerrado): " + e.getMessage());
+        throw e;
+      }
+      
+      log.fine("Creando nueva página para URL: " + finalUrl);
+      page = context.newPage();
+      log.info("Página creada exitosamente para URL: " + finalUrl);
+      
+      log.info("Navegando a URL: " + finalUrl);
       page.navigate(finalUrl);
+      log.fine("Esperando a que la página cargue completamente");
       page.waitForLoadState();
+      log.info("Página cargada exitosamente");
+      
+      log.fine("Buscando imágenes con selector: .comic_wraCon > a");
       var images = page.querySelectorAll(".comic_wraCon > a");
+      log.info("Imágenes encontradas: " + images.size());
+      
+      int processedCount = 0;
+      int errorCount = 0;
+      
       for (var image : images) {
-        String img = image.querySelector("img").getAttribute("data-src");
-        String number = image.getAttribute("name");
-        if (img != null && !img.isEmpty()) {
-          imgModels.add(ImgModel.builder().number(Integer.parseInt(number)).url(img).build());
+        try {
+          String img = image.querySelector("img").getAttribute("data-src");
+          String number = image.getAttribute("name");
+          
+          if (img != null && !img.isEmpty() && number != null && !number.isEmpty()) {
+            try {
+              int imgNumber = Integer.parseInt(number);
+              imgModels.add(ImgModel.builder().number(imgNumber).url(img).build());
+              processedCount++;
+              log.fine("Imagen agregada - Número: " + imgNumber + ", URL: " + img);
+            } catch (NumberFormatException e) {
+              log.warning("Error al parsear número de imagen '" + number + "': " + e.getMessage());
+              errorCount++;
+            }
+          } else {
+            log.fine("Imagen omitida - img: " + (img != null ? "presente" : "null") + ", number: " + (number != null ? "presente" : "null"));
+          }
+        } catch (Exception e) {
+          log.warning("Error al procesar imagen: " + e.getMessage());
+          errorCount++;
         }
       }
 
+      long duration = System.currentTimeMillis() - startTime;
+      log.info(String.format("getImg completado - Imágenes procesadas: %d, Errores: %d, Total: %d, Duración: %d ms", 
+          processedCount, errorCount, imgModels.size(), duration));
+
+    } catch (IllegalStateException e) {
+      long duration = System.currentTimeMillis() - startTime;
+      if (e.getMessage() != null && e.getMessage().contains("state should be: open")) {
+        log.severe(String.format("ERROR: Contexto de Playwright cerrado o en estado inválido después de %d ms - URL: %s, Thread: %s, Mensaje: %s", 
+            duration, finalUrl, Thread.currentThread().getName(), e.getMessage()));
+        e.printStackTrace();
+      } else {
+        log.severe("ERROR: Estado ilegal en getImg después de " + duration + " ms - URL: " + finalUrl + ", Mensaje: " + e.getMessage());
+        e.printStackTrace();
+      }
     } catch (Exception e) {
-      log.warning(e.getMessage());
+      long duration = System.currentTimeMillis() - startTime;
+      log.severe(String.format("Error inesperado en getImg después de %d ms - URL: %s, Thread: %s, Tipo: %s, Mensaje: %s", 
+          duration, finalUrl, Thread.currentThread().getName(), e.getClass().getSimpleName(), e.getMessage()));
+      e.printStackTrace();
     } finally {
-      page.close();
+      if (page != null) {
+        try {
+          log.fine("Cerrando página para URL: " + finalUrl);
+          page.close();
+          log.fine("Página cerrada exitosamente");
+        } catch (Exception e) {
+          log.warning("Error al cerrar página: " + e.getMessage());
+        }
+      }
     }
 
     if (imgModels.size() >= 1) {
+      log.fine("Ordenando " + imgModels.size() + " imágenes por número");
       imgModels.sort(Comparator.comparingInt(ImgModel::getNumber));
     }
+    
+    log.info("Finalizando getImg - Retornando " + imgModels.size() + " imágenes para URL: " + finalUrl);
     return imgModels;
   }
 
