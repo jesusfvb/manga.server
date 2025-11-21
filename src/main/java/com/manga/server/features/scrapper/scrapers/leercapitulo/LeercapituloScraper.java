@@ -33,7 +33,7 @@ public class LeercapituloScraper implements Scraper {
 
   @Override
   public String baseURl() {
-    return "https://www.leercapitulo.co";
+    return "https://www.leercapitulo.re";
   }
 
   @Override
@@ -49,7 +49,7 @@ public class LeercapituloScraper implements Scraper {
       Document document = Jsoup.connect(baseUrl).get();
       log.info("Conexión exitosa a " + baseUrl);
 
-      String selector = "body > section > div > div > div.col-md-8 > div > div > div";
+      String selector = "div.media.mainpage-manga";
       log.fine("Buscando elementos con selector: " + selector);
       Elements elements = document.select(selector);
       log.info("Elementos encontrados: " + elements.size());
@@ -59,10 +59,10 @@ public class LeercapituloScraper implements Scraper {
       
       for (var element : elements) {
         try {
-          String name = element.select("div.media-body > a > h4").text();
-          String url = element.select("div.media-body > a").attr("href");
-          String thumbnail = element.select("div > div.media-left.cover-manga > a > img").attr("data-src");
-          String lastChapterText = element.select("div.media-body > div > div > div > span:nth-child(1) > a")
+          String name = element.select("div.media-body > a > h4.manga-newest").text();
+          String url = element.select("div.media-body > a").first().attr("href");
+          String thumbnail = element.select("div.media-left.cover-manga > a > img.media-object.lozad").attr("data-src");
+          String lastChapterText = element.select("div.media-body > div.row > div.col-xs-11 > div.hotup-list > span:first-child > a.xanh")
               .text().replace("Capitulo", "").trim();
 
           log.fine("Procesando manga - Nombre: " + name + ", URL: " + url + ", Último capítulo: " + lastChapterText);
