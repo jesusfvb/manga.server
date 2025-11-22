@@ -27,9 +27,10 @@ public class MangaSaveService {
         }
         var example = MangaModel.builder()
                 .name(manga.getName() != null ? manga.getName() : "")
-                .url(manga.getUrl() != null ? manga.getUrl() : "")
+                .url(manga.getUrl())
                 .build();
-        // El builder es seguro, los campos null son manejados correctamente por Spring Data
+        // El builder es seguro, los campos null son manejados correctamente por Spring
+        // Data
         @SuppressWarnings("null")
         var exit = mangaRepository.findOne(Example.of(example));
         if (exit.isEmpty()) {
@@ -59,4 +60,3 @@ public class MangaSaveService {
         }
     }
 }
-
