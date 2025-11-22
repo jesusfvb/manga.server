@@ -20,6 +20,8 @@ import com.manga.server.features.chapter.models.ImgModel;
 import com.manga.server.features.manga.model.MangaModel;
 import com.manga.server.features.scrapper.scrapers.Scraper;
 import com.manga.server.features.scrapper.scrapers.leercapitulo.dtos.LeerCapituloSearchDTO;
+import com.manga.server.shared.enums.ScrappersEnum;
+import com.manga.server.shared.model.UrlModel;
 import com.microsoft.playwright.Page;
 
 import lombok.AllArgsConstructor;
@@ -40,10 +42,10 @@ public class LeercapituloScraper implements Scraper {
   public List<MangaModel> getMangasWithNewChapters() {
     long startTime = System.currentTimeMillis();
     log.info("Iniciando getMangasWithNewChapters - Thread: " + Thread.currentThread().getName());
-    
+
     List<MangaModel> mangas = new LinkedList<>();
     String baseUrl = baseURl();
-    
+
     try {
       log.info("Conectando a la URL base: " + baseUrl);
       Document document = Jsoup.connect(baseUrl).get();
@@ -56,13 +58,14 @@ public class LeercapituloScraper implements Scraper {
 
       int processedCount = 0;
       int errorCount = 0;
-      
+
       for (var element : elements) {
         try {
           String name = element.select("div.media-body > a > h4.manga-newest").text();
           String url = element.select("div.media-body > a").first().attr("href");
           String thumbnail = element.select("div.media-left.cover-manga > a > img.media-object.lozad").attr("data-src");
-          String lastChapterText = element.select("div.media-body > div.row > div.col-xs-11 > div.hotup-list > span:first-child > a.xanh")
+          String lastChapterText = element
+              .select("div.media-body > div.row > div.col-xs-11 > div.hotup-list > span:first-child > a.xanh")
               .text().replace("Capitulo", "").trim();
 
           log.fine("Procesando manga - Nombre: " + name + ", URL: " + url + ", Último capítulo: " + lastChapterText);
@@ -83,21 +86,22 @@ public class LeercapituloScraper implements Scraper {
             double lastChapter = Double.parseDouble(lastChapterText);
             MangaModel manga = MangaModel.builder()
                 .name(name)
-                .url(baseUrl + url)
+                .url(UrlModel.builder().url(url).scrapper(ScrappersEnum.leerCapitulo).build())
                 .thumbnail(baseUrl + thumbnail)
                 .lastChapter(lastChapter)
                 .build();
-            
+
             mangas.add(manga);
             log.fine("Manga agregado: " + name + " (Capítulo " + lastChapter + ")");
-            
+
             // Construir detalles del manga
             log.fine("Construyendo detalles para manga: " + name);
             buildManga(manga);
             processedCount++;
-            
+
           } catch (NumberFormatException e) {
-            log.warning("Error al parsear último capítulo '" + lastChapterText + "' para manga '" + name + "': " + e.getMessage());
+            log.warning("Error al parsear último capítulo '" + lastChapterText + "' para manga '" + name + "': "
+                + e.getMessage());
             errorCount++;
           }
 
@@ -108,7 +112,8 @@ public class LeercapituloScraper implements Scraper {
       }
 
       long duration = System.currentTimeMillis() - startTime;
-      log.info(String.format("getMangasWithNewChapters completado - Mangas procesados: %d, Errores: %d, Total: %d, Duración: %d ms", 
+      log.info(String.format(
+          "getMangasWithNewChapters completado - Mangas procesados: %d, Errores: %d, Total: %d, Duración: %d ms",
           processedCount, errorCount, mangas.size(), duration));
 
     } catch (IOException e) {
@@ -120,7 +125,7 @@ public class LeercapituloScraper implements Scraper {
       log.severe("Error inesperado en getMangasWithNewChapters después de " + duration + " ms: " + e.getMessage());
       e.printStackTrace();
     }
-    
+
     log.info("Finalizando getMangasWithNewChapters - Retornando " + mangas.size() + " mangas");
     return mangas;
   }
@@ -145,7 +150,8 @@ public class LeercapituloScraper implements Scraper {
           new TypeReference<List<LeerCapituloSearchDTO>>() {
           });
       list.forEach(manga -> {
-        var mangaModel = MangaModel.builder().name(manga.label()).url(baseURl() + manga.link())
+        var mangaModel = MangaModel.builder().name(manga.label()).url(
+            UrlModel.builder().url(manga.link()).scrapper(ScrappersEnum.leerCapitulo).build())
             .thumbnail(baseURl() + manga.thumbnail()).build();
         buildManga(mangaModel);
         mangas.add(mangaModel);
@@ -190,20 +196,20 @@ public class LeercapituloScraper implements Scraper {
   public List<ImgModel> getImg(String url) {
     long startTime = System.currentTimeMillis();
     log.info("Iniciando getImg - URL: " + url + ", Thread: " + Thread.currentThread().getName());
-    
+
     final String finalUrl = url.contains(baseURl()) ? url : baseURl() + url;
     List<ImgModel> imgModels = new LinkedList<>();
     Page page = null;
-    
+
     try {
       log.fine("Obteniendo contexto de Playwright para URL: " + finalUrl);
       var context = playwrightManager.getContext();
-      
+
       if (context == null) {
         log.severe("El contexto de Playwright es null para URL: " + finalUrl);
         return imgModels;
       }
-      
+
       log.fine("Contexto de Playwright obtenido. Agregando script de inicialización");
       try {
         context.addInitScript("localStorage.setItem('display_mode', '1')");
@@ -212,29 +218,29 @@ public class LeercapituloScraper implements Scraper {
         log.warning("Error al agregar script de inicialización (contexto puede estar cerrado): " + e.getMessage());
         throw e;
       }
-      
+
       log.fine("Creando nueva página para URL: " + finalUrl);
       page = context.newPage();
       log.info("Página creada exitosamente para URL: " + finalUrl);
-      
+
       log.info("Navegando a URL: " + finalUrl);
       page.navigate(finalUrl);
       log.fine("Esperando a que la página cargue completamente");
       page.waitForLoadState();
       log.info("Página cargada exitosamente");
-      
+
       log.fine("Buscando imágenes con selector: .comic_wraCon > a");
       var images = page.querySelectorAll(".comic_wraCon > a");
       log.info("Imágenes encontradas: " + images.size());
-      
+
       int processedCount = 0;
       int errorCount = 0;
-      
+
       for (var image : images) {
         try {
           String img = image.querySelector("img").getAttribute("data-src");
           String number = image.getAttribute("name");
-          
+
           if (img != null && !img.isEmpty() && number != null && !number.isEmpty()) {
             try {
               int imgNumber = Integer.parseInt(number);
@@ -250,7 +256,8 @@ public class LeercapituloScraper implements Scraper {
               errorCount++;
             }
           } else {
-            log.fine("Imagen omitida - img: " + (img != null ? "presente" : "null") + ", number: " + (number != null ? "presente" : "null"));
+            log.fine("Imagen omitida - img: " + (img != null ? "presente" : "null") + ", number: "
+                + (number != null ? "presente" : "null"));
           }
         } catch (Exception e) {
           log.warning("Error al procesar imagen: " + e.getMessage());
@@ -259,23 +266,26 @@ public class LeercapituloScraper implements Scraper {
       }
 
       long duration = System.currentTimeMillis() - startTime;
-      log.info(String.format("getImg completado - Imágenes procesadas: %d, Errores: %d, Total: %d, Duración: %d ms", 
+      log.info(String.format("getImg completado - Imágenes procesadas: %d, Errores: %d, Total: %d, Duración: %d ms",
           processedCount, errorCount, imgModels.size(), duration));
 
     } catch (IllegalStateException e) {
       long duration = System.currentTimeMillis() - startTime;
       if (e.getMessage() != null && e.getMessage().contains("state should be: open")) {
-        log.severe(String.format("ERROR: Contexto de Playwright cerrado o en estado inválido después de %d ms - URL: %s, Thread: %s, Mensaje: %s", 
+        log.severe(String.format(
+            "ERROR: Contexto de Playwright cerrado o en estado inválido después de %d ms - URL: %s, Thread: %s, Mensaje: %s",
             duration, finalUrl, Thread.currentThread().getName(), e.getMessage()));
         e.printStackTrace();
       } else {
-        log.severe("ERROR: Estado ilegal en getImg después de " + duration + " ms - URL: " + finalUrl + ", Mensaje: " + e.getMessage());
+        log.severe("ERROR: Estado ilegal en getImg después de " + duration + " ms - URL: " + finalUrl + ", Mensaje: "
+            + e.getMessage());
         e.printStackTrace();
       }
     } catch (Exception e) {
       long duration = System.currentTimeMillis() - startTime;
-      log.severe(String.format("Error inesperado en getImg después de %d ms - URL: %s, Thread: %s, Tipo: %s, Mensaje: %s", 
-          duration, finalUrl, Thread.currentThread().getName(), e.getClass().getSimpleName(), e.getMessage()));
+      log.severe(
+          String.format("Error inesperado en getImg después de %d ms - URL: %s, Thread: %s, Tipo: %s, Mensaje: %s",
+              duration, finalUrl, Thread.currentThread().getName(), e.getClass().getSimpleName(), e.getMessage()));
       e.printStackTrace();
     } finally {
       if (page != null) {
@@ -293,13 +303,13 @@ public class LeercapituloScraper implements Scraper {
       log.fine("Ordenando " + imgModels.size() + " imágenes por número");
       imgModels.sort(Comparator.comparingInt(ImgModel::getNumber));
     }
-    
+
     log.info("Finalizando getImg - Retornando " + imgModels.size() + " imágenes para URL: " + finalUrl);
     return imgModels;
   }
 
   private void buildManga(MangaModel mangaModel) {
-    var url = mangaModel.getUrl();
+    var url = mangaModel.getUrl().getUrl();
     if (!url.contains(baseURl()))
       url = baseURl() + url;
     try {
