@@ -28,7 +28,7 @@ public class MangaModel {
 
   private UrlModel url;
 
-  private String thumbnail;
+  private UrlModel thumbnail;
 
   private String description;
 

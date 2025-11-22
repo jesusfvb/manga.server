@@ -87,7 +87,7 @@ public class LeercapituloScraper implements Scraper {
             MangaModel manga = MangaModel.builder()
                 .name(name)
                 .url(UrlModel.builder().url(url).scrapper(ScrappersEnum.leerCapitulo).build())
-                .thumbnail(baseUrl + thumbnail)
+                .thumbnail(UrlModel.builder().url(thumbnail).scrapper(ScrappersEnum.leerCapitulo).build())
                 .lastChapter(lastChapter)
                 .build();
 
@@ -152,7 +152,8 @@ public class LeercapituloScraper implements Scraper {
       list.forEach(manga -> {
         var mangaModel = MangaModel.builder().name(manga.label()).url(
             UrlModel.builder().url(manga.link()).scrapper(ScrappersEnum.leerCapitulo).build())
-            .thumbnail(baseURl() + manga.thumbnail()).build();
+            .thumbnail(UrlModel.builder().url(manga.thumbnail()).scrapper(ScrappersEnum.leerCapitulo).build())
+            .build();
         buildManga(mangaModel);
         mangas.add(mangaModel);
       });
