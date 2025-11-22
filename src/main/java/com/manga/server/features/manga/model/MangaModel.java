@@ -6,6 +6,8 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import com.manga.server.shared.model.UrlModel;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -24,7 +26,7 @@ public class MangaModel {
   @Indexed(unique = true)
   private String name;
 
-  private String url;
+  private UrlModel url;
 
   private String thumbnail;
 
