@@ -25,11 +25,10 @@ public class ImgService {
     private final ScrapperService scrapperService;
     private final ImgRepository repository;
     private final ChapterService chapterService;
-    
+
     @Lazy
     @Autowired
     private ImgPreloadService imgPreloadService;
-
 
     public List<ImgModel> getImg(String chapterId) {
         if (chapterId == null || chapterId.isEmpty()) {
@@ -39,7 +38,8 @@ public class ImgService {
 
         // chapterId ya está validado arriba, así que no puede ser null aquí
         var exampleModel = ImgModel.builder().chapterId(chapterId).build();
-        // El builder es seguro, los campos null son manejados correctamente por Spring Data
+        // El builder es seguro, los campos null son manejados correctamente por Spring
+        // Data
         @SuppressWarnings("null")
         var example = Example.of(exampleModel);
         var imgs = repository.findAll(example);
@@ -51,7 +51,7 @@ public class ImgService {
                 return List.of();
             }
 
-            String chapterUrl = chapter.getUrl();
+            String chapterUrl = chapter.getUrl().getFullUrl();
             if (chapterUrl == null || chapterUrl.isEmpty()) {
                 log.warn("El capítulo con ID {} no tiene URL", chapterId);
                 return List.of();

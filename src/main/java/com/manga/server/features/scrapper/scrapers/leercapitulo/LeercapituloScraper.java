@@ -179,7 +179,7 @@ public class LeercapituloScraper implements Scraper {
           number = number.split(":")[0];
         }
         chapterModels.add(ChapterModel.builder()
-            .url(baseURl() + chapterUrl)
+            .url(UrlModel.builder().url(chapterUrl).scrapper(ScrappersEnum.leerCapitulo).build())
             .number(Double.parseDouble(number))
             .mangaId(url)
             .lastUpdated(LocalDateTime.now())

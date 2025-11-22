@@ -5,6 +5,8 @@ import java.time.LocalDateTime;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import com.manga.server.shared.model.UrlModel;
+
 import lombok.Builder;
 import lombok.Data;
 
@@ -17,9 +19,7 @@ public class ChapterModel {
 
   private Double number;
 
-  private String[] images;
-
-  private String url;
+  private UrlModel url;
 
   private String mangaId;
 
