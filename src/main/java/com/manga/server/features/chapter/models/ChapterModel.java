@@ -13,15 +13,15 @@ import lombok.Data;
 @Document("chapters")
 public class ChapterModel {
   @Id
-  String id;
+  private String id;
 
-  Double number;
+  private Double number;
 
-  String[] images;
+  private String[] images;
 
-  String url;
+  private String url;
 
-  String mangaId;
+  private String mangaId;
 
-  LocalDateTime lastUpdated;
+  private LocalDateTime lastUpdated;
 }
