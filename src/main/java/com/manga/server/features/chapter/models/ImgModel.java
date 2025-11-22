@@ -16,13 +16,13 @@ import lombok.Data;
 public class ImgModel {
 
     @Id
-    public String id;
+    private String id;
 
-    public UrlModel url;
+    private UrlModel url;
 
-    public Integer number;
+    private Integer number;
 
-    public String chapterId;
+    private String chapterId;
 
-    public LocalDateTime lastUpdated;
+    private LocalDateTime lastUpdated;
 }
