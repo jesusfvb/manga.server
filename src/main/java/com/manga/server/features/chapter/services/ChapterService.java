@@ -4,19 +4,18 @@ import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.data.domain.Example;
+import org.springframework.stereotype.Service;
+
 import com.manga.server.features.chapter.models.ChapterModel;
 import com.manga.server.features.chapter.repository.ChapterRepository;
 import com.manga.server.features.manga.model.MangaModel;
 import com.manga.server.features.manga.services.MangaService;
 import com.manga.server.features.scrapper.services.ScrapperService;
-import com.manga.server.shared.enums.ScrappersEnum;
 
 import lombok.extern.java.Log;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.data.domain.Example;
-import org.springframework.stereotype.Service;
 
 @Log
 @Service
@@ -53,7 +52,7 @@ public class ChapterService {
                 log.warning("No se encontró el manga con ID: " + mangaId + " o no tiene URL");
                 return List.of();
             }
-            var scrapedChapters = scrapperService.getChapters(ScrappersEnum.leerCapitulo, manga.getUrl());
+            var scrapedChapters = scrapperService.getChapters(manga.getUrl());
             if (scrapedChapters != null && !scrapedChapters.isEmpty()) {
                 scrapedChapters.forEach(chapter -> {
                     if (chapter != null) {
