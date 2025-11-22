@@ -22,6 +22,8 @@ import com.manga.server.features.manga.dtos.MangaDTO;
 import com.manga.server.features.manga.mapper.MangaMapper;
 import com.manga.server.features.manga.model.MangaModel;
 import com.manga.server.features.manga.services.MangaService;
+import com.manga.server.shared.enums.ScrappersEnum;
+import com.manga.server.shared.model.UrlModel;
 
 @WebMvcTest(MangaController.class)
 class MangaControllerTest {
@@ -47,7 +49,7 @@ class MangaControllerTest {
         mangaModel1 = MangaModel.builder()
                 .id("1")
                 .name("One Piece")
-                .thumbnail("https://example.com/one-piece.jpg")
+                .thumbnail(UrlModel.builder().url("https://example.com/one-piece.jpg").scrapper(ScrappersEnum.leerCapitulo).build())
                 .description("Aventuras piratas")
                 .lastChapter(1100.0)
                 .build();
@@ -55,7 +57,7 @@ class MangaControllerTest {
         mangaModel2 = MangaModel.builder()
                 .id("2")
                 .name("Naruto")
-                .thumbnail("https://example.com/naruto.jpg")
+                .thumbnail(UrlModel.builder().url("https://example.com/naruto.jpg").scrapper(ScrappersEnum.leerCapitulo).build())
                 .description("Ninja shinobi")
                 .lastChapter(700.0)
                 .build();
