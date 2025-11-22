@@ -30,6 +30,7 @@ import com.manga.server.features.manga.model.MangaModel;
 import com.manga.server.features.manga.repository.MangaRepository;
 import com.manga.server.features.scrapper.services.ScrapperService;
 import com.manga.server.shared.enums.ScrappersEnum;
+import com.manga.server.shared.model.UrlModel;
 
 @ExtendWith(MockitoExtension.class)
 class MangaServiceTest {
@@ -58,7 +59,7 @@ class MangaServiceTest {
         mangaModel1 = MangaModel.builder()
                 .id("1")
                 .name("One Piece")
-                .url("https://example.com/one-piece")
+                .url(UrlModel.builder().url("https://example.com/one-piece").scrapper(ScrappersEnum.leerCapitulo).build())
                 .thumbnail("https://example.com/one-piece.jpg")
                 .description("Aventuras piratas")
                 .lastChapter(1100.0)
@@ -68,7 +69,7 @@ class MangaServiceTest {
         mangaModel2 = MangaModel.builder()
                 .id("2")
                 .name("Naruto")
-                .url("https://example.com/naruto")
+                .url(UrlModel.builder().url("https://example.com/naruto").scrapper(ScrappersEnum.leerCapitulo).build())
                 .thumbnail("https://example.com/naruto.jpg")
                 .description("Ninja shinobi")
                 .lastChapter(700.0)
@@ -203,7 +204,7 @@ class MangaServiceTest {
         List<MangaModel> dbResults = new ArrayList<>(); // Pocos resultados
         MangaModel scrapperManga = MangaModel.builder()
                 .name("Bleach")
-                .url("https://example.com/bleach")
+                .url(UrlModel.builder().url("https://example.com/bleach").scrapper(ScrappersEnum.leerCapitulo).build())
                 .build();
         List<MangaModel> scrapperResults = Arrays.asList(scrapperManga);
 
