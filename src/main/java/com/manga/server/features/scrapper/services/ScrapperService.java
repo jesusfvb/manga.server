@@ -3,8 +3,8 @@ package com.manga.server.features.scrapper.services;
 import com.manga.server.features.chapter.models.ChapterModel;
 import com.manga.server.features.chapter.models.ImgModel;
 import com.manga.server.features.manga.model.MangaModel;
-import com.manga.server.features.scrapper.enums.ScrappersEnum;
 import com.manga.server.features.scrapper.scrapers.leercapitulo.LeercapituloScraper;
+import com.manga.server.shared.enums.ScrappersEnum;
 
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;

@@ -11,8 +11,8 @@ import org.springframework.stereotype.Service;
 
 import com.manga.server.features.chapter.models.ImgModel;
 import com.manga.server.features.chapter.repository.ImgRepository;
-import com.manga.server.features.scrapper.enums.ScrappersEnum;
 import com.manga.server.features.scrapper.services.ScrapperService;
+import com.manga.server.shared.enums.ScrappersEnum;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

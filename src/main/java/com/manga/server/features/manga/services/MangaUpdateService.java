@@ -7,8 +7,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
-import com.manga.server.features.scrapper.enums.ScrappersEnum;
 import com.manga.server.features.scrapper.services.ScrapperService;
+import com.manga.server.shared.enums.ScrappersEnum;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;

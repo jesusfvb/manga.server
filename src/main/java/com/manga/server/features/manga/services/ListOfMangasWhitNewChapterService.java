@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 import com.manga.server.features.manga.model.MangaModel;
 import com.manga.server.features.manga.model.ListOfMangasWhitNewChapterModel;
 import com.manga.server.features.manga.repository.ListOfMangasWhitNewChapterRepository;
-import com.manga.server.features.scrapper.enums.ScrappersEnum;
+import com.manga.server.shared.enums.ScrappersEnum;
 
 import lombok.AllArgsConstructor;
 

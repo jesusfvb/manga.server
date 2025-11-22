@@ -28,8 +28,8 @@ import org.springframework.data.domain.Example;
 
 import com.manga.server.features.manga.model.MangaModel;
 import com.manga.server.features.manga.repository.MangaRepository;
-import com.manga.server.features.scrapper.enums.ScrappersEnum;
 import com.manga.server.features.scrapper.services.ScrapperService;
+import com.manga.server.shared.enums.ScrappersEnum;
 
 @ExtendWith(MockitoExtension.class)
 class MangaServiceTest {
