@@ -10,4 +10,8 @@ import lombok.Data;
 public class UrlModel {
     private String url;
     private ScrappersEnum scrapper;
+
+    public String getFullUrl() {
+        return scrapper.getUrl() + url;
+    }
 }
