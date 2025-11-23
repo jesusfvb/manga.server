@@ -32,7 +32,7 @@ public class ChapterService {
     private ImgService imgService;
 
     @Autowired
-    ChapterRepository chapterRepository;
+    private ChapterRepository chapterRepository;
 
     public List<ChapterModel> getChapters(String mangaId) {
         if (mangaId == null || mangaId.isEmpty()) {
@@ -98,7 +98,7 @@ public class ChapterService {
         if (chapters == null || chapters.isEmpty()) {
             return 0.0;
         }
-        
+
         return chapters.stream()
                 .filter(chapter -> chapter != null && chapter.getNumber() != null)
                 .max(Comparator.comparingDouble(ChapterModel::getNumber))
