@@ -12,7 +12,7 @@ import com.manga.server.features.chapter.models.ImgModel;
 public interface ImgMapper {
 
     
-    @Mapping(target = "url", source = "img.url.fullUrl")
+    @Mapping(target = "url", source = "img.url.url")
     public ImgDTO imgModelToImgDTO(ImgModel img);
 
     public List<ImgDTO> imgModelsToImgDTOs(List<ImgModel> imgList);

@@ -247,6 +247,7 @@ public class LeercapituloScraper implements Scraper {
               int imgNumber = Integer.parseInt(number);
               imgModels.add(ImgModel.builder()
                   .number(imgNumber)
+                  .scrapper(ScrappersEnum.leerCapitulo)
                   .url(UrlModel.builder().url(img).scrapper(ScrappersEnum.leerCapitulo).build())
                   .lastUpdated(LocalDateTime.now())
                   .build());

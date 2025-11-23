@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import com.manga.server.shared.enums.ScrappersEnum;
 import com.manga.server.shared.model.UrlModel;
 
 import lombok.Builder;
@@ -19,6 +20,8 @@ public class ImgModel {
     private String id;
 
     private UrlModel url;
+
+    private ScrappersEnum scrapper;
 
     private Integer number;
 
