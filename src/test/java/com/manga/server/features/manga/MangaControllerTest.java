@@ -14,8 +14,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.manga.server.features.manga.dtos.MangaDTO;
@@ -31,10 +31,10 @@ class MangaControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
-    @MockBean
+    @MockitoBean
     private MangaService mangaService;
 
-    @MockBean
+    @MockitoBean
     private MangaMapper mangaMapper;
 
     private MangaModel mangaModel1;
@@ -69,6 +69,7 @@ class MangaControllerTest {
         mangaDTOs = Arrays.asList(mangaDTO1, mangaDTO2);
     }
 
+    @SuppressWarnings("null")
     @Test
     @DisplayName("GET / - Debe retornar lista de mangas con nuevos capítulos")
     void testGetMangasWhitNewChapters() throws Exception {
@@ -90,6 +91,7 @@ class MangaControllerTest {
                 .andExpect(jsonPath("$[1].lastChapter").value(700.0));
     }
 
+    @SuppressWarnings("null")
     @Test
     @DisplayName("GET /search?query=One - Debe retornar mangas que coincidan con la búsqueda")
     void testSearchMangas() throws Exception {
@@ -120,6 +122,7 @@ class MangaControllerTest {
                 .andExpect(status().isBadRequest());
     }
 
+    @SuppressWarnings("null")
     @Test
     @DisplayName("GET /ids?ids=1&ids=2 - Debe retornar mangas por IDs")
     void testGetMangasByIds() throws Exception {
@@ -147,6 +150,7 @@ class MangaControllerTest {
                 .andExpect(status().isBadRequest());
     }
 
+    @SuppressWarnings("null")
     @Test
     @DisplayName("GET / - Debe retornar lista vacía cuando no hay mangas con nuevos capítulos")
     void testGetMangasWhitNewChaptersEmpty() throws Exception {

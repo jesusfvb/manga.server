@@ -79,6 +79,7 @@ class MangaServiceTest {
         mangaModels = Arrays.asList(mangaModel1, mangaModel2);
     }
 
+    @SuppressWarnings("null")
     @Test
     @DisplayName("getMangasByIds - Debe retornar lista de mangas cuando se proporcionan IDs válidos")
     void testGetMangasByIds() {
@@ -97,6 +98,7 @@ class MangaServiceTest {
         verify(mangaRepository, times(1)).findAllById(ids);
     }
 
+    @SuppressWarnings("null")
     @Test
     @DisplayName("getMangasByIds - Debe retornar lista vacía cuando no hay IDs")
     void testGetMangasByIdsEmpty() {
@@ -176,6 +178,7 @@ class MangaServiceTest {
         verify(listOfMangasWhitNewChapterService, times(1)).getLastListNewManga(scrapper);
     }
 
+    @SuppressWarnings({ "null", "unchecked" })
     @Test
     @DisplayName("searchManga - Debe retornar mangas de la base de datos cuando encuentra resultados")
     void testSearchMangaFoundInDatabase() {
@@ -195,6 +198,7 @@ class MangaServiceTest {
         verify(scrapperService, never()).searchManga(any(ScrappersEnum.class), anyString());
     }
 
+    @SuppressWarnings({ "null", "unchecked" })
     @Test
     @DisplayName("searchManga - Debe buscar en scrapper cuando hay pocos resultados en BD")
     void testSearchMangaWithScrapper() {
@@ -222,6 +226,7 @@ class MangaServiceTest {
         verify(mangaRepository, atLeast(1)).save(any(MangaModel.class));
     }
 
+    @SuppressWarnings({ "null", "unchecked" })
     @Test
     @DisplayName("searchManga - No debe buscar en scrapper cuando hay suficientes resultados en BD")
     void testSearchMangaNotUseScrapper() {
@@ -241,6 +246,7 @@ class MangaServiceTest {
         verify(scrapperService, never()).searchManga(any(), anyString());
     }
 
+    @SuppressWarnings({ "null", "unchecked" })
     @Test
     @DisplayName("searchManga - No debe agregar mangas duplicados del scrapper")
     void testSearchMangaAvoidDuplicates() {
