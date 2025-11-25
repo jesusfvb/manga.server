@@ -9,6 +9,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.util.List;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -16,10 +17,13 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
+
+import com.manga.server.core.filtres.RateLimitFilter;
 
 import com.manga.server.features.chapter.dtos.ChapterDTO;
 import com.manga.server.features.chapter.dtos.ImgDTO;
@@ -33,10 +37,14 @@ import com.manga.server.shared.model.UrlModel;
 
 @ExtendWith(SpringExtension.class)
 @WebMvcTest(ChapterController.class)
+@Import(RateLimitFilter.class)
 class ChapterControllerTest {
 
         @Autowired
         private MockMvc mockMvc;
+
+        @Autowired
+        private RateLimitFilter rateLimitFilter;
 
         @MockitoBean
         private ChapterService chapterService;
@@ -49,6 +57,14 @@ class ChapterControllerTest {
 
         @MockitoBean
         private ImgMapper imgMapper;
+
+        @BeforeEach
+        void setUp() {
+                // Limpiar los buckets de rate limiting antes de cada test
+                if (rateLimitFilter != null) {
+                        rateLimitFilter.reset();
+                }
+        }
 
         // Get Chapters
 
@@ -207,6 +223,139 @@ class ChapterControllerTest {
                 Mockito.verify(imgService, times(1)).preloadImages(argumentCaptor.capture());
 
                 assertEquals(chapterIds, argumentCaptor.getValue());
+        }
+
+        // Test Rate Limiting
+
+        @SuppressWarnings("null")
+        @Test
+        @DisplayName("GET /chapter - Rate limit: Debe permitir 5 requests y rechazar el 6to con 429")
+        void testRateLimitGetChapters() throws Exception {
+                // Given
+                List<ChapterModel> chapterModels = List.of(
+                                ChapterModel.builder()
+                                                .id("1")
+                                                .number(1.0)
+                                                .build());
+                List<ChapterDTO> chapterDTOs = List.of(new ChapterDTO("1", 1.0));
+
+                Mockito.when(chapterService.getChapters("1")).thenReturn(chapterModels);
+                Mockito.when(chapterMapper.chaptersToChapterDTOs(chapterModels)).thenReturn(chapterDTOs);
+
+                // When & Then - Primeros 5 requests deben ser exitosos
+                for (int i = 0; i < 5; i++) {
+                        mockMvc.perform(get("/chapter")
+                                        .param("mangaId", "1"))
+                                        .andExpect(status().isOk());
+                }
+
+                // El 6to request debe ser rechazado con 429
+                mockMvc.perform(get("/chapter")
+                                .param("mangaId", "1"))
+                                .andExpect(status().isTooManyRequests())
+                                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                                .andExpect(jsonPath("$.error").value("Rate limit excedido. Máximo 5 requests por minuto por endpoint."));
+        }
+
+        @SuppressWarnings("null")
+        @Test
+        @DisplayName("GET /chapter/img - Rate limit: Debe permitir 5 requests y rechazar el 6to con 429")
+        void testRateLimitGetImg() throws Exception {
+                // Given
+                List<ImgModel> imgModels = List.of(
+                                ImgModel.builder()
+                                                .id("1")
+                                                .number(1)
+                                                .url(UrlModel.builder()
+                                                                .url("https://example.com/image1")
+                                                                .build())
+                                                .build());
+                List<ImgDTO> imgDTOs = List.of(new ImgDTO("1", 1, "https://example.com/image1"));
+
+                Mockito.when(imgService.getImg("1")).thenReturn(imgModels);
+                Mockito.when(imgMapper.imgModelsToImgDTOs(imgModels)).thenReturn(imgDTOs);
+
+                // When & Then - Primeros 5 requests deben ser exitosos
+                for (int i = 0; i < 5; i++) {
+                        mockMvc.perform(get("/chapter/img")
+                                        .param("chapterId", "1"))
+                                        .andExpect(status().isOk());
+                }
+
+                // El 6to request debe ser rechazado con 429
+                mockMvc.perform(get("/chapter/img")
+                                .param("chapterId", "1"))
+                                .andExpect(status().isTooManyRequests())
+                                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                                .andExpect(jsonPath("$.error").value("Rate limit excedido. Máximo 5 requests por minuto por endpoint."));
+        }
+
+        @SuppressWarnings("null")
+        @Test
+        @DisplayName("GET /chapter/img/preload - Rate limit: Debe permitir 5 requests y rechazar el 6to con 429")
+        void testRateLimitPreloadImages() throws Exception {
+                // When & Then - Primeros 5 requests deben ser exitosos
+                for (int i = 0; i < 5; i++) {
+                        mockMvc.perform(get("/chapter/img/preload")
+                                        .param("chapterIds", "1", "2"))
+                                        .andExpect(status().isOk());
+                }
+
+                // El 6to request debe ser rechazado con 429
+                mockMvc.perform(get("/chapter/img/preload")
+                                .param("chapterIds", "1", "2"))
+                                .andExpect(status().isTooManyRequests())
+                                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                                .andExpect(jsonPath("$.error").value("Rate limit excedido. Máximo 5 requests por minuto por endpoint."));
+        }
+
+        @SuppressWarnings("null")
+        @Test
+        @DisplayName("Rate limit: Cada endpoint debe tener su propio límite independiente")
+        void testRateLimitIndependentPerEndpoint() throws Exception {
+                // Given
+                List<ChapterModel> chapterModels = List.of(
+                                ChapterModel.builder()
+                                                .id("1")
+                                                .number(1.0)
+                                                .build());
+                List<ChapterDTO> chapterDTOs = List.of(new ChapterDTO("1", 1.0));
+
+                List<ImgModel> imgModels = List.of(
+                                ImgModel.builder()
+                                                .id("1")
+                                                .number(1)
+                                                .url(UrlModel.builder()
+                                                                .url("https://example.com/image1")
+                                                                .build())
+                                                .build());
+                List<ImgDTO> imgDTOs = List.of(new ImgDTO("1", 1, "https://example.com/image1"));
+
+                Mockito.when(chapterService.getChapters("1")).thenReturn(chapterModels);
+                Mockito.when(chapterMapper.chaptersToChapterDTOs(chapterModels)).thenReturn(chapterDTOs);
+                Mockito.when(imgService.getImg("1")).thenReturn(imgModels);
+                Mockito.when(imgMapper.imgModelsToImgDTOs(imgModels)).thenReturn(imgDTOs);
+
+                // When & Then - Hacer 5 requests a "/chapter" y 5 requests a "/chapter/img"
+                // Todos deben ser exitosos porque cada endpoint tiene su propio límite
+                for (int i = 0; i < 5; i++) {
+                        mockMvc.perform(get("/chapter")
+                                        .param("mangaId", "1"))
+                                        .andExpect(status().isOk());
+                        mockMvc.perform(get("/chapter/img")
+                                        .param("chapterId", "1"))
+                                        .andExpect(status().isOk());
+                }
+
+                // El 6to request a "/chapter" debe ser rechazado
+                mockMvc.perform(get("/chapter")
+                                .param("mangaId", "1"))
+                                .andExpect(status().isTooManyRequests());
+
+                // Pero el 6to request a "/chapter/img" también debe ser rechazado
+                mockMvc.perform(get("/chapter/img")
+                                .param("chapterId", "1"))
+                                .andExpect(status().isTooManyRequests());
         }
 
 }
