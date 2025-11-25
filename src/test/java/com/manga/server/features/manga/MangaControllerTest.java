@@ -14,9 +14,12 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+
+import com.manga.server.core.filtres.RateLimitFilter;
 
 import com.manga.server.features.manga.dtos.MangaDTO;
 import com.manga.server.features.manga.mapper.MangaMapper;
@@ -26,10 +29,14 @@ import com.manga.server.shared.enums.ScrappersEnum;
 import com.manga.server.shared.model.UrlModel;
 
 @WebMvcTest(MangaController.class)
+@Import(RateLimitFilter.class)
 class MangaControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
+
+    @Autowired
+    private RateLimitFilter rateLimitFilter;
 
     @MockitoBean
     private MangaService mangaService;
@@ -46,6 +53,11 @@ class MangaControllerTest {
 
     @BeforeEach
     void setUp() {
+        // Limpiar los buckets de rate limiting antes de cada test
+        if (rateLimitFilter != null) {
+            rateLimitFilter.reset();
+        }
+
         mangaModel1 = MangaModel.builder()
                 .id("1")
                 .name("One Piece")
@@ -164,6 +176,114 @@ class MangaControllerTest {
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$").isArray())
                 .andExpect(jsonPath("$.length()").value(0));
+    }
+
+    // Test Rate Limiting
+
+    @SuppressWarnings("null")
+    @Test
+    @DisplayName("GET / - Rate limit: Debe permitir 5 requests y rechazar el 6to con 429")
+    void testRateLimitGetMangasWhitNewChapters() throws Exception {
+        // Given
+        org.mockito.Mockito.when(mangaService.mangasWithNewChapters()).thenReturn(mangaModels);
+        org.mockito.Mockito.when(mangaMapper.mangasToMangaDTOs(mangaModels)).thenReturn(mangaDTOs);
+
+        // When & Then - Primeros 5 requests deben ser exitosos
+        for (int i = 0; i < 5; i++) {
+            mockMvc.perform(get("/"))
+                    .andExpect(status().isOk());
+        }
+
+        // El 6to request debe ser rechazado con 429
+        mockMvc.perform(get("/"))
+                .andExpect(status().isTooManyRequests())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.error").value("Rate limit excedido. Máximo 5 requests por minuto por endpoint."));
+    }
+
+    @SuppressWarnings("null")
+    @Test
+    @DisplayName("GET /search - Rate limit: Debe permitir 5 requests y rechazar el 6to con 429")
+    void testRateLimitSearchMangas() throws Exception {
+        // Given
+        String query = "One";
+        List<MangaModel> searchResults = Arrays.asList(mangaModel1);
+        List<MangaDTO> searchDTOs = Arrays.asList(mangaDTO1);
+
+        org.mockito.Mockito.when(mangaService.searchManga(query)).thenReturn(searchResults);
+        org.mockito.Mockito.when(mangaMapper.mangasToMangaDTOs(searchResults)).thenReturn(searchDTOs);
+
+        // When & Then - Primeros 5 requests deben ser exitosos
+        for (int i = 0; i < 5; i++) {
+            mockMvc.perform(get("/search")
+                    .param("query", query))
+                    .andExpect(status().isOk());
+        }
+
+        // El 6to request debe ser rechazado con 429
+        mockMvc.perform(get("/search")
+                .param("query", query))
+                .andExpect(status().isTooManyRequests())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.error").value("Rate limit excedido. Máximo 5 requests por minuto por endpoint."));
+    }
+
+    @SuppressWarnings("null")
+    @Test
+    @DisplayName("GET /ids - Rate limit: Debe permitir 5 requests y rechazar el 6to con 429")
+    void testRateLimitGetMangasByIds() throws Exception {
+        // Given
+        List<String> ids = Arrays.asList("1", "2");
+        org.mockito.Mockito.when(mangaService.getMangasByIds(ids)).thenReturn(mangaModels);
+        org.mockito.Mockito.when(mangaMapper.mangasToMangaDTOs(mangaModels)).thenReturn(mangaDTOs);
+
+        // When & Then - Primeros 5 requests deben ser exitosos
+        for (int i = 0; i < 5; i++) {
+            mockMvc.perform(get("/ids")
+                    .param("ids", "1", "2"))
+                    .andExpect(status().isOk());
+        }
+
+        // El 6to request debe ser rechazado con 429
+        mockMvc.perform(get("/ids")
+                .param("ids", "1", "2"))
+                .andExpect(status().isTooManyRequests())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.error").value("Rate limit excedido. Máximo 5 requests por minuto por endpoint."));
+    }
+
+    @SuppressWarnings("null")
+    @Test
+    @DisplayName("Rate limit: Cada endpoint debe tener su propio límite independiente")
+    void testRateLimitIndependentPerEndpoint() throws Exception {
+        // Given
+        org.mockito.Mockito.when(mangaService.mangasWithNewChapters()).thenReturn(mangaModels);
+        org.mockito.Mockito.when(mangaMapper.mangasToMangaDTOs(mangaModels)).thenReturn(mangaDTOs);
+
+        String query = "One";
+        List<MangaModel> searchResults = Arrays.asList(mangaModel1);
+        List<MangaDTO> searchDTOs = Arrays.asList(mangaDTO1);
+        org.mockito.Mockito.when(mangaService.searchManga(query)).thenReturn(searchResults);
+        org.mockito.Mockito.when(mangaMapper.mangasToMangaDTOs(searchResults)).thenReturn(searchDTOs);
+
+        // When & Then - Hacer 5 requests a "/" y 5 requests a "/search"
+        // Todos deben ser exitosos porque cada endpoint tiene su propio límite
+        for (int i = 0; i < 5; i++) {
+            mockMvc.perform(get("/"))
+                    .andExpect(status().isOk());
+            mockMvc.perform(get("/search")
+                    .param("query", query))
+                    .andExpect(status().isOk());
+        }
+
+        // El 6to request a "/" debe ser rechazado
+        mockMvc.perform(get("/"))
+                .andExpect(status().isTooManyRequests());
+
+        // Pero el 6to request a "/search" también debe ser rechazado
+        mockMvc.perform(get("/search")
+                .param("query", query))
+                .andExpect(status().isTooManyRequests());
     }
 }
 
