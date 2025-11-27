@@ -65,27 +65,21 @@ public class ListOfMangasWhitNewChapterService {
         // scrappersEnum ya está validado arriba, el builder es seguro
         @SuppressWarnings("null")
         var newListManga = newListMangaRepository.findOne(Example.of(example));
-        if(newListManga.isPresent()){
-            var existingModel = newListManga.get();
-            if (existingModel != null) {
-                existingModel.setMangas(mangas);
-                existingModel.setDateTime(LocalDateTime.now());
-                newListMangaRepository.save(existingModel);
-            }
+
+        if (newListManga.isPresent() && newListManga.get() != null) {
+            example.setId(newListManga.get().getId());
         }
-        else {
-            example.setDateTime(LocalDateTime.now());
-            example.setMangas(mangas);
-            newListMangaRepository.save(example);
-        }
+        example.setDateTime(LocalDateTime.now());
+        example.setMangas(mangas);
+        newListMangaRepository.save(example);
+
     }
 
     private boolean isMoreThanMinutes(LocalDateTime date) {
         int MINUTES = 30;
 
-        Duration duration = Duration.between(date,LocalDateTime.now());
-        Duration fiveMinutes = Duration.ofMinutes(MINUTES);
-        return duration.compareTo(fiveMinutes) > 0;
+        Duration duration = Duration.between(date, LocalDateTime.now());
+        return duration.toMinutes() > MINUTES;
     }
 
 }
