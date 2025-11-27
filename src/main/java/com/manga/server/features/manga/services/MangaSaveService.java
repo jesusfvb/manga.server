@@ -25,6 +25,14 @@ public class MangaSaveService {
         if (manga == null) {
             return;
         }
+        if (manga.getName() == null || manga.getUrl() == null) {
+            return;
+        }
+
+        if (manga.getLastChapter() == null) {
+            manga.setLastChapter(0.0);
+        }
+
         var example = MangaModel.builder()
                 .name(manga.getName() != null ? manga.getName() : "")
                 .url(manga.getUrl())
