@@ -33,9 +33,11 @@ import lombok.extern.java.Log;
 public class LeercapituloScraper implements Scraper {
   PlaywrightManager playwrightManager;
 
+  private ScrappersEnum scrapper = ScrappersEnum.leerCapitulo;
+
   @Override
   public String baseURl() {
-    return "https://www.leercapitulo.re";
+    return scrapper.getUrl();
   }
 
   @Override
