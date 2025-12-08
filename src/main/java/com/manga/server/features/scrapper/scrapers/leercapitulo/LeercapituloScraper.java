@@ -6,14 +6,15 @@ import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.manga.server.core.browser.JsoupWrapper;
 import com.manga.server.core.browser.PlaywrightManager;
 import com.manga.server.features.chapter.models.ChapterModel;
 import com.manga.server.features.chapter.models.ImgModel;
@@ -24,16 +25,19 @@ import com.manga.server.shared.enums.ScrappersEnum;
 import com.manga.server.shared.model.UrlModel;
 import com.microsoft.playwright.Page;
 
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
 
 @Log
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class LeercapituloScraper implements Scraper {
-  PlaywrightManager playwrightManager;
 
-  private ScrappersEnum scrapper = ScrappersEnum.leerCapitulo;
+  private final PlaywrightManager playwrightManager;
+
+  private final JsoupWrapper jsoupWrapper;
+
+  private final ScrappersEnum scrapper = ScrappersEnum.leerCapitulo;
 
   @Override
   public String baseURl() {
@@ -50,7 +54,7 @@ public class LeercapituloScraper implements Scraper {
 
     try {
       log.info("Conectando a la URL base: " + baseUrl);
-      Document document = Jsoup.connect(baseUrl).get();
+      Document document = jsoupWrapper.getDocument(baseUrl);
       log.info("Conexión exitosa a " + baseUrl);
 
       String selector = "div.media.mainpage-manga";
@@ -170,7 +174,7 @@ public class LeercapituloScraper implements Scraper {
     if (!url.contains(baseURl()))
       url = baseURl() + url;
     try {
-      Document document = Jsoup.connect(url).get();
+      Document document = jsoupWrapper.getDocument(url);
       var chapters = document.select("#examples > div > div > ul > li > div > h4 > a");
       List<ChapterModel> chapterModels = new LinkedList<>();
       for (var chapter : chapters) {
@@ -317,7 +321,7 @@ public class LeercapituloScraper implements Scraper {
     if (!url.contains(baseURl()))
       url = baseURl() + url;
     try {
-      Document document = Jsoup.connect(url).get();
+      Document document = jsoupWrapper.getDocument(url);
       var description = getMangaDescription(document);
 
       mangaModel.setDescription(description);
