@@ -9,12 +9,11 @@ import java.util.List;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestClient;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.manga.server.core.browser.JsoupWrapper;
 import com.manga.server.core.browser.PlaywrightManager;
+import com.manga.server.core.browser.RestClientWrapper;
 import com.manga.server.features.chapter.models.ChapterModel;
 import com.manga.server.features.chapter.models.ImgModel;
 import com.manga.server.features.manga.model.MangaModel;
@@ -35,6 +34,8 @@ public class LeercapituloScraper implements Scraper {
   private final PlaywrightManager playwrightManager;
 
   private final JsoupWrapper jsoupWrapper;
+
+  private final RestClientWrapper restClientWrapper;
 
   private final ScrappersEnum scrapper = ScrappersEnum.leerCapitulo;
 
@@ -141,19 +142,12 @@ public class LeercapituloScraper implements Scraper {
       return List.of();
     }
     List<MangaModel> mangas = new LinkedList<>();
+
     try {
-      RestClient restClient = RestClient.create();
       String uri = baseURl() + "/search-autocomplete?term=" + query;
-      String result = restClient.get()
-          .uri(uri)
-          .retrieve()
-          .body(String.class);
+      List<LeerCapituloSearchDTO> list = restClientWrapper.get(uri, new TypeReference<List<LeerCapituloSearchDTO>>() {
+      });
 
-      ObjectMapper objectMapper = new ObjectMapper();
-
-      List<LeerCapituloSearchDTO> list = objectMapper.readValue(result,
-          new TypeReference<List<LeerCapituloSearchDTO>>() {
-          });
       list.forEach(manga -> {
         var mangaModel = MangaModel.builder().name(manga.label()).url(
             UrlModel.builder().url(manga.link()).scrapper(ScrappersEnum.leerCapitulo).build())
