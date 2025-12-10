@@ -3,6 +3,8 @@ package com.manga.server.features.scrapper.scrapers.leercapitulo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
@@ -11,7 +13,6 @@ import java.nio.file.Paths;
 import java.util.List;
 
 import org.jsoup.nodes.Document;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -69,143 +70,93 @@ public class LeercapituloScraperTests {
         assertEquals(5, result.size());
     }
 
-    // @Test
-    // @DisplayName("getMangasWithNewChapters - Debe retornar lista de mangas vacia
-    // cuando el HTML es inválido")
-    // void testGetMangasWithNewChaptersInvalid() throws IOException {
-    // // Given
-    // String html = createHtmlWithInvalidManga();
-    // Document document = Document.createShell("http://example.com");
-    // document.html(html);
-    // when(jsoupWrapper.getDocument(anyString())).thenReturn(document);
-    // List<MangaModel> result = leercapituloScraper.getMangasWithNewChapters();
-    // assertNotNull(result);
-    // assertEquals(0, result.size());
-    // }
+    @Test
+    @DisplayName("getMangasWithNewChapters - Debe retornar lista de mangas vacía cuando el HTML es inválido")
+    void testGetMangasWithNewChaptersInvalid() throws IOException {
+        // Given
+        String html = Files.readString(
+                Paths.get("src/test/resources/html/leercapitulo/manga_with_new_chapters_bad.html"));
 
-    // @Test
-    // @DisplayName("getMangasWithNewChapters - Debe manejar el error de
-    // JsoupWrapper.getDocument")
-    // void testGetMangasWithNewChaptersJsoupWrapperError() throws IOException {
-    // // Given
-    // when(jsoupWrapper.getDocument(anyString())).thenThrow(new IOException("Error
-    // de conexión"));
-    // List<MangaModel> result = leercapituloScraper.getMangasWithNewChapters();
-    // assertNotNull(result);
-    // assertEquals(0, result.size());
+        Document documentDescription = Document.createShell("http://example.com");
+        documentDescription.html(html);
 
-    // }
+        Document document = Document.createShell("http://example.com");
+        document.html(html);
+        when(jsoupWrapper.getDocument(anyString())).thenReturn(document);
 
-    // @Test
-    // @DisplayName("getMangasWithNewChapters - Debe manejar el error de
-    // NumberFormatException")
-    // void testGetMangasWithNewChaptersNumberFormatException() throws IOException {
-    // // Given
-    // String html = createHtmlWithInvalidChapterNumber();
-    // Document document = Document.createShell("http://example.com");
-    // document.html(html);
-    // when(jsoupWrapper.getDocument(anyString())).thenReturn(document);
-    // List<MangaModel> result = leercapituloScraper.getMangasWithNewChapters();
-    // assertNotNull(result);
-    // assertEquals(0, result.size());
-    // }
+        List<MangaModel> result = leercapituloScraper.getMangasWithNewChapters();
 
-    // @Test
-    // @DisplayName("getMangasWithNewChapters - Debe manejar la url vacia")
-    // void testGetMangasWithNewChaptersEmptyUrl() throws IOException {
-    // // Given
-    // String html = createHtmlWithMangas(1, 1);
-    // Document document = Document.createShell("http://example.com");
-    // document.html(html);
-    // when(jsoupWrapper.getDocument(anyString())).thenReturn(document);
-    // List<MangaModel> result = leercapituloScraper.getMangasWithNewChapters();
-    // assertNotNull(result);
-    // assertEquals(1, result.size());
-    // }
+        verify(jsoupWrapper, times(1)).getDocument(anyString());
+        assertNotNull(result);
+        assertEquals(0, result.size());
 
-    // // Tests para searchMangas
+    }
 
-    // @Test
-    // @DisplayName("searchMangas - Debe retornar lista vacía cuando query es null")
-    // void testSearchMangasNullQuery() {
-    // // When
-    // List<MangaModel> result = leercapituloScraper.searchMangas(null);
+    @Test
+    @DisplayName("getMangasWithNewChapters - Debe manejar el error de JsoupWrapper.getDocument")
+    void testGetMangasWithNewChaptersJsoupWrapperError() throws IOException {
+        // Given
+        when(jsoupWrapper.getDocument(anyString())).thenThrow(new IOException("Error de conexión"));
+        List<MangaModel> result = leercapituloScraper.getMangasWithNewChapters();
+        assertNotNull(result);
+        verify(jsoupWrapper, times(1)).getDocument(anyString());
+        assertEquals(0, result.size());
 
-    // // Then
-    // assertNotNull(result);
-    // assertEquals(0, result.size());
-    // }
+    }
 
-    // @Test
-    // @DisplayName("searchMangas - Debe retornar lista vacía cuando query está
-    // vacío")
-    // void testSearchMangasEmptyQuery() {
-    // // When
-    // List<MangaModel> result = leercapituloScraper.searchMangas("");
+    @Test
+    @DisplayName("getMangasWithNewChapters - Debe omitir mangas con URL vacía")
+    void testGetMangasWithNewChaptersEmptyUrl() throws IOException {
+        // Given
+        String html = Files.readString(
+                Paths.get("src/test/resources/html/leercapitulo/manga_with_new_chapters_empty_url.html"));
 
-    // // Then
-    // assertNotNull(result);
-    // assertEquals(0, result.size());
-    // }
+        Document document = Document.createShell("http://example.com");
+        document.html(html);
 
-    // @Test
-    // @DisplayName("searchMangas - Debe retornar lista vacía cuando query solo
-    // tiene espacios")
-    // void testSearchMangasBlankQuery() {
-    // // When
-    // List<MangaModel> result = leercapituloScraper.searchMangas(" ");
+        String htmlDescription = Files.readString(
+                Paths.get("src/test/resources/html/leercapitulo/manga_description.htm"));
 
-    // // Then - El método no verifica espacios en blanco, así que intentará hacer
-    // la
-    // // búsqueda
-    // // pero si falla, retornará lista vacía
-    // assertNotNull(result);
-    // }
+        Document documentDescription = Document.createShell("http://example.com");
+        documentDescription.html(htmlDescription);
 
-    // @Test
-    // @DisplayName("searchMangas - Debe retornar lista cuando se ejecuta con query
-    // válida (test de integración básico)")
-    // void testSearchMangasWithValidQuery() {
-    // // Given - Este test verifica que el método no lanza excepciones
-    // // y retorna una lista (puede estar vacía si hay error de conexión)
-    // String query = "One Piece";
+        when(jsoupWrapper.getDocument(anyString())).thenReturn(document, documentDescription);
+        List<MangaModel> result = leercapituloScraper.getMangasWithNewChapters();
 
-    // // When
-    // List<MangaModel> result = leercapituloScraper.searchMangas(query);
+        // Then
+        assertNotNull(result);
+        assertEquals(1, result.size(), "Debe retornar solo el manga con URL válida");
+        assertEquals("Hikaru no shinda Natsu", result.get(0).getName());
+        assertEquals("/manga/vu8qr59pze/hikaru-no-shinda-natsu/", result.get(0).getUrl().getUrl());
+        verify(jsoupWrapper, times(2)).getDocument(anyString());
+    }
 
-    // // Then
-    // assertNotNull(result);
-    // // No verificamos el tamaño porque depende de la conexión a internet
-    // }
+    @Test
+    @DisplayName("getMangasWithNewChapters - Debe omitir mangas con último capítulo inválido")
+    void testGetMangasWithNewChaptersInvalidLastChapter() throws IOException {
+        // Given
+        String html = Files.readString(
+                Paths.get("src/test/resources/html/leercapitulo/manga_with_new_chapters_invalid_last_chapter.html"));
 
-    // @Test
-    // @DisplayName("searchMangas - Debe manejar errores de conexión correctamente")
-    // void testSearchMangasConnectionError() {
-    // // Given - El método maneja excepciones internamente
-    // String query = "test query";
+        Document document = Document.createShell("http://example.com");
+        document.html(html);
 
-    // // When - Si hay error de conexión, el método debe retornar lista vacía
-    // List<MangaModel> result = leercapituloScraper.searchMangas(query);
+        String htmlDescription = Files.readString(
+                Paths.get("src/test/resources/html/leercapitulo/manga_description.htm"));
 
-    // // Then
-    // assertNotNull(result);
-    // // El método captura excepciones y retorna lista vacía o lista con resultados
-    // // parciales
-    // }
+        Document documentDescription = Document.createShell("http://example.com");
+        documentDescription.html(htmlDescription);
 
-    // @Test
-    // @DisplayName("searchMangas - Debe ejecutarse sin errores con query válida")
-    // void testSearchMangasExecutesWithoutErrors() {
-    // // Given
-    // String query = "naruto";
+        when(jsoupWrapper.getDocument(anyString())).thenReturn(document, documentDescription);
+        List<MangaModel> result = leercapituloScraper.getMangasWithNewChapters();
 
-    // // When - Verificamos que el método se ejecuta sin errores
-    // // La URI construida sería: baseUrl + "/search-autocomplete?term=" + query
-    // List<MangaModel> result = leercapituloScraper.searchMangas(query);
+        // Then
+        assertNotNull(result);
+        assertEquals(1, result.size(), "Debe retornar solo el manga con último capítulo válido");
+        assertEquals("Hikaru no shinda Natsu", result.get(0).getName());
+        assertEquals("/manga/vu8qr59pze/hikaru-no-shinda-natsu/", result.get(0).getUrl().getUrl());
+        assertEquals(38.0, result.get(0).getLastChapter(), "Debe tener el último capítulo correcto");
+        verify(jsoupWrapper, times(2)).getDocument(anyString());
+    }
 
-    // // Then
-    // assertNotNull(result);
-    // // No podemos verificar la URI directamente sin mockear RestClient,
-    // // pero el test verifica que el método no falla y retorna una lista
-    // }
 }
