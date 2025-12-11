@@ -1,0 +1,302 @@
+[
+  {
+    "value": "manga-1",
+    "label": "Manga válido 1",
+    "link": "/manga/1/manga-valido-1/",
+    "thumbnail": "/covers/1/thumbnail1.jpg"
+  },
+  {
+    "value": "manga-2",
+    "label": "Manga válido 2",
+    "link": "/manga/2/manga-valido-2/",
+    "thumbnail": "/covers/2/thumbnail2.jpg"
+  },
+  {
+    "value": "manga-3",
+    "label": "Manga válido 3",
+    "link": "/manga/3/manga-valido-3/",
+    "thumbnail": "/covers/3/thumbnail3.jpg"
+  },
+  {
+    "value": "manga-4",
+    "label": "Manga válido 4",
+    "link": "/manga/4/manga-valido-4/",
+    "thumbnail": "/covers/4/thumbnail4.jpg"
+  },
+  {
+    "value": "manga-5",
+    "label": "Manga válido 5",
+    "link": "/manga/5/manga-valido-5/",
+    "thumbnail": "/covers/5/thumbnail5.jpg"
+  },
+  {
+    "value": "manga-6",
+    "label": "Manga válido 6",
+    "link": "/manga/6/manga-valido-6/",
+    "thumbnail": "/covers/6/thumbnail6.jpg"
+  },
+  {
+    "value": "manga-7",
+    "label": "Manga válido 7",
+    "link": "/manga/7/manga-valido-7/",
+    "thumbnail": "/covers/7/thumbnail7.jpg"
+  },
+  {
+    "value": "manga-8",
+    "label": "Manga válido 8",
+    "link": "/manga/8/manga-valido-8/",
+    "thumbnail": "/covers/8/thumbnail8.jpg"
+  },
+  {
+    "value": "manga-9",
+    "label": "Manga válido 9",
+    "link": "/manga/9/manga-valido-9/",
+    "thumbnail": "/covers/9/thumbnail9.jpg"
+  },
+  {
+    "value": "manga-10",
+    "label": "Manga válido 10",
+    "link": "/manga/10/manga-valido-10/",
+    "thumbnail": "/covers/10/thumbnail10.jpg"
+  },
+  {
+    "value": "manga-11",
+    "label": "Manga válido 11",
+    "link": "/manga/11/manga-valido-11/",
+    "thumbnail": "/covers/11/thumbnail11.jpg"
+  },
+  {
+    "value": "manga-12",
+    "label": "Manga válido 12",
+    "link": "/manga/12/manga-valido-12/",
+    "thumbnail": "/covers/12/thumbnail12.jpg"
+  },
+  {
+    "value": "manga-13",
+    "label": "Manga válido 13",
+    "link": "/manga/13/manga-valido-13/",
+    "thumbnail": "/covers/13/thumbnail13.jpg"
+  },
+  {
+    "value": "manga-14",
+    "label": "Manga válido 14",
+    "link": "/manga/14/manga-valido-14/",
+    "thumbnail": "/covers/14/thumbnail14.jpg"
+  },
+  {
+    "value": "manga-15",
+    "label": "Manga válido 15",
+    "link": "/manga/15/manga-valido-15/",
+    "thumbnail": "/covers/15/thumbnail15.jpg"
+  },
+  {
+    "value": "manga-16",
+    "label": "Manga válido 16",
+    "link": "/manga/16/manga-valido-16/",
+    "thumbnail": "/covers/16/thumbnail16.jpg"
+  },
+  {
+    "value": "manga-17",
+    "label": "Manga válido 17",
+    "link": "/manga/17/manga-valido-17/",
+    "thumbnail": "/covers/17/thumbnail17.jpg"
+  },
+  {
+    "value": "manga-18",
+    "label": "Manga válido 18",
+    "link": "/manga/18/manga-valido-18/",
+    "thumbnail": "/covers/18/thumbnail18.jpg"
+  },
+  {
+    "value": "manga-19",
+    "label": "Manga válido 19",
+    "link": "/manga/19/manga-valido-19/",
+    "thumbnail": "/covers/19/thumbnail19.jpg"
+  },
+  {
+    "value": "manga-20",
+    "label": "Manga válido 20",
+    "link": "/manga/20/manga-valido-20/",
+    "thumbnail": "/covers/20/thumbnail20.jpg"
+  },
+  {
+    "value": "manga-21",
+    "label": "Manga válido 21",
+    "link": "/manga/21/manga-valido-21/",
+    "thumbnail": "/covers/21/thumbnail21.jpg"
+  },
+  {
+    "value": "manga-22",
+    "label": "Manga válido 22",
+    "link": "/manga/22/manga-valido-22/",
+    "thumbnail": "/covers/22/thumbnail22.jpg"
+  },
+  {
+    "value": "manga-23",
+    "label": "Manga válido 23",
+    "link": "/manga/23/manga-valido-23/",
+    "thumbnail": "/covers/23/thumbnail23.jpg"
+  },
+  {
+    "value": "manga-24",
+    "label": "Manga válido 24",
+    "link": "/manga/24/manga-valido-24/",
+    "thumbnail": "/covers/24/thumbnail24.jpg"
+  },
+  {
+    "value": "manga-25",
+    "label": "Manga válido 25",
+    "link": "/manga/25/manga-valido-25/",
+    "thumbnail": "/covers/25/thumbnail25.jpg"
+  },
+  {
+    "value": "manga-26-url-vacia",
+    "label": "Manga con URL vacía",
+    "link": "",
+    "thumbnail": "/covers/26/thumbnail26.jpg"
+  },
+  {
+    "value": "manga-27-url-vacia",
+    "label": "Manga con URL vacía 2",
+    "link": "",
+    "thumbnail": "/covers/27/thumbnail27.jpg"
+  },
+  {
+    "value": "manga-28-url-vacia",
+    "label": "Manga con URL vacía 3",
+    "link": "",
+    "thumbnail": "/covers/28/thumbnail28.jpg"
+  },
+  {
+    "value": "manga-29-nombre-vacio",
+    "label": "",
+    "link": "/manga/29/manga-nombre-vacio/",
+    "thumbnail": "/covers/29/thumbnail29.jpg"
+  },
+  {
+    "value": "manga-30-nombre-vacio",
+    "label": "",
+    "link": "/manga/30/manga-nombre-vacio-2/",
+    "thumbnail": "/covers/30/thumbnail30.jpg"
+  },
+  {
+    "value": "manga-31-nombre-vacio",
+    "label": "",
+    "link": "/manga/31/manga-nombre-vacio-3/",
+    "thumbnail": "/covers/31/thumbnail31.jpg"
+  },
+  {
+    "value": "manga-32-thumbnail-vacio",
+    "label": "Manga con thumbnail vacío",
+    "link": "/manga/32/manga-thumbnail-vacio/",
+    "thumbnail": ""
+  },
+  {
+    "value": "manga-33-thumbnail-vacio",
+    "label": "Manga con thumbnail vacío 2",
+    "link": "/manga/33/manga-thumbnail-vacio-2/",
+    "thumbnail": ""
+  },
+  {
+    "value": "manga-34-thumbnail-vacio",
+    "label": "Manga con thumbnail vacío 3",
+    "link": "/manga/34/manga-thumbnail-vacio-3/",
+    "thumbnail": ""
+  },
+  {
+    "value": "manga-35-url-nombre-vacios",
+    "label": "",
+    "link": "",
+    "thumbnail": "/covers/35/thumbnail35.jpg"
+  },
+  {
+    "value": "manga-36-url-nombre-vacios",
+    "label": "",
+    "link": "",
+    "thumbnail": "/covers/36/thumbnail36.jpg"
+  },
+  {
+    "value": "manga-37-url-thumbnail-vacios",
+    "label": "Manga con URL y thumbnail vacíos",
+    "link": "",
+    "thumbnail": ""
+  },
+  {
+    "value": "manga-38-url-thumbnail-vacios",
+    "label": "Manga con URL y thumbnail vacíos 2",
+    "link": "",
+    "thumbnail": ""
+  },
+  {
+    "value": "manga-39-nombre-thumbnail-vacios",
+    "label": "",
+    "link": "/manga/39/manga-nombre-thumbnail-vacios/",
+    "thumbnail": ""
+  },
+  {
+    "value": "manga-40-nombre-thumbnail-vacios",
+    "label": "",
+    "link": "/manga/40/manga-nombre-thumbnail-vacios-2/",
+    "thumbnail": ""
+  },
+  {
+    "value": "",
+    "label": "",
+    "link": "",
+    "thumbnail": ""
+  },
+  {
+    "value": "",
+    "label": "",
+    "link": "",
+    "thumbnail": ""
+  },
+  {
+    "value": "",
+    "label": "",
+    "link": "",
+    "thumbnail": ""
+  },
+  {
+    "value": "manga-44",
+    "label": "Manga válido 44",
+    "link": "/manga/44/manga-valido-44/",
+    "thumbnail": "/covers/44/thumbnail44.jpg"
+  },
+  {
+    "value": "manga-45",
+    "label": "Manga válido 45",
+    "link": "/manga/45/manga-valido-45/",
+    "thumbnail": "/covers/45/thumbnail45.jpg"
+  },
+  {
+    "value": "manga-46",
+    "label": "Manga válido 46",
+    "link": "/manga/46/manga-valido-46/",
+    "thumbnail": "/covers/46/thumbnail46.jpg"
+  },
+  {
+    "value": "manga-47",
+    "label": "Manga válido 47",
+    "link": "/manga/47/manga-valido-47/",
+    "thumbnail": "/covers/47/thumbnail47.jpg"
+  },
+  {
+    "value": "manga-48",
+    "label": "Manga válido 48",
+    "link": "/manga/48/manga-valido-48/",
+    "thumbnail": "/covers/48/thumbnail48.jpg"
+  },
+  {
+    "value": "manga-49",
+    "label": "Manga válido 49",
+    "link": "/manga/49/manga-valido-49/",
+    "thumbnail": "/covers/49/thumbnail49.jpg"
+  },
+  {
+    "value": "manga-50",
+    "label": "Manga válido 50",
+    "link": "/manga/50/manga-valido-50/",
+    "thumbnail": "/covers/50/thumbnail50.jpg"
+  }
+]
