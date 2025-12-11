@@ -149,6 +149,11 @@ public class LeercapituloScraper implements Scraper {
       });
 
       list.forEach(manga -> {
+        if (manga.link() == null || manga.link().isEmpty() || manga.label() == null || manga.label().isEmpty()
+            || manga.thumbnail() == null || manga.thumbnail().isEmpty() || manga.value() == null
+            || manga.value().isEmpty()) {
+          return;
+        }
         var mangaModel = MangaModel.builder().name(manga.label()).url(
             UrlModel.builder().url(manga.link()).scrapper(ScrappersEnum.leerCapitulo).build())
             .thumbnail(UrlModel.builder().url(manga.thumbnail()).scrapper(ScrappersEnum.leerCapitulo).build())
