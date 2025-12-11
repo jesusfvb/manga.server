@@ -26,6 +26,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.manga.server.core.browser.JsoupWrapper;
 import com.manga.server.core.browser.PlaywrightManager;
 import com.manga.server.core.browser.RestClientWrapper;
+import com.manga.server.features.chapter.models.ChapterModel;
 import com.manga.server.features.manga.model.MangaModel;
 import com.manga.server.features.scrapper.scrapers.leercapitulo.dtos.LeerCapituloSearchDTO;
 
@@ -395,6 +396,110 @@ public class LeercapituloScraperTests {
                 verify(restClientWrapper, times(1)).get(anyString(), any(TypeReference.class));
 
                 verify(jsoupWrapper, times(32)).getDocument(anyString());
+        }
+
+        @Test
+        @DisplayName("getChapters - Debe retornar lista de capítulos cuando el HTML es válido")
+        void testGetChaptersSuccess() throws IOException {
+                // Given
+                String url = "/manga/2gw70ci10x/sss-class-gacha-hunter/";
+                String html = Files.readString(
+                                Paths.get("src/test/resources/html/leercapitulo/manga_description.htm"));
+
+                Document document = Document.createShell("http://example.com");
+                document.html(html);
+
+                when(jsoupWrapper.getDocument(anyString())).thenReturn(document);
+
+                // When
+                List<ChapterModel> result = leercapituloScraper.getChapters(url);
+
+                // Then
+                assertNotNull(result);
+                assertEquals(10, result.size(), "Debe retornar 10 capítulos");
+
+                // Verificar el primer capítulo (136)
+                assertEquals(136.0, result.get(0).getNumber());
+                assertEquals("/leer/2gw70ci10x/sss-class-gacha-hunter/136/", result.get(0).getUrl().getUrl());
+                assertNotNull(result.get(0).getMangaId());
+                assertNotNull(result.get(0).getLastUpdated());
+
+                // Verificar el último capítulo (127)
+                assertEquals(127.0, result.get(9).getNumber());
+                assertEquals("/leer/2gw70ci10x/sss-class-gacha-hunter/127/", result.get(9).getUrl().getUrl());
+
+                // Verificar algunos capítulos intermedios
+                assertEquals(135.0, result.get(1).getNumber());
+                assertEquals(134.0, result.get(2).getNumber());
+                assertEquals(133.0, result.get(3).getNumber());
+
+                verify(jsoupWrapper, times(1)).getDocument(anyString());
+        }
+
+        @Test
+        @DisplayName("getChapters - Debe retornar lista vacía cuando no hay capítulos")
+        void testGetChaptersEmpty() throws IOException {
+                // Given
+                String url = "/manga/2gw70ci10x/sss-class-gacha-hunter/";
+                String html = Files.readString(
+                                Paths.get("src/test/resources/html/leercapitulo/manga_description_no_chapters.htm"));
+
+                Document document = Document.createShell("http://example.com");
+                document.html(html);
+
+                when(jsoupWrapper.getDocument(anyString())).thenReturn(document);
+
+                // When
+                List<ChapterModel> result = leercapituloScraper.getChapters(url);
+
+                // Then
+                assertNotNull(result);
+                assertEquals(0, result.size(), "Debe retornar lista vacía cuando no hay capítulos");
+
+                verify(jsoupWrapper, times(1)).getDocument(anyString());
+        }
+
+        @Test
+        @DisplayName("getChapters - Debe manejar correctamente el error de JsoupWrapper.getDocument")
+        void testGetChaptersJsoupWrapperError() throws IOException {
+                // Given
+                String url = "/manga/2gw70ci10x/sss-class-gacha-hunter/";
+
+                when(jsoupWrapper.getDocument(anyString())).thenThrow(new IOException("Error de conexión"));
+
+                // When
+                List<ChapterModel> result = leercapituloScraper.getChapters(url);
+
+                // Then
+                // El método retorna null cuando hay un error de IO
+                assertEquals(null, result, "Debe retornar null cuando hay un error de IO");
+
+                verify(jsoupWrapper, times(1)).getDocument(anyString());
+        }
+
+        @Test
+        @DisplayName("getChapters - Debe retornar lista vacía cuando el HTML tiene estructura incorrecta")
+        void testGetChaptersInvalidHtml() throws IOException {
+                // Given
+                String url = "/manga/2gw70ci10x/sss-class-gacha-hunter/";
+                String html = Files.readString(
+                                Paths.get("src/test/resources/html/leercapitulo/manga_description_invalid.htm"));
+
+                Document document = Document.createShell("http://example.com");
+                document.html(html);
+
+                when(jsoupWrapper.getDocument(anyString())).thenReturn(document);
+
+                // When
+                List<ChapterModel> result = leercapituloScraper.getChapters(url);
+
+                // Then
+                assertNotNull(result);
+                // Cuando el HTML no tiene la estructura correcta, el selector no encuentra elementos
+                // y retorna una lista vacía
+                assertEquals(0, result.size(), "Debe retornar lista vacía cuando el HTML tiene estructura incorrecta");
+
+                verify(jsoupWrapper, times(1)).getDocument(anyString());
         }
 
 }
