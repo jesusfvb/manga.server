@@ -21,7 +21,7 @@ import com.manga.server.features.scrapper.scrapers.Scraper;
 import com.manga.server.features.scrapper.scrapers.leercapitulo.dtos.LeerCapituloSearchDTO;
 import com.manga.server.shared.enums.ScrappersEnum;
 import com.manga.server.shared.model.UrlModel;
-import com.microsoft.playwright.Page;
+import com.microsoft.playwright.ElementHandle;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
@@ -203,77 +203,18 @@ public class LeercapituloScraper implements Scraper {
     log.info("Iniciando getImg - URL: " + url + ", Thread: " + Thread.currentThread().getName());
 
     final String finalUrl = url.contains(baseURl()) ? url : baseURl() + url;
+    final String selector = ".comic_wraCon > a";
+    final String initScript = "localStorage.setItem('display_mode', '1')";
+
     List<ImgModel> imgModels = new LinkedList<>();
-    Page page = null;
 
     try {
-      log.fine("Obteniendo contexto de Playwright para URL: " + finalUrl);
-      var context = playwrightManager.getContext();
-
-      if (context == null) {
-        log.severe("El contexto de Playwright es null para URL: " + finalUrl);
-        return imgModels;
-      }
-
-      log.fine("Contexto de Playwright obtenido. Agregando script de inicialización");
-      try {
-        context.addInitScript("localStorage.setItem('display_mode', '1')");
-        log.fine("Script de inicialización agregado exitosamente");
-      } catch (Exception e) {
-        log.warning("Error al agregar script de inicialización (contexto puede estar cerrado): " + e.getMessage());
-        throw e;
-      }
-
-      log.fine("Creando nueva página para URL: " + finalUrl);
-      page = context.newPage();
-      log.info("Página creada exitosamente para URL: " + finalUrl);
-
-      log.info("Navegando a URL: " + finalUrl);
-      page.navigate(finalUrl);
-      log.fine("Esperando a que la página cargue completamente");
-      page.waitForLoadState();
-      log.info("Página cargada exitosamente");
-
-      log.fine("Buscando imágenes con selector: .comic_wraCon > a");
-      var images = page.querySelectorAll(".comic_wraCon > a");
-      log.info("Imágenes encontradas: " + images.size());
-
-      int processedCount = 0;
-      int errorCount = 0;
-
-      for (var image : images) {
-        try {
-          String img = image.querySelector("img").getAttribute("data-src");
-          String number = image.getAttribute("name");
-
-          if (img != null && !img.isEmpty() && number != null && !number.isEmpty()) {
-            try {
-              int imgNumber = Integer.parseInt(number);
-              imgModels.add(ImgModel.builder()
-                  .number(imgNumber)
-                  .scrapper(ScrappersEnum.leerCapitulo)
-                  .url(UrlModel.builder().url(img).scrapper(ScrappersEnum.leerCapitulo).build())
-                  .lastUpdated(LocalDateTime.now())
-                  .build());
-              processedCount++;
-              log.fine("Imagen agregada - Número: " + imgNumber + ", URL: " + img);
-            } catch (NumberFormatException e) {
-              log.warning("Error al parsear número de imagen '" + number + "': " + e.getMessage());
-              errorCount++;
-            }
-          } else {
-            log.fine("Imagen omitida - img: " + (img != null ? "presente" : "null") + ", number: "
-                + (number != null ? "presente" : "null"));
-          }
-        } catch (Exception e) {
-          log.warning("Error al procesar imagen: " + e.getMessage());
-          errorCount++;
-        }
-      }
+      imgModels = playwrightManager.querySelectorAll(finalUrl, selector, initScript, this::imgMapper);
+      log.info("Imágenes encontradas: " + imgModels.size());
 
       long duration = System.currentTimeMillis() - startTime;
-      log.info(String.format("getImg completado - Imágenes procesadas: %d, Errores: %d, Total: %d, Duración: %d ms",
-          processedCount, errorCount, imgModels.size(), duration));
+      log.info(String.format("getImg completado - Imágenes procesadas: %d, Duración: %d ms",
+          imgModels.size(), duration));
 
     } catch (IllegalStateException e) {
       long duration = System.currentTimeMillis() - startTime;
@@ -293,16 +234,6 @@ public class LeercapituloScraper implements Scraper {
           String.format("Error inesperado en getImg después de %d ms - URL: %s, Thread: %s, Tipo: %s, Mensaje: %s",
               duration, finalUrl, Thread.currentThread().getName(), e.getClass().getSimpleName(), e.getMessage()));
       e.printStackTrace();
-    } finally {
-      if (page != null) {
-        try {
-          log.fine("Cerrando página para URL: " + finalUrl);
-          page.close();
-          log.fine("Página cerrada exitosamente");
-        } catch (Exception e) {
-          log.warning("Error al cerrar página: " + e.getMessage());
-        }
-      }
     }
 
     if (imgModels.size() >= 1) {
@@ -312,6 +243,33 @@ public class LeercapituloScraper implements Scraper {
 
     log.info("Finalizando getImg - Retornando " + imgModels.size() + " imágenes para URL: " + finalUrl);
     return imgModels;
+  }
+
+  protected ImgModel imgMapper(ElementHandle element) {
+    try {
+      ElementHandle imgElement = element.querySelector("img");
+      if (imgElement == null) {
+        return null;
+      }
+
+      String img = imgElement.getAttribute("data-src");
+      if (img == null || img.isEmpty()) {
+        return null;
+      }
+
+      String number = element.getAttribute("name");
+      if (number == null || number.isEmpty()) {
+        return null;
+      }
+
+      return ImgModel.builder().number(Integer.parseInt(number)).scrapper(ScrappersEnum.leerCapitulo)
+          .url(UrlModel.builder().url(img).scrapper(ScrappersEnum.leerCapitulo).build())
+          .lastUpdated(LocalDateTime.now())
+          .build();
+    } catch (Exception e) {
+      e.printStackTrace();
+      return null;
+    }
   }
 
   private void buildManga(MangaModel mangaModel) {

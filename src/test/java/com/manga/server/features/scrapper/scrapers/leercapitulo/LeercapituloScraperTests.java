@@ -2,11 +2,14 @@ package com.manga.server.features.scrapper.scrapers.leercapitulo;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -37,6 +40,7 @@ import com.manga.server.features.manga.model.MangaModel;
 import com.manga.server.features.scrapper.scrapers.leercapitulo.dtos.LeerCapituloSearchDTO;
 import com.manga.server.shared.enums.ScrappersEnum;
 import com.manga.server.shared.model.UrlModel;
+import com.microsoft.playwright.ElementHandle;
 
 /**
  * Tests para el método getMangasWithNewChapters de LeercapituloScraper.
@@ -657,6 +661,143 @@ public class LeercapituloScraperTests {
                                 eq(".comic_wraCon > a"),
                                 eq("localStorage.setItem('display_mode', '1')"),
                                 any());
+        }
+
+        @Test
+        @DisplayName("imgMapper - Debe retornar ImgModel cuando todo funciona correctamente")
+        void testImgMapperSuccess() {
+                // Given
+                ElementHandle elementHandle = mock(ElementHandle.class);
+                ElementHandle imgElement = mock(ElementHandle.class);
+
+                String imgUrl = "/images/chapter1/img1.jpg";
+                String number = "1";
+
+                when(elementHandle.querySelector("img")).thenReturn(imgElement);
+                when(imgElement.getAttribute("data-src")).thenReturn(imgUrl);
+                when(elementHandle.getAttribute("name")).thenReturn(number);
+
+                // When
+                ImgModel result = leercapituloScraper.imgMapper(elementHandle);
+
+                // Then
+                assertNotNull(result);
+                assertEquals(1, result.getNumber());
+                assertEquals(imgUrl, result.getUrl().getUrl());
+                assertEquals(ScrappersEnum.leerCapitulo, result.getScrapper());
+                assertNotNull(result.getLastUpdated());
+
+                verify(elementHandle, times(1)).querySelector("img");
+                verify(imgElement, times(1)).getAttribute("data-src");
+                verify(elementHandle, times(1)).getAttribute("name");
+        }
+
+        @Test
+        @DisplayName("imgMapper - Debe retornar null cuando el elemento img es null")
+        void testImgMapperNullImgElement() {
+                // Given
+                ElementHandle elementHandle = mock(ElementHandle.class);
+
+                when(elementHandle.querySelector("img")).thenReturn(null);
+
+                // When
+                ImgModel result = leercapituloScraper.imgMapper(elementHandle);
+
+                // Then
+                assertNull(result, "Debe retornar null cuando el elemento img es null");
+
+                verify(elementHandle, times(1)).querySelector("img");
+                verify(elementHandle, never()).getAttribute(anyString());
+        }
+
+        @Test
+        @DisplayName("imgMapper - Debe retornar null cuando data-src es null")
+        void testImgMapperNullDataSrc() {
+                // Given
+                ElementHandle elementHandle = mock(ElementHandle.class);
+                ElementHandle imgElement = mock(ElementHandle.class);
+
+                when(elementHandle.querySelector("img")).thenReturn(imgElement);
+                when(imgElement.getAttribute("data-src")).thenReturn(null);
+
+                // When
+                ImgModel result = leercapituloScraper.imgMapper(elementHandle);
+
+                // Then
+                assertNull(result, "Debe retornar null cuando data-src es null");
+
+                verify(elementHandle, times(1)).querySelector("img");
+                verify(imgElement, times(1)).getAttribute("data-src");
+                verify(elementHandle, never()).getAttribute("name");
+        }
+
+        @Test
+        @DisplayName("imgMapper - Debe retornar null cuando data-src está vacío")
+        void testImgMapperEmptyDataSrc() {
+                // Given
+                ElementHandle elementHandle = mock(ElementHandle.class);
+                ElementHandle imgElement = mock(ElementHandle.class);
+
+                when(elementHandle.querySelector("img")).thenReturn(imgElement);
+                when(imgElement.getAttribute("data-src")).thenReturn("");
+
+                // When
+                ImgModel result = leercapituloScraper.imgMapper(elementHandle);
+
+                // Then
+                assertNull(result, "Debe retornar null cuando data-src está vacío");
+
+                verify(elementHandle, times(1)).querySelector("img");
+                verify(imgElement, times(1)).getAttribute("data-src");
+                verify(elementHandle, never()).getAttribute("name");
+        }
+
+        @Test
+        @DisplayName("imgMapper - Debe retornar null cuando name es null")
+        void testImgMapperNullName() {
+                // Given
+                ElementHandle elementHandle = mock(ElementHandle.class);
+                ElementHandle imgElement = mock(ElementHandle.class);
+
+                String imgUrl = "/images/chapter1/img1.jpg";
+
+                when(elementHandle.querySelector("img")).thenReturn(imgElement);
+                when(imgElement.getAttribute("data-src")).thenReturn(imgUrl);
+                when(elementHandle.getAttribute("name")).thenReturn(null);
+
+                // When
+                ImgModel result = leercapituloScraper.imgMapper(elementHandle);
+
+                // Then
+                assertNull(result, "Debe retornar null cuando name es null");
+
+                verify(elementHandle, times(1)).querySelector("img");
+                verify(imgElement, times(1)).getAttribute("data-src");
+                verify(elementHandle, times(1)).getAttribute("name");
+        }
+
+        @Test
+        @DisplayName("imgMapper - Debe retornar null cuando name está vacío")
+        void testImgMapperEmptyName() {
+                // Given
+                ElementHandle elementHandle = mock(ElementHandle.class);
+                ElementHandle imgElement = mock(ElementHandle.class);
+
+                String imgUrl = "/images/chapter1/img1.jpg";
+
+                when(elementHandle.querySelector("img")).thenReturn(imgElement);
+                when(imgElement.getAttribute("data-src")).thenReturn(imgUrl);
+                when(elementHandle.getAttribute("name")).thenReturn("");
+
+                // When
+                ImgModel result = leercapituloScraper.imgMapper(elementHandle);
+
+                // Then
+                assertNull(result, "Debe retornar null cuando name está vacío");
+
+                verify(elementHandle, times(1)).querySelector("img");
+                verify(imgElement, times(1)).getAttribute("data-src");
+                verify(elementHandle, times(1)).getAttribute("name");
         }
 
 }
