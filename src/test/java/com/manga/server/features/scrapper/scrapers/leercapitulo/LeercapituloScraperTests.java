@@ -4,6 +4,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -11,6 +14,8 @@ import static org.mockito.Mockito.when;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.jsoup.nodes.Document;
@@ -27,8 +32,11 @@ import com.manga.server.core.browser.JsoupWrapper;
 import com.manga.server.core.browser.PlaywrightManager;
 import com.manga.server.core.browser.RestClientWrapper;
 import com.manga.server.features.chapter.models.ChapterModel;
+import com.manga.server.features.chapter.models.ImgModel;
 import com.manga.server.features.manga.model.MangaModel;
 import com.manga.server.features.scrapper.scrapers.leercapitulo.dtos.LeerCapituloSearchDTO;
+import com.manga.server.shared.enums.ScrappersEnum;
+import com.manga.server.shared.model.UrlModel;
 
 /**
  * Tests para el método getMangasWithNewChapters de LeercapituloScraper.
@@ -500,6 +508,155 @@ public class LeercapituloScraperTests {
                 assertEquals(0, result.size(), "Debe retornar lista vacía cuando el HTML tiene estructura incorrecta");
 
                 verify(jsoupWrapper, times(1)).getDocument(anyString());
+        }
+
+        @Test
+        @DisplayName("getImg - Debe retornar lista de imágenes cuando todo funciona correctamente")
+        void testGetImgSuccess() throws Exception {
+                // Given
+                String url = "/leer/8375z8arvm/resurreccion-solitaria/1/";
+                String baseUrl = ScrappersEnum.leerCapitulo.getUrl();
+                String expectedUrl = baseUrl + url;
+
+                List<ImgModel> expectedImages = new ArrayList<>();
+                // Crear imágenes en orden no ordenado para verificar que se ordenan
+                expectedImages.add(ImgModel.builder()
+                                .number(3)
+                                .scrapper(ScrappersEnum.leerCapitulo)
+                                .url(UrlModel.builder().url("/images/chapter1/img3.jpg").scrapper(ScrappersEnum.leerCapitulo)
+                                                .build())
+                                .lastUpdated(LocalDateTime.now())
+                                .build());
+                expectedImages.add(ImgModel.builder()
+                                .number(1)
+                                .scrapper(ScrappersEnum.leerCapitulo)
+                                .url(UrlModel.builder().url("/images/chapter1/img1.jpg").scrapper(ScrappersEnum.leerCapitulo)
+                                                .build())
+                                .lastUpdated(LocalDateTime.now())
+                                .build());
+                expectedImages.add(ImgModel.builder()
+                                .number(2)
+                                .scrapper(ScrappersEnum.leerCapitulo)
+                                .url(UrlModel.builder().url("/images/chapter1/img2.jpg").scrapper(ScrappersEnum.leerCapitulo)
+                                                .build())
+                                .lastUpdated(LocalDateTime.now())
+                                .build());
+
+                doReturn(expectedImages).when(playwrightManager).querySelectorAll(
+                                eq(expectedUrl),
+                                eq(".comic_wraCon > a"),
+                                eq("localStorage.setItem('display_mode', '1')"),
+                                any());
+
+                // When
+                List<ImgModel> result = leercapituloScraper.getImg(url);
+
+                // Then
+                assertNotNull(result);
+                assertEquals(3, result.size(), "Debe retornar 3 imágenes");
+                // Verificar que las imágenes están ordenadas por número (el método ordena si hay 1 o más)
+                assertEquals(1, result.get(0).getNumber(), "Primera imagen debe ser número 1");
+                assertEquals("/images/chapter1/img1.jpg", result.get(0).getUrl().getUrl());
+                assertEquals(2, result.get(1).getNumber(), "Segunda imagen debe ser número 2");
+                assertEquals("/images/chapter1/img2.jpg", result.get(1).getUrl().getUrl());
+                assertEquals(3, result.get(2).getNumber(), "Tercera imagen debe ser número 3");
+                assertEquals("/images/chapter1/img3.jpg", result.get(2).getUrl().getUrl());
+
+                verify(playwrightManager, times(1)).querySelectorAll(
+                                eq(expectedUrl),
+                                eq(".comic_wraCon > a"),
+                                eq("localStorage.setItem('display_mode', '1')"),
+                                any());
+        }
+
+        @Test
+        @DisplayName("getImg - Debe manejar correctamente IllegalStateException de querySelectorAll")
+        void testGetImgIllegalStateException() throws Exception {
+                // Given
+                String url = "/leer/8375z8arvm/resurreccion-solitaria/1/";
+                String baseUrl = ScrappersEnum.leerCapitulo.getUrl();
+                String expectedUrl = baseUrl + url;
+
+                IllegalStateException exception = new IllegalStateException("state should be: open");
+
+                doThrow(exception).when(playwrightManager).querySelectorAll(
+                                eq(expectedUrl),
+                                eq(".comic_wraCon > a"),
+                                eq("localStorage.setItem('display_mode', '1')"),
+                                any());
+
+                // When
+                List<ImgModel> result = leercapituloScraper.getImg(url);
+
+                // Then
+                assertNotNull(result);
+                assertEquals(0, result.size(), "Debe retornar lista vacía cuando hay error");
+
+                verify(playwrightManager, times(1)).querySelectorAll(
+                                eq(expectedUrl),
+                                eq(".comic_wraCon > a"),
+                                eq("localStorage.setItem('display_mode', '1')"),
+                                any());
+        }
+
+        @Test
+        @DisplayName("getImg - Debe manejar correctamente Exception genérica de querySelectorAll")
+        void testGetImgGenericException() throws Exception {
+                // Given
+                String url = "/leer/8375z8arvm/resurreccion-solitaria/1/";
+                String baseUrl = ScrappersEnum.leerCapitulo.getUrl();
+                String expectedUrl = baseUrl + url;
+
+                Exception exception = new Exception("Error de conexión");
+
+                doThrow(exception).when(playwrightManager).querySelectorAll(
+                                eq(expectedUrl),
+                                eq(".comic_wraCon > a"),
+                                eq("localStorage.setItem('display_mode', '1')"),
+                                any());
+
+                // When
+                List<ImgModel> result = leercapituloScraper.getImg(url);
+
+                // Then
+                assertNotNull(result);
+                assertEquals(0, result.size(), "Debe retornar lista vacía cuando hay error");
+
+                verify(playwrightManager, times(1)).querySelectorAll(
+                                eq(expectedUrl),
+                                eq(".comic_wraCon > a"),
+                                eq("localStorage.setItem('display_mode', '1')"),
+                                any());
+        }
+
+        @Test
+        @DisplayName("getImg - Debe manejar correctamente IllegalStateException sin mensaje específico")
+        void testGetImgIllegalStateExceptionWithoutMessage() throws Exception {
+                // Given
+                String url = "/leer/8375z8arvm/resurreccion-solitaria/1/";
+                String baseUrl = ScrappersEnum.leerCapitulo.getUrl();
+                String expectedUrl = baseUrl + url;
+
+                IllegalStateException exception = new IllegalStateException("Otro error de estado");
+
+                doThrow(exception).when(playwrightManager).querySelectorAll(
+                                eq(expectedUrl),
+                                eq(".comic_wraCon > a"),
+                                eq("localStorage.setItem('display_mode', '1')"),
+                                any());
+
+                // When
+                List<ImgModel> result = leercapituloScraper.getImg(url);
+
+                // Then
+                assertNotNull(result);
+                assertEquals(0, result.size(), "Debe retornar lista vacía cuando hay error");
+
+                verify(playwrightManager, times(1)).querySelectorAll(
+                                eq(expectedUrl),
+                                eq(".comic_wraCon > a"),
+                                eq("localStorage.setItem('display_mode', '1')"),
+                                any());
         }
 
 }
