@@ -1,7 +1,10 @@
 package com.manga.server.core.browser;
 
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.stereotype.Component;
@@ -9,10 +12,13 @@ import org.springframework.stereotype.Component;
 import com.microsoft.playwright.Browser;
 import com.microsoft.playwright.BrowserContext;
 import com.microsoft.playwright.BrowserType;
+import com.microsoft.playwright.ElementHandle;
+import com.microsoft.playwright.Page;
 import com.microsoft.playwright.Playwright;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
+import lombok.NonNull;
 import lombok.extern.java.Log;
 
 @Component
@@ -43,10 +49,9 @@ public class PlaywrightManager implements DisposableBean {
             log.info("Inicializando Playwright...");
             playwright = Playwright.create();
             browser = playwright.chromium().launch(
-                new BrowserType.LaunchOptions()
-                    .setHeadless(true)
-                    .setTimeout(30000)
-            );
+                    new BrowserType.LaunchOptions()
+                            .setHeadless(true)
+                            .setTimeout(30000));
             context = browser.newContext();
             isInitialized.set(true);
             log.info("Playwright inicializado correctamente.");
@@ -74,6 +79,69 @@ public class PlaywrightManager implements DisposableBean {
         }
 
         return context;
+    }
+
+    public <T> List<T> querySelectorAll(@NonNull String url, @NonNull String selector, String initScript,
+            @NonNull Function<ElementHandle, T> mapper) throws Exception {
+        BrowserContext context = getContext();
+        Page page = context.newPage();
+
+        try {
+            // Agregar script de inicialización a la página específica si se proporciona
+            // Debe llamarse ANTES de navegar para que se ejecute durante la carga inicial
+            if (initScript != null) {
+                try {
+                    page.addInitScript(initScript);
+                    log.fine("Script de inicialización agregado: " + initScript);
+                } catch (Exception e) {
+                    log.warning(
+                            "Error al agregar script de inicialización a la página: " + e.getMessage());
+                    throw e;
+                }
+            }
+
+            log.info("Navegando a URL: " + url);
+            page.navigate(url);
+            log.fine("Esperando a que la página cargue completamente");
+            page.waitForLoadState();
+            log.info("Página cargada exitosamente");
+
+            // Esperar a que al menos un elemento con el selector esté disponible
+            // Esto es importante para elementos que se cargan dinámicamente
+            try {
+                log.fine("Esperando a que los elementos con selector '" + selector + "' estén disponibles");
+                page.waitForSelector(selector, new Page.WaitForSelectorOptions().setTimeout(10000));
+                log.fine("Elementos con selector disponibles");
+            } catch (Exception e) {
+                log.warning("No se encontraron elementos con selector '" + selector + "' después de esperar: "
+                        + e.getMessage());
+                // Continuar de todas formas, puede que no haya elementos
+            }
+
+            List<ElementHandle> elements = page.querySelectorAll(selector);
+            log.info("Elementos encontrados: " + elements.size());
+
+            List<T> mappedElements = elements.stream()
+                    .map(mapper)
+                    .collect(Collectors.toList());
+
+            log.info("Elementos mapeados: " + mappedElements.size());
+            return mappedElements;
+        } catch (Exception e) {
+            log.warning("Error al obtener elementos con selector: " + selector + " en la página: " + url + " - "
+                    + e.getMessage());
+            throw new Exception("Error al obtener elementos con selector: " + selector + " en la página: " + url + " - "
+                    + e.getMessage());
+        } finally {
+            // Cerrar la página solo una vez en el finally para asegurar limpieza
+            if (page != null && !page.isClosed()) {
+                try {
+                    page.close();
+                } catch (Exception e) {
+                    log.warning("Error al cerrar la página: " + e.getMessage());
+                }
+            }
+        }
     }
 
     /**
@@ -157,7 +225,8 @@ public class PlaywrightManager implements DisposableBean {
      * Verifica si una excepción es esperada durante el cierre de Playwright.
      */
     private boolean isExpectedShutdownException(Throwable e) {
-        if (e == null) return false;
+        if (e == null)
+            return false;
 
         String msg = e.getMessage();
         if (msg != null) {
@@ -175,6 +244,6 @@ public class PlaywrightManager implements DisposableBean {
      */
     public boolean isAvailable() {
         return isInitialized.get() && !isShuttingDown.get()
-            && playwright != null && browser != null && context != null;
+                && playwright != null && browser != null && context != null;
     }
 }
