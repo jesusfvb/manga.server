@@ -1,0 +1,43 @@
+# Dockerfile para Desarrollo
+# Incluye Maven y JDK para compilación en caliente y hot reload
+
+FROM maven:3.9.6-eclipse-temurin-21
+
+WORKDIR /app
+
+# Instalar herramientas adicionales para desarrollo y dependencias de Playwright
+RUN apt-get update && apt-get install -y \
+    curl \
+    vim \
+    libnss3 \
+    libnspr4 \
+    libatk1.0-0 \
+    libatk-bridge2.0-0 \
+    libcups2 \
+    libdrm2 \
+    libdbus-1-3 \
+    libxkbcommon0 \
+    libxcomposite1 \
+    libxdamage1 \
+    libxfixes3 \
+    libxrandr2 \
+    libgbm1 \
+    libasound2 \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copiar solo pom.xml primero para cachear dependencias
+COPY pom.xml .
+RUN mvn dependency:go-offline -DskipTests
+
+# Copiar código fuente (se montará como volumen en desarrollo)
+COPY src ./src
+
+# Exponer puertos
+EXPOSE 8080
+# Puerto para debugging remoto (opcional)
+EXPOSE 5005
+
+# Comando para desarrollo con Spring Boot DevTools
+# El código se montará como volumen, así que Maven compilará en caliente
+CMD ["mvn", "spring-boot:run", "-Dspring-boot.run.jvmArguments=-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005"]
+

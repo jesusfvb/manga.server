@@ -1,0 +1,82 @@
+version: '3.8'
+
+services:
+  mongodb:
+    image: mongo:7.0
+    container_name: manga_mongodb_dev
+    restart: unless-stopped
+    # En desarrollo, exponemos MongoDB para facilitar el acceso con herramientas
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: admin123
+      MONGO_INITDB_DATABASE: manga_db
+    volumes:
+      - mongodb_data_dev:/data/db
+      - mongodb_config_dev:/data/configdb
+    networks:
+      - manga_network_dev
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "mongosh",
+          "-u", "admin",
+          "-p", "admin123",
+          "--authenticationDatabase", "admin",
+          "--eval", "db.adminCommand('ping')"
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  server:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: manga_server_dev
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+      # Puerto para debugging remoto (JDWP)
+      - "5005:5005"
+    environment:
+      SPRING_DATA_MONGODB_URI: mongodb://admin:admin123@mongodb:27017/manga_db?authSource=admin
+      SPRING_APPLICATION_NAME: server
+      SPRINGDOC_SWAGGER_UI_PATH: /api/docs
+      SPRING_PROFILES_ACTIVE: dev
+      # Habilitar hot reload de Spring Boot DevTools
+      SPRING_DEVTOOLS_RESTART_ENABLED: "true"
+      SPRING_DEVTOOLS_LIVERELOAD_ENABLED: "true"
+    volumes:
+      # Montar código fuente para hot reload
+      - ./src:/app/src
+      # Montar pom.xml para detectar cambios en dependencias
+      - ./pom.xml:/app/pom.xml
+      # Excluir target para evitar conflictos
+      - /app/target
+      # Cache de Maven para acelerar builds
+      - maven_cache:/root/.m2
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - manga_network_dev
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 90s
+
+volumes:
+  mongodb_data_dev:
+  mongodb_config_dev:
+  maven_cache:
+
+networks:
+  manga_network_dev:
+    driver: bridge
+

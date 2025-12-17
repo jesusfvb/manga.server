@@ -34,13 +34,70 @@ El `docker-compose.yml` incluye:
 - **Perfil activo**: `docker`
 - **Playwright**: Incluido para scraping web
 
+## Entornos
+
+Este proyecto incluye dos configuraciones Docker:
+
+- **Producción**: `docker-compose.yml` y `Dockerfile` (optimizado, sin hot reload)
+- **Desarrollo**: `docker-compose.dev.yml` y `Dockerfile.dev` (con hot reload y debugging)
+
 ## Uso
 
-### Construir y levantar los servicios
+### Entorno de Producción
+
+#### Construir y levantar los servicios
 
 ```bash
 docker-compose up -d --build
 ```
+
+### Entorno de Desarrollo
+
+El entorno de desarrollo incluye:
+- ✅ **Hot Reload**: Los cambios en el código se reflejan automáticamente
+- ✅ **MongoDB expuesto**: Puerto 27017 disponible para herramientas de desarrollo
+- ✅ **Debugging remoto**: Puerto 5005 para conectar el debugger de tu IDE
+- ✅ **Logging detallado**: Nivel DEBUG activado
+- ✅ **Volúmenes montados**: Código fuente montado para cambios en tiempo real
+
+#### Construir y levantar los servicios de desarrollo
+
+```bash
+docker-compose -f docker-compose.dev.yml up -d --build
+```
+
+#### Ver logs en desarrollo
+
+```bash
+# Todos los servicios
+docker-compose -f docker-compose.dev.yml logs -f
+
+# Solo el servidor (útil para ver hot reload)
+docker-compose -f docker-compose.dev.yml logs -f server
+```
+
+#### Detener servicios de desarrollo
+
+```bash
+docker-compose -f docker-compose.dev.yml down
+```
+
+#### Configurar debugging remoto en tu IDE
+
+1. El puerto 5005 está expuesto para debugging remoto
+2. Configura tu IDE para conectarse a `localhost:5005`
+3. Ejemplo para IntelliJ IDEA:
+   - Run → Edit Configurations
+   - Add New → Remote JVM Debug
+   - Host: `localhost`, Port: `5005`
+   - Debug mode: `Attach`
+
+#### Hot Reload
+
+Con Spring Boot DevTools activado:
+- Los cambios en clases Java se recargan automáticamente
+- Los cambios en `application.properties` requieren reinicio manual
+- Para reiniciar manualmente: `docker-compose -f docker-compose.dev.yml restart server`
 
 ### Ver logs
 
@@ -104,9 +161,11 @@ Puedes personalizar la configuración modificando las variables de entorno en `d
 - Implementar HTTPS/TLS para la API
 - Configurar firewall para limitar acceso al puerto 8080
 
-## Arquitectura del Dockerfile
+## Arquitectura de los Dockerfiles
 
-El Dockerfile utiliza un build multi-stage:
+### Dockerfile (Producción)
+
+El Dockerfile de producción utiliza un build multi-stage:
 
 1. **Stage 1 (Build)**: 
    - Imagen base: `maven:3.9.6-eclipse-temurin-21`
@@ -117,18 +176,37 @@ El Dockerfile utiliza un build multi-stage:
    - Imagen base: `mcr.microsoft.com/playwright/java:v1.45.0-jammy`
    - Incluye Java 21 JRE y Playwright para scraping web
    - Ejecuta la aplicación como usuario no-root (`spring`)
+   - Tamaño optimizado: solo incluye el JAR compilado
+
+### Dockerfile.dev (Desarrollo)
+
+El Dockerfile de desarrollo está optimizado para desarrollo activo:
+
+- **Imagen base**: `maven:3.9.6-eclipse-temurin-21` (incluye Maven y JDK completo)
+- **Herramientas**: curl, vim para debugging
+- **Playwright**: Dependencias del navegador instaladas
+- **Hot Reload**: Ejecuta `mvn spring-boot:run` en lugar de JAR precompilado
+- **Debugging**: Puerto 5005 expuesto para JDWP
+- **Volúmenes**: Código fuente montado para cambios en tiempo real
 
 ## Acceso
+
+### Producción
 
 - **API**: http://localhost:8080
 - **Swagger UI**: http://localhost:8080/api/docs
 - **Health Check**: http://localhost:8080/actuator/health
 - **MongoDB**: Solo accesible desde dentro de la red Docker (no expuesto por seguridad)
 
-> **Nota de Seguridad**: MongoDB no está expuesto al host para proteger la base de datos. Si necesitas acceder a MongoDB para desarrollo/debugging, puedes usar:
-> ```bash
-> docker-compose exec mongodb mongosh -u admin -p admin123 --authenticationDatabase admin
-> ```
+### Desarrollo
+
+- **API**: http://localhost:8080
+- **Swagger UI**: http://localhost:8080/api/docs
+- **Health Check**: http://localhost:8080/actuator/health
+- **MongoDB**: http://localhost:27017 (expuesto para herramientas de desarrollo)
+- **Debugging**: localhost:5005 (JDWP)
+
+> **Nota de Seguridad**: En producción, MongoDB no está expuesto al host para proteger la base de datos. En desarrollo, está expuesto para facilitar el uso de herramientas como MongoDB Compass o Studio 3T.
 
 ## Troubleshooting
 
