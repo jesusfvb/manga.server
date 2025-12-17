@@ -1,0 +1,66 @@
+version: '3.8'
+
+services:
+  mongodb:
+    image: mongo:7.0
+    container_name: manga_mongodb
+    restart: unless-stopped
+    # Puerto NO expuesto por seguridad - solo accesible desde la red interna
+    # ports:
+    #   - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: admin123
+      MONGO_INITDB_DATABASE: manga_db
+    volumes:
+      - mongodb_data:/data/db
+      - mongodb_config:/data/configdb
+    networks:
+      - manga_network
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "mongosh",
+          "-u", "admin",
+          "-p", "admin123",
+          "--authenticationDatabase", "admin",
+          "--eval", "db.adminCommand('ping')"
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: manga_server
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATA_MONGODB_URI: mongodb://admin:admin123@mongodb:27017/manga_db?authSource=admin
+      SPRING_APPLICATION_NAME: server
+      SPRINGDOC_SWAGGER_UI_PATH: /api/docs
+      SPRING_PROFILES_ACTIVE: docker
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - manga_network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+volumes:
+  mongodb_data:
+  mongodb_config:
+
+networks:
+  manga_network:
+    driver: bridge
