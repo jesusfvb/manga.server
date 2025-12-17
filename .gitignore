@@ -34,4 +34,6 @@ build/
 
 ### Environment Variables ###
 .env
+.env.dev
+.env.prod
 !.env.example

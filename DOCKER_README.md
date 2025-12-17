@@ -48,6 +48,10 @@ Este proyecto incluye dos configuraciones Docker:
 #### Construir y levantar los servicios
 
 ```bash
+# Con archivo .env.prod explícito
+docker-compose --env-file .env.prod up -d --build
+
+# O si usas .env por defecto
 docker-compose up -d --build
 ```
 
@@ -63,6 +67,10 @@ El entorno de desarrollo incluye:
 #### Construir y levantar los servicios de desarrollo
 
 ```bash
+# Con archivo .env.dev explícito (recomendado)
+docker-compose -f docker-compose.dev.yml --env-file .env.dev up -d --build
+
+# O si usas .env por defecto
 docker-compose -f docker-compose.dev.yml up -d --build
 ```
 
@@ -132,22 +140,42 @@ docker-compose up -d --build server
 
 ## Variables de Entorno
 
-### Archivo .env
+### Archivos .env
 
-Para mejorar la seguridad, todas las configuraciones sensibles se gestionan a través del archivo `.env`. 
+Para mejorar la seguridad, todas las configuraciones sensibles se gestionan a través de archivos `.env` separados por entorno.
 
-**⚠️ IMPORTANTE**: El archivo `.env` contiene credenciales y no debe subirse al repositorio. Está incluido en `.gitignore`.
+**⚠️ IMPORTANTE**: Los archivos `.env.dev` y `.env.prod` contienen credenciales y no deben subirse al repositorio. Están incluidos en `.gitignore`.
 
 #### Configuración inicial
 
-1. Copia el archivo de ejemplo:
-   ```bash
-   cp .env.example .env
-   ```
+**Para Desarrollo:**
+```bash
+cp .env.example .env.dev
+# Edita .env.dev si necesitas cambiar alguna configuración
+```
 
-2. Edita el archivo `.env` y cambia las credenciales por defecto, especialmente:
-   - `MONGO_ROOT_USERNAME`: Usuario de MongoDB
-   - `MONGO_ROOT_PASSWORD`: Contraseña de MongoDB (⚠️ **CAMBIA ESTA CONTRASEÑA**)
+**Para Producción:**
+```bash
+cp .env.example .env.prod
+# ⚠️ IMPORTANTE: Edita .env.prod y cambia las credenciales:
+# - MONGO_ROOT_PASSWORD: Usa una contraseña segura
+# - SPRING_PROFILES_ACTIVE: Asegúrate de que sea "docker"
+# - SPRING_DEVTOOLS_RESTART_ENABLED: Debe ser "false"
+```
+
+#### Uso de los archivos .env
+
+**Desarrollo:**
+```bash
+docker-compose -f docker-compose.dev.yml --env-file .env.dev up
+```
+
+**Producción:**
+```bash
+docker-compose --env-file .env.prod up
+# O si usas .env por defecto:
+docker-compose up
+```
 
 #### Variables disponibles
 
@@ -169,11 +197,19 @@ Para mejorar la seguridad, todas las configuraciones sensibles se gestionan a tr
 - `SPRING_DEVTOOLS_RESTART_ENABLED`: Habilitar hot reload (default: `true`)
 - `SPRING_DEVTOOLS_LIVERELOAD_ENABLED`: Habilitar live reload (default: `true`)
 
-#### Uso
+#### Diferencias entre .env.dev y .env.prod
 
-Docker Compose lee automáticamente el archivo `.env` si está en el mismo directorio que `docker-compose.yml`. Las variables se pueden usar con la sintaxis `${VARIABLE:-default}`.
+| Configuración | Desarrollo (.env.dev) | Producción (.env.prod) |
+|--------------|----------------------|------------------------|
+| `SPRING_PROFILES_ACTIVE` | `dev` | `docker` |
+| `SPRING_DEVTOOLS_RESTART_ENABLED` | `true` | `false` |
+| `SPRING_DEVTOOLS_LIVERELOAD_ENABLED` | `true` | `false` |
+| `MONGO_ROOT_PASSWORD` | `admin123` (desarrollo) | **Debe cambiarse** |
+| MongoDB expuesto | Sí (puerto 27017) | No (solo interno) |
 
-Si no existe el archivo `.env`, se usarán los valores por defecto definidos en los archivos docker-compose.
+#### Valores por defecto
+
+Si no especificas `--env-file`, Docker Compose buscará un archivo `.env` en el mismo directorio. Si no existe, se usarán los valores por defecto definidos en los archivos docker-compose con la sintaxis `${VARIABLE:-default}`.
 
 ## Seguridad
 
@@ -191,13 +227,14 @@ Si no existe el archivo `.env`, se usarán los valores por defecto definidos en 
 
 ### Recomendaciones para Producción
 
-- ✅ **Usar archivo .env**: Las credenciales ya están externalizadas en `.env`
-- ⚠️ **Cambiar credenciales por defecto**: Edita `.env` y cambia `MONGO_ROOT_PASSWORD`
-- 🔒 **No subir .env al repositorio**: Ya está en `.gitignore`
-- 🔐 **Usar secrets en producción**: Para entornos de producción, considera usar Docker Secrets o un gestor de secretos
-- 🔒 **Implementar HTTPS/TLS**: Para la API en producción
-- 🛡️ **Configurar firewall**: Limitar acceso al puerto 8080
+- ✅ **Usar archivo .env.prod**: Las credenciales ya están externalizadas
+- ⚠️ **Cambiar credenciales por defecto**: Edita `.env.prod` y cambia `MONGO_ROOT_PASSWORD` antes de desplegar
+- 🔒 **No subir .env al repositorio**: `.env.dev` y `.env.prod` están en `.gitignore`
+- 🔐 **Usar secrets en producción**: Para entornos críticos, considera usar Docker Secrets o un gestor de secretos (HashiCorp Vault, AWS Secrets Manager, etc.)
+- 🔒 **Implementar HTTPS/TLS**: Para la API en producción (usar reverse proxy como Nginx o Traefik)
+- 🛡️ **Configurar firewall**: Limitar acceso al puerto 8080 solo a IPs autorizadas
 - 🔑 **Rotar credenciales**: Cambiar contraseñas regularmente
+- 📝 **Revisar .env.prod**: Asegúrate de que `SPRING_DEVTOOLS_RESTART_ENABLED=false` en producción
 
 ## Arquitectura de los Dockerfiles
 

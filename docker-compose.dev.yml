@@ -1,5 +1,8 @@
 version: '3.8'
 
+# Usar archivo .env.dev para desarrollo
+# Ejecutar con: docker-compose -f docker-compose.dev.yml --env-file .env.dev up
+
 services:
   mongodb:
     image: mongo:7.0

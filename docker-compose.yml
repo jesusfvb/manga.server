@@ -1,5 +1,9 @@
 version: '3.8'
 
+# Usar archivo .env.prod para producción
+# Ejecutar con: docker-compose --env-file .env.prod up
+# O usar .env por defecto: docker-compose up
+
 services:
   mongodb:
     image: mongo:7.0
