@@ -7,11 +7,11 @@ services:
     restart: unless-stopped
     # Puerto NO expuesto por seguridad - solo accesible desde la red interna
     # ports:
-    #   - "27017:27017"
+    #   - "${MONGO_PORT:-27017}:27017"
     environment:
-      MONGO_INITDB_ROOT_USERNAME: admin
-      MONGO_INITDB_ROOT_PASSWORD: admin123
-      MONGO_INITDB_DATABASE: manga_db
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USERNAME:-admin}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD:-admin123}
+      MONGO_INITDB_DATABASE: ${MONGO_DATABASE:-manga_db}
     volumes:
       - mongodb_data:/data/db
       - mongodb_config:/data/configdb
@@ -22,8 +22,8 @@ services:
         [
           "CMD",
           "mongosh",
-          "-u", "admin",
-          "-p", "admin123",
+          "-u", "${MONGO_ROOT_USERNAME:-admin}",
+          "-p", "${MONGO_ROOT_PASSWORD:-admin123}",
           "--authenticationDatabase", "admin",
           "--eval", "db.adminCommand('ping')"
         ]
@@ -39,12 +39,12 @@ services:
     container_name: manga_server
     restart: unless-stopped
     ports:
-      - "8080:8080"
+      - "${SERVER_PORT:-8080}:8080"
     environment:
-      SPRING_DATA_MONGODB_URI: mongodb://admin:admin123@mongodb:27017/manga_db?authSource=admin
-      SPRING_APPLICATION_NAME: server
-      SPRINGDOC_SWAGGER_UI_PATH: /api/docs
-      SPRING_PROFILES_ACTIVE: docker
+      SPRING_DATA_MONGODB_URI: mongodb://${MONGO_ROOT_USERNAME:-admin}:${MONGO_ROOT_PASSWORD:-admin123}@${MONGO_SERVICE_NAME:-mongodb}:27017/${MONGO_DATABASE:-manga_db}?authSource=admin
+      SPRING_APPLICATION_NAME: ${SPRING_APPLICATION_NAME:-server}
+      SPRINGDOC_SWAGGER_UI_PATH: ${SPRINGDOC_SWAGGER_UI_PATH:-/api/docs}
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-docker}
     depends_on:
       mongodb:
         condition: service_healthy

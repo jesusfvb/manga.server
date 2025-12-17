@@ -132,12 +132,48 @@ docker-compose up -d --build server
 
 ## Variables de Entorno
 
-Puedes personalizar la configuración modificando las variables de entorno en `docker-compose.yml`:
+### Archivo .env
 
-- `SPRING_DATA_MONGODB_URI`: URI de conexión a MongoDB
-- `SPRING_APPLICATION_NAME`: Nombre de la aplicación
-- `SPRINGDOC_SWAGGER_UI_PATH`: Ruta de Swagger UI
-- `SPRING_PROFILES_ACTIVE`: Perfil de Spring activo (por defecto: `docker`)
+Para mejorar la seguridad, todas las configuraciones sensibles se gestionan a través del archivo `.env`. 
+
+**⚠️ IMPORTANTE**: El archivo `.env` contiene credenciales y no debe subirse al repositorio. Está incluido en `.gitignore`.
+
+#### Configuración inicial
+
+1. Copia el archivo de ejemplo:
+   ```bash
+   cp .env.example .env
+   ```
+
+2. Edita el archivo `.env` y cambia las credenciales por defecto, especialmente:
+   - `MONGO_ROOT_USERNAME`: Usuario de MongoDB
+   - `MONGO_ROOT_PASSWORD`: Contraseña de MongoDB (⚠️ **CAMBIA ESTA CONTRASEÑA**)
+
+#### Variables disponibles
+
+**MongoDB:**
+- `MONGO_ROOT_USERNAME`: Usuario root de MongoDB (default: `admin`)
+- `MONGO_ROOT_PASSWORD`: Contraseña root de MongoDB (default: `admin123`)
+- `MONGO_DATABASE`: Nombre de la base de datos (default: `manga_db`)
+- `MONGO_PORT`: Puerto de MongoDB (default: `27017`)
+- `MONGO_SERVICE_NAME`: Nombre del servicio MongoDB en Docker (default: `mongodb`)
+
+**Servidor Spring Boot:**
+- `SERVER_PORT`: Puerto del servidor (default: `8080`)
+- `SPRING_APPLICATION_NAME`: Nombre de la aplicación (default: `server`)
+- `SPRINGDOC_SWAGGER_UI_PATH`: Ruta de Swagger UI (default: `/api/docs`)
+- `SPRING_PROFILES_ACTIVE`: Perfil de Spring activo (default: `docker`)
+
+**Desarrollo:**
+- `DEBUG_PORT`: Puerto para debugging remoto JDWP (default: `5005`)
+- `SPRING_DEVTOOLS_RESTART_ENABLED`: Habilitar hot reload (default: `true`)
+- `SPRING_DEVTOOLS_LIVERELOAD_ENABLED`: Habilitar live reload (default: `true`)
+
+#### Uso
+
+Docker Compose lee automáticamente el archivo `.env` si está en el mismo directorio que `docker-compose.yml`. Las variables se pueden usar con la sintaxis `${VARIABLE:-default}`.
+
+Si no existe el archivo `.env`, se usarán los valores por defecto definidos en los archivos docker-compose.
 
 ## Seguridad
 
@@ -155,11 +191,13 @@ Puedes personalizar la configuración modificando las variables de entorno en `d
 
 ### Recomendaciones para Producción
 
-- Cambiar las credenciales por defecto de MongoDB
-- Usar variables de entorno para credenciales (no hardcodear en docker-compose.yml)
-- Considerar usar secrets de Docker Compose para credenciales
-- Implementar HTTPS/TLS para la API
-- Configurar firewall para limitar acceso al puerto 8080
+- ✅ **Usar archivo .env**: Las credenciales ya están externalizadas en `.env`
+- ⚠️ **Cambiar credenciales por defecto**: Edita `.env` y cambia `MONGO_ROOT_PASSWORD`
+- 🔒 **No subir .env al repositorio**: Ya está en `.gitignore`
+- 🔐 **Usar secrets en producción**: Para entornos de producción, considera usar Docker Secrets o un gestor de secretos
+- 🔒 **Implementar HTTPS/TLS**: Para la API en producción
+- 🛡️ **Configurar firewall**: Limitar acceso al puerto 8080
+- 🔑 **Rotar credenciales**: Cambiar contraseñas regularmente
 
 ## Arquitectura de los Dockerfiles
 

@@ -7,11 +7,11 @@ services:
     restart: unless-stopped
     # En desarrollo, exponemos MongoDB para facilitar el acceso con herramientas
     ports:
-      - "27017:27017"
+      - "${MONGO_PORT:-27017}:27017"
     environment:
-      MONGO_INITDB_ROOT_USERNAME: admin
-      MONGO_INITDB_ROOT_PASSWORD: admin123
-      MONGO_INITDB_DATABASE: manga_db
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USERNAME:-admin}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD:-admin123}
+      MONGO_INITDB_DATABASE: ${MONGO_DATABASE:-manga_db}
     volumes:
       - mongodb_data_dev:/data/db
       - mongodb_config_dev:/data/configdb
@@ -22,8 +22,8 @@ services:
         [
           "CMD",
           "mongosh",
-          "-u", "admin",
-          "-p", "admin123",
+          "-u", "${MONGO_ROOT_USERNAME:-admin}",
+          "-p", "${MONGO_ROOT_PASSWORD:-admin123}",
           "--authenticationDatabase", "admin",
           "--eval", "db.adminCommand('ping')"
         ]
@@ -39,17 +39,17 @@ services:
     container_name: manga_server_dev
     restart: unless-stopped
     ports:
-      - "8080:8080"
+      - "${SERVER_PORT:-8080}:8080"
       # Puerto para debugging remoto (JDWP)
-      - "5005:5005"
+      - "${DEBUG_PORT:-5005}:5005"
     environment:
-      SPRING_DATA_MONGODB_URI: mongodb://admin:admin123@mongodb:27017/manga_db?authSource=admin
-      SPRING_APPLICATION_NAME: server
-      SPRINGDOC_SWAGGER_UI_PATH: /api/docs
-      SPRING_PROFILES_ACTIVE: dev
+      SPRING_DATA_MONGODB_URI: mongodb://${MONGO_ROOT_USERNAME:-admin}:${MONGO_ROOT_PASSWORD:-admin123}@${MONGO_SERVICE_NAME:-mongodb}:27017/${MONGO_DATABASE:-manga_db}?authSource=admin
+      SPRING_APPLICATION_NAME: ${SPRING_APPLICATION_NAME:-server}
+      SPRINGDOC_SWAGGER_UI_PATH: ${SPRINGDOC_SWAGGER_UI_PATH:-/api/docs}
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-dev}
       # Habilitar hot reload de Spring Boot DevTools
-      SPRING_DEVTOOLS_RESTART_ENABLED: "true"
-      SPRING_DEVTOOLS_LIVERELOAD_ENABLED: "true"
+      SPRING_DEVTOOLS_RESTART_ENABLED: ${SPRING_DEVTOOLS_RESTART_ENABLED:-true}
+      SPRING_DEVTOOLS_LIVERELOAD_ENABLED: ${SPRING_DEVTOOLS_LIVERELOAD_ENABLED:-true}
     volumes:
       # Montar código fuente para hot reload
       - ./src:/app/src
