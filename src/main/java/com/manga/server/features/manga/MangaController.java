@@ -3,11 +3,7 @@ package com.manga.server.features.manga;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-
+import org.springframework.web.bind.annotation.*;
 import com.manga.server.features.manga.dtos.MangaDTO;
 import com.manga.server.features.manga.mapper.MangaMapper;
 import com.manga.server.features.manga.model.MangaModel;
@@ -15,9 +11,10 @@ import com.manga.server.features.manga.services.MangaService;
 
 import lombok.RequiredArgsConstructor;
 
-@RestController("/")
+@RestController
 @CrossOrigin("*")
 @RequiredArgsConstructor
+@RequestMapping("/")
 public class MangaController {
 
   final MangaService mangaService;
