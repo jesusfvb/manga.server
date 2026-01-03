@@ -45,7 +45,10 @@ class MangaServiceTest {
     private ListOfMangasWhitNewChapterService listOfMangasWhitNewChapterService;
 
     @Mock
-    private java.util.concurrent.Executor executor;
+    private MangaSaveService mangaSaveService;
+
+    @Mock
+    private MangaUpdateService mangaUpdateService;
 
     @InjectMocks
     private MangaService mangaService;
@@ -104,7 +107,6 @@ class MangaServiceTest {
     void testGetMangasByIdsEmpty() {
         // Given
         List<String> ids = Arrays.asList();
-        when(mangaRepository.findAllById(ids)).thenReturn(Arrays.asList());
 
         // When
         List<MangaModel> result = mangaService.getMangasByIds(ids);
@@ -112,7 +114,7 @@ class MangaServiceTest {
         // Then
         assertNotNull(result);
         assertEquals(0, result.size());
-        verify(mangaRepository, times(1)).findAllById(ids);
+        verify(mangaRepository, never()).findAllById(any());
     }
 
     @Test
@@ -153,6 +155,7 @@ class MangaServiceTest {
         // Given
         ScrappersEnum scrapper = ScrappersEnum.leerCapitulo;
         when(listOfMangasWhitNewChapterService.getLastListNewManga(scrapper)).thenReturn(mangaModels);
+        // No hacer nada cuando se llame a updateMangasWithNewChapters (void method)
 
         // When
         List<MangaModel> result = mangaService.mangasWithNewChapters();
@@ -160,11 +163,12 @@ class MangaServiceTest {
         // Then
         assertNotNull(result);
         assertEquals(2, result.size());
+        verify(mangaUpdateService, times(1)).updateMangasWithNewChapters();
         verify(listOfMangasWhitNewChapterService, times(1)).getLastListNewManga(scrapper);
     }
 
     @Test
-    @DisplayName("mangasWithNewChapters - Debe retornar null cuando no hay lista disponible")
+    @DisplayName("mangasWithNewChapters - Debe retornar lista vacía cuando no hay lista disponible")
     void testMangasWithNewChaptersNull() {
         // Given
         ScrappersEnum scrapper = ScrappersEnum.leerCapitulo;
@@ -174,7 +178,9 @@ class MangaServiceTest {
         List<MangaModel> result = mangaService.mangasWithNewChapters();
 
         // Then
-        assertNull(result);
+        assertNotNull(result);
+        assertEquals(0, result.size());
+        verify(mangaUpdateService, times(1)).updateMangasWithNewChapters();
         verify(listOfMangasWhitNewChapterService, times(1)).getLastListNewManga(scrapper);
     }
 
@@ -214,8 +220,7 @@ class MangaServiceTest {
 
         when(mangaRepository.findAll(any(Example.class))).thenReturn(dbResults);
         when(scrapperService.searchManga(ScrappersEnum.leerCapitulo, query)).thenReturn(scrapperResults);
-        when(mangaRepository.findOne(any(Example.class))).thenReturn(Optional.empty());
-        when(mangaRepository.save(any(MangaModel.class))).thenReturn(scrapperManga);
+        // mangaSaveService.saveIfNotExists es void, no necesita mock
 
         // When
         List<MangaModel> result = mangaService.searchManga(query);
@@ -223,7 +228,7 @@ class MangaServiceTest {
         // Then
         assertNotNull(result);
         verify(scrapperService, times(1)).searchManga(ScrappersEnum.leerCapitulo, query);
-        verify(mangaRepository, atLeast(1)).save(any(MangaModel.class));
+        verify(mangaSaveService, times(1)).saveIfNotExists(any(MangaModel.class));
     }
 
     @SuppressWarnings({ "null", "unchecked" })

@@ -4,7 +4,6 @@ import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Example;
 import org.springframework.stereotype.Service;
@@ -15,24 +14,18 @@ import com.manga.server.features.manga.model.MangaModel;
 import com.manga.server.features.manga.services.MangaService;
 import com.manga.server.features.scrapper.services.ScrapperService;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
 
 @Log
 @Service
+@RequiredArgsConstructor
 public class ChapterService {
 
     @Lazy
-    @Autowired
-    private MangaService mangaService;
-    @Autowired
-    private ScrapperService scrapperService;
-
-    @Lazy
-    @Autowired
-    private ImgService imgService;
-
-    @Autowired
-    private ChapterRepository chapterRepository;
+    private final MangaService mangaService;
+    private final ScrapperService scrapperService;
+    private final ChapterRepository chapterRepository;
 
     public List<ChapterModel> getChapters(String mangaId) {
         if (mangaId == null || mangaId.isEmpty()) {
