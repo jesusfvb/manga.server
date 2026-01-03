@@ -3,42 +3,42 @@ package com.manga.server.features.scrapper.services;
 import com.manga.server.features.chapter.models.ChapterModel;
 import com.manga.server.features.chapter.models.ImgModel;
 import com.manga.server.features.manga.model.MangaModel;
-import com.manga.server.features.scrapper.scrapers.leercapitulo.LeercapituloScraper;
+import com.manga.server.features.scrapper.registry.ScraperRegistry;
+import com.manga.server.features.scrapper.scrapers.Scraper;
 import com.manga.server.shared.enums.ScrappersEnum;
 import com.manga.server.shared.model.UrlModel;
 
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class ScrapperService {
-  final LeercapituloScraper leercapituloScraper;
+  
+  private final ScraperRegistry scraperRegistry;
 
   public List<MangaModel> getMangasWithNewChapters() {
-    return leercapituloScraper.getMangasWithNewChapters();
+    Scraper scraper = scraperRegistry.getScraper(ScrappersEnum.leerCapitulo);
+    return scraper.getMangasWithNewChapters();
   }
+
 
   public List<MangaModel> searchManga(ScrappersEnum scrapper, String query) {
-    return switch (scrapper) {
-      case leerCapitulo -> leercapituloScraper.searchMangas(query);
-      default -> throw new IllegalArgumentException("Scraper not implemented: " + scrapper);
-    };
+    Scraper scraper = scraperRegistry.getScraper(scrapper);
+    return scraper.searchMangas(query);
   }
 
+
   public List<ChapterModel> getChapters(UrlModel url) {
-    return switch (url.getScrapper()) {
-      case leerCapitulo -> leercapituloScraper.getChapters(url.getUrl());
-      default -> throw new IllegalArgumentException("Scraper not implemented: " + url.getScrapper());
-    };
+    ScrappersEnum scrapper = url.getScrapper();
+    Scraper scraper = scraperRegistry.getScraper(scrapper);
+    return scraper.getChapters(url.getUrl());
   }
 
   public List<ImgModel> getImg(ScrappersEnum scrapper, String url) {
-    return switch (scrapper) {
-      case leerCapitulo -> leercapituloScraper.getImg(url);
-      default -> throw new IllegalArgumentException("Scraper not implemented: " + scrapper);
-    };
+    Scraper scraper = scraperRegistry.getScraper(scrapper);
+    return scraper.getImg(url);
   }
 }

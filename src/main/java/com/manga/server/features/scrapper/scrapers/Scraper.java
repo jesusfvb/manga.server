@@ -5,10 +5,13 @@ import java.util.List;
 import com.manga.server.features.chapter.models.ChapterModel;
 import com.manga.server.features.chapter.models.ImgModel;
 import com.manga.server.features.manga.model.MangaModel;
+import com.manga.server.shared.enums.ScrappersEnum;
 
 public interface Scraper {
 
   String baseURl();
+
+  ScrappersEnum getScrapperEnum();
 
   List<MangaModel> getMangasWithNewChapters();
 

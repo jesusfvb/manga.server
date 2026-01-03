@@ -23,7 +23,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.manga.server.features.chapter.models.ChapterModel;
 import com.manga.server.features.chapter.models.ImgModel;
 import com.manga.server.features.manga.model.MangaModel;
-import com.manga.server.features.scrapper.scrapers.leercapitulo.LeercapituloScraper;
+import com.manga.server.features.scrapper.registry.ScraperRegistry;
+import com.manga.server.features.scrapper.scrapers.Scraper;
 import com.manga.server.shared.enums.ScrappersEnum;
 import com.manga.server.shared.model.UrlModel;
 
@@ -31,7 +32,10 @@ import com.manga.server.shared.model.UrlModel;
 public class ScrapperServiceTests {
 
     @Mock
-    private LeercapituloScraper leercapituloScraper;
+    private ScraperRegistry scraperRegistry;
+
+    @Mock
+    private Scraper scraper;
 
     @InjectMocks
     private ScrapperService scrapperService;
@@ -69,7 +73,8 @@ public class ScrapperServiceTests {
     @DisplayName("getMangasWithNewChapters - Debe retornar lista de mangas cuando el scraper retorna mangas")
     void testGetMangasWithNewChaptersSuccess() {
         // Given
-        when(leercapituloScraper.getMangasWithNewChapters()).thenReturn(mangaModels);
+        when(scraperRegistry.getScraper(ScrappersEnum.leerCapitulo)).thenReturn(scraper);
+        when(scraper.getMangasWithNewChapters()).thenReturn(mangaModels);
 
         // When
         List<MangaModel> result = scrapperService.getMangasWithNewChapters();
@@ -81,28 +86,32 @@ public class ScrapperServiceTests {
         assertEquals("Naruto", result.get(1).getName());
         assertEquals(1100.0, result.get(0).getLastChapter());
         assertEquals(700.0, result.get(1).getLastChapter());
-        verify(leercapituloScraper, times(1)).getMangasWithNewChapters();
+        verify(scraperRegistry, times(1)).getScraper(ScrappersEnum.leerCapitulo);
+        verify(scraper, times(1)).getMangasWithNewChapters();
     }
 
     @Test
     @DisplayName("getMangasWithNewChapters - Debe retornar null cuando el scraper retorna null")
     void testGetMangasWithNewChaptersNull() {
         // Given
-        when(leercapituloScraper.getMangasWithNewChapters()).thenReturn(null);
+        when(scraperRegistry.getScraper(ScrappersEnum.leerCapitulo)).thenReturn(scraper);
+        when(scraper.getMangasWithNewChapters()).thenReturn(null);
 
         // When
         List<MangaModel> result = scrapperService.getMangasWithNewChapters();
 
         // Then
         assertNull(result);
-        verify(leercapituloScraper, times(1)).getMangasWithNewChapters();
+        verify(scraperRegistry, times(1)).getScraper(ScrappersEnum.leerCapitulo);
+        verify(scraper, times(1)).getMangasWithNewChapters();
     }
 
     @Test
     @DisplayName("getMangasWithNewChapters - Debe retornar lista vacía cuando el scraper retorna lista vacía")
     void testGetMangasWithNewChaptersEmptyList() {
         // Given
-        when(leercapituloScraper.getMangasWithNewChapters()).thenReturn(Collections.emptyList());
+        when(scraperRegistry.getScraper(ScrappersEnum.leerCapitulo)).thenReturn(scraper);
+        when(scraper.getMangasWithNewChapters()).thenReturn(Collections.emptyList());
 
         // When
         List<MangaModel> result = scrapperService.getMangasWithNewChapters();
@@ -110,7 +119,8 @@ public class ScrapperServiceTests {
         // Then
         assertNotNull(result);
         assertEquals(0, result.size());
-        verify(leercapituloScraper, times(1)).getMangasWithNewChapters();
+        verify(scraperRegistry, times(1)).getScraper(ScrappersEnum.leerCapitulo);
+        verify(scraper, times(1)).getMangasWithNewChapters();
     }
 
     // Tests para searchManga
@@ -120,7 +130,8 @@ public class ScrapperServiceTests {
     void testSearchMangaSuccess() {
         // Given
         String query = "One Piece";
-        when(leercapituloScraper.searchMangas(query)).thenReturn(mangaModels);
+        when(scraperRegistry.getScraper(ScrappersEnum.leerCapitulo)).thenReturn(scraper);
+        when(scraper.searchMangas(query)).thenReturn(mangaModels);
 
         // When
         List<MangaModel> result = scrapperService.searchManga(ScrappersEnum.leerCapitulo, query);
@@ -130,7 +141,8 @@ public class ScrapperServiceTests {
         assertEquals(2, result.size());
         assertEquals("One Piece", result.get(0).getName());
         assertEquals("Naruto", result.get(1).getName());
-        verify(leercapituloScraper, times(1)).searchMangas(query);
+        verify(scraperRegistry, times(1)).getScraper(ScrappersEnum.leerCapitulo);
+        verify(scraper, times(1)).searchMangas(query);
     }
 
     @Test
@@ -138,14 +150,16 @@ public class ScrapperServiceTests {
     void testSearchMangaNull() {
         // Given
         String query = "Bleach";
-        when(leercapituloScraper.searchMangas(query)).thenReturn(null);
+        when(scraperRegistry.getScraper(ScrappersEnum.leerCapitulo)).thenReturn(scraper);
+        when(scraper.searchMangas(query)).thenReturn(null);
 
         // When
         List<MangaModel> result = scrapperService.searchManga(ScrappersEnum.leerCapitulo, query);
 
         // Then
         assertNull(result);
-        verify(leercapituloScraper, times(1)).searchMangas(query);
+        verify(scraperRegistry, times(1)).getScraper(ScrappersEnum.leerCapitulo);
+        verify(scraper, times(1)).searchMangas(query);
     }
 
     @Test
@@ -153,7 +167,8 @@ public class ScrapperServiceTests {
     void testSearchMangaEmptyList() {
         // Given
         String query = "Dragon Ball";
-        when(leercapituloScraper.searchMangas(query)).thenReturn(Collections.emptyList());
+        when(scraperRegistry.getScraper(ScrappersEnum.leerCapitulo)).thenReturn(scraper);
+        when(scraper.searchMangas(query)).thenReturn(Collections.emptyList());
 
         // When
         List<MangaModel> result = scrapperService.searchManga(ScrappersEnum.leerCapitulo, query);
@@ -161,7 +176,8 @@ public class ScrapperServiceTests {
         // Then
         assertNotNull(result);
         assertEquals(0, result.size());
-        verify(leercapituloScraper, times(1)).searchMangas(query);
+        verify(scraperRegistry, times(1)).getScraper(ScrappersEnum.leerCapitulo);
+        verify(scraper, times(1)).searchMangas(query);
     }
 
     @Test
@@ -170,7 +186,8 @@ public class ScrapperServiceTests {
         // Given
         String query = "One Piece";
         List<MangaModel> singleManga = Arrays.asList(mangaModel1);
-        when(leercapituloScraper.searchMangas(query)).thenReturn(singleManga);
+        when(scraperRegistry.getScraper(ScrappersEnum.leerCapitulo)).thenReturn(scraper);
+        when(scraper.searchMangas(query)).thenReturn(singleManga);
 
         // When
         List<MangaModel> result = scrapperService.searchManga(ScrappersEnum.leerCapitulo, query);
@@ -179,7 +196,8 @@ public class ScrapperServiceTests {
         assertNotNull(result);
         assertEquals(1, result.size());
         assertEquals("One Piece", result.get(0).getName());
-        verify(leercapituloScraper, times(1)).searchMangas(query);
+        verify(scraperRegistry, times(1)).getScraper(ScrappersEnum.leerCapitulo);
+        verify(scraper, times(1)).searchMangas(query);
     }
 
     @Test
@@ -187,13 +205,15 @@ public class ScrapperServiceTests {
     void testSearchMangaQueryPassedCorrectly() {
         // Given
         String query = "Naruto Shippuden";
-        when(leercapituloScraper.searchMangas(query)).thenReturn(mangaModels);
+        when(scraperRegistry.getScraper(ScrappersEnum.leerCapitulo)).thenReturn(scraper);
+        when(scraper.searchMangas(query)).thenReturn(mangaModels);
 
         // When
         scrapperService.searchManga(ScrappersEnum.leerCapitulo, query);
 
         // Then
-        verify(leercapituloScraper, times(1)).searchMangas(query);
+        verify(scraperRegistry, times(1)).getScraper(ScrappersEnum.leerCapitulo);
+        verify(scraper, times(1)).searchMangas(query);
     }
 
     @Test
@@ -201,7 +221,8 @@ public class ScrapperServiceTests {
     void testSearchMangaEmptyQuery() {
         // Given
         String query = "";
-        when(leercapituloScraper.searchMangas(query)).thenReturn(Collections.emptyList());
+        when(scraperRegistry.getScraper(ScrappersEnum.leerCapitulo)).thenReturn(scraper);
+        when(scraper.searchMangas(query)).thenReturn(Collections.emptyList());
 
         // When
         List<MangaModel> result = scrapperService.searchManga(ScrappersEnum.leerCapitulo, query);
@@ -209,7 +230,8 @@ public class ScrapperServiceTests {
         // Then
         assertNotNull(result);
         assertEquals(0, result.size());
-        verify(leercapituloScraper, times(1)).searchMangas(query);
+        verify(scraperRegistry, times(1)).getScraper(ScrappersEnum.leerCapitulo);
+        verify(scraper, times(1)).searchMangas(query);
     }
 
     @Test
@@ -217,7 +239,8 @@ public class ScrapperServiceTests {
     void testSearchMangaNullQuery() {
         // Given
         String query = null;
-        when(leercapituloScraper.searchMangas(query)).thenReturn(Collections.emptyList());
+        when(scraperRegistry.getScraper(ScrappersEnum.leerCapitulo)).thenReturn(scraper);
+        when(scraper.searchMangas(query)).thenReturn(Collections.emptyList());
 
         // When
         List<MangaModel> result = scrapperService.searchManga(ScrappersEnum.leerCapitulo, query);
@@ -225,7 +248,8 @@ public class ScrapperServiceTests {
         // Then
         assertNotNull(result);
         assertEquals(0, result.size());
-        verify(leercapituloScraper, times(1)).searchMangas(query);
+        verify(scraperRegistry, times(1)).getScraper(ScrappersEnum.leerCapitulo);
+        verify(scraper, times(1)).searchMangas(query);
     }
 
     // Tests para getChapters
@@ -261,7 +285,8 @@ public class ScrapperServiceTests {
                 .build();
 
         List<ChapterModel> chapters = Arrays.asList(chapter1, chapter2);
-        when(leercapituloScraper.getChapters(mangaUrl)).thenReturn(chapters);
+        when(scraperRegistry.getScraper(ScrappersEnum.leerCapitulo)).thenReturn(scraper);
+        when(scraper.getChapters(mangaUrl)).thenReturn(chapters);
 
         // When
         List<ChapterModel> result = scrapperService.getChapters(urlModel);
@@ -271,7 +296,8 @@ public class ScrapperServiceTests {
         assertEquals(2, result.size());
         assertEquals(1100.0, result.get(0).getNumber());
         assertEquals(1101.0, result.get(1).getNumber());
-        verify(leercapituloScraper, times(1)).getChapters(mangaUrl);
+        verify(scraperRegistry, times(1)).getScraper(ScrappersEnum.leerCapitulo);
+        verify(scraper, times(1)).getChapters(mangaUrl);
     }
 
     @Test
@@ -283,14 +309,16 @@ public class ScrapperServiceTests {
                 .url(mangaUrl)
                 .scrapper(ScrappersEnum.leerCapitulo)
                 .build();
-        when(leercapituloScraper.getChapters(mangaUrl)).thenReturn(null);
+        when(scraperRegistry.getScraper(ScrappersEnum.leerCapitulo)).thenReturn(scraper);
+        when(scraper.getChapters(mangaUrl)).thenReturn(null);
 
         // When
         List<ChapterModel> result = scrapperService.getChapters(urlModel);
 
         // Then
         assertNull(result);
-        verify(leercapituloScraper, times(1)).getChapters(mangaUrl);
+        verify(scraperRegistry, times(1)).getScraper(ScrappersEnum.leerCapitulo);
+        verify(scraper, times(1)).getChapters(mangaUrl);
     }
 
     @Test
@@ -302,7 +330,8 @@ public class ScrapperServiceTests {
                 .url(mangaUrl)
                 .scrapper(ScrappersEnum.leerCapitulo)
                 .build();
-        when(leercapituloScraper.getChapters(mangaUrl)).thenReturn(Collections.emptyList());
+        when(scraperRegistry.getScraper(ScrappersEnum.leerCapitulo)).thenReturn(scraper);
+        when(scraper.getChapters(mangaUrl)).thenReturn(Collections.emptyList());
 
         // When
         List<ChapterModel> result = scrapperService.getChapters(urlModel);
@@ -310,7 +339,8 @@ public class ScrapperServiceTests {
         // Then
         assertNotNull(result);
         assertEquals(0, result.size());
-        verify(leercapituloScraper, times(1)).getChapters(mangaUrl);
+        verify(scraperRegistry, times(1)).getScraper(ScrappersEnum.leerCapitulo);
+        verify(scraper, times(1)).getChapters(mangaUrl);
     }
 
     @Test
@@ -334,7 +364,8 @@ public class ScrapperServiceTests {
                 .build();
 
         List<ChapterModel> singleChapter = Arrays.asList(chapter);
-        when(leercapituloScraper.getChapters(mangaUrl)).thenReturn(singleChapter);
+        when(scraperRegistry.getScraper(ScrappersEnum.leerCapitulo)).thenReturn(scraper);
+        when(scraper.getChapters(mangaUrl)).thenReturn(singleChapter);
 
         // When
         List<ChapterModel> result = scrapperService.getChapters(urlModel);
@@ -343,7 +374,8 @@ public class ScrapperServiceTests {
         assertNotNull(result);
         assertEquals(1, result.size());
         assertEquals(1100.0, result.get(0).getNumber());
-        verify(leercapituloScraper, times(1)).getChapters(mangaUrl);
+        verify(scraperRegistry, times(1)).getScraper(ScrappersEnum.leerCapitulo);
+        verify(scraper, times(1)).getChapters(mangaUrl);
     }
 
     @Test
@@ -355,14 +387,16 @@ public class ScrapperServiceTests {
                 .url(mangaUrl)
                 .scrapper(ScrappersEnum.leerCapitulo)
                 .build();
-        when(leercapituloScraper.getChapters(mangaUrl)).thenReturn(Collections.emptyList());
+        when(scraperRegistry.getScraper(ScrappersEnum.leerCapitulo)).thenReturn(scraper);
+        when(scraper.getChapters(mangaUrl)).thenReturn(Collections.emptyList());
 
         // When
         scrapperService.getChapters(urlModel);
 
         // Then
-        verify(leercapituloScraper, times(1)).getChapters(mangaUrl);
-        verify(leercapituloScraper).getChapters(argThat(url -> url.equals(mangaUrl)));
+        verify(scraperRegistry, times(1)).getScraper(ScrappersEnum.leerCapitulo);
+        verify(scraper, times(1)).getChapters(mangaUrl);
+        verify(scraper).getChapters(argThat(url -> url.equals(mangaUrl)));
     }
 
     @Test
@@ -374,7 +408,8 @@ public class ScrapperServiceTests {
                 .url(mangaUrl)
                 .scrapper(ScrappersEnum.leerCapitulo)
                 .build();
-        when(leercapituloScraper.getChapters(mangaUrl)).thenReturn(Collections.emptyList());
+        when(scraperRegistry.getScraper(ScrappersEnum.leerCapitulo)).thenReturn(scraper);
+        when(scraper.getChapters(mangaUrl)).thenReturn(Collections.emptyList());
 
         // When
         List<ChapterModel> result = scrapperService.getChapters(urlModel);
@@ -382,7 +417,8 @@ public class ScrapperServiceTests {
         // Then
         assertNotNull(result);
         assertEquals(0, result.size());
-        verify(leercapituloScraper, times(1)).getChapters(mangaUrl);
+        verify(scraperRegistry, times(1)).getScraper(ScrappersEnum.leerCapitulo);
+        verify(scraper, times(1)).getChapters(mangaUrl);
     }
 
     @Test
@@ -394,7 +430,8 @@ public class ScrapperServiceTests {
                 .url(mangaUrl)
                 .scrapper(ScrappersEnum.leerCapitulo)
                 .build();
-        when(leercapituloScraper.getChapters(mangaUrl)).thenReturn(Collections.emptyList());
+        when(scraperRegistry.getScraper(ScrappersEnum.leerCapitulo)).thenReturn(scraper);
+        when(scraper.getChapters(mangaUrl)).thenReturn(Collections.emptyList());
 
         // When
         List<ChapterModel> result = scrapperService.getChapters(urlModel);
@@ -402,7 +439,8 @@ public class ScrapperServiceTests {
         // Then
         assertNotNull(result);
         assertEquals(0, result.size());
-        verify(leercapituloScraper, times(1)).getChapters(mangaUrl);
+        verify(scraperRegistry, times(1)).getScraper(ScrappersEnum.leerCapitulo);
+        verify(scraper, times(1)).getChapters(mangaUrl);
     }
 
     // Tests para getImg
@@ -437,7 +475,8 @@ public class ScrapperServiceTests {
                 .build();
 
         List<ImgModel> images = Arrays.asList(img1, img2);
-        when(leercapituloScraper.getImg(chapterUrl)).thenReturn(images);
+        when(scraperRegistry.getScraper(ScrappersEnum.leerCapitulo)).thenReturn(scraper);
+        when(scraper.getImg(chapterUrl)).thenReturn(images);
 
         // When
         List<ImgModel> result = scrapperService.getImg(scrapper, chapterUrl);
@@ -447,7 +486,8 @@ public class ScrapperServiceTests {
         assertEquals(2, result.size());
         assertEquals(1, result.get(0).getNumber());
         assertEquals(2, result.get(1).getNumber());
-        verify(leercapituloScraper, times(1)).getImg(chapterUrl);
+        verify(scraperRegistry, times(1)).getScraper(ScrappersEnum.leerCapitulo);
+        verify(scraper, times(1)).getImg(chapterUrl);
     }
 
     @Test
@@ -456,14 +496,16 @@ public class ScrapperServiceTests {
         // Given
         String chapterUrl = "/naruto/chapter-700";
         ScrappersEnum scrapper = ScrappersEnum.leerCapitulo;
-        when(leercapituloScraper.getImg(chapterUrl)).thenReturn(null);
+        when(scraperRegistry.getScraper(ScrappersEnum.leerCapitulo)).thenReturn(scraper);
+        when(scraper.getImg(chapterUrl)).thenReturn(null);
 
         // When
         List<ImgModel> result = scrapperService.getImg(scrapper, chapterUrl);
 
         // Then
         assertNull(result);
-        verify(leercapituloScraper, times(1)).getImg(chapterUrl);
+        verify(scraperRegistry, times(1)).getScraper(ScrappersEnum.leerCapitulo);
+        verify(scraper, times(1)).getImg(chapterUrl);
     }
 
     @Test
@@ -472,7 +514,8 @@ public class ScrapperServiceTests {
         // Given
         String chapterUrl = "/bleach/chapter-686";
         ScrappersEnum scrapper = ScrappersEnum.leerCapitulo;
-        when(leercapituloScraper.getImg(chapterUrl)).thenReturn(Collections.emptyList());
+        when(scraperRegistry.getScraper(ScrappersEnum.leerCapitulo)).thenReturn(scraper);
+        when(scraper.getImg(chapterUrl)).thenReturn(Collections.emptyList());
 
         // When
         List<ImgModel> result = scrapperService.getImg(scrapper, chapterUrl);
@@ -480,7 +523,8 @@ public class ScrapperServiceTests {
         // Then
         assertNotNull(result);
         assertEquals(0, result.size());
-        verify(leercapituloScraper, times(1)).getImg(chapterUrl);
+        verify(scraperRegistry, times(1)).getScraper(ScrappersEnum.leerCapitulo);
+        verify(scraper, times(1)).getImg(chapterUrl);
     }
 
     @Test
@@ -502,7 +546,8 @@ public class ScrapperServiceTests {
                 .build();
 
         List<ImgModel> singleImage = Arrays.asList(img);
-        when(leercapituloScraper.getImg(chapterUrl)).thenReturn(singleImage);
+        when(scraperRegistry.getScraper(ScrappersEnum.leerCapitulo)).thenReturn(scraper);
+        when(scraper.getImg(chapterUrl)).thenReturn(singleImage);
 
         // When
         List<ImgModel> result = scrapperService.getImg(scrapper, chapterUrl);
@@ -511,7 +556,8 @@ public class ScrapperServiceTests {
         assertNotNull(result);
         assertEquals(1, result.size());
         assertEquals(1, result.get(0).getNumber());
-        verify(leercapituloScraper, times(1)).getImg(chapterUrl);
+        verify(scraperRegistry, times(1)).getScraper(ScrappersEnum.leerCapitulo);
+        verify(scraper, times(1)).getImg(chapterUrl);
     }
 
     @Test
@@ -520,14 +566,16 @@ public class ScrapperServiceTests {
         // Given
         String chapterUrl = "/dragon-ball/chapter-1";
         ScrappersEnum scrapper = ScrappersEnum.leerCapitulo;
-        when(leercapituloScraper.getImg(chapterUrl)).thenReturn(Collections.emptyList());
+        when(scraperRegistry.getScraper(ScrappersEnum.leerCapitulo)).thenReturn(scraper);
+        when(scraper.getImg(chapterUrl)).thenReturn(Collections.emptyList());
 
         // When
         scrapperService.getImg(scrapper, chapterUrl);
 
         // Then
-        verify(leercapituloScraper, times(1)).getImg(chapterUrl);
-        verify(leercapituloScraper).getImg(argThat(url -> url.equals(chapterUrl)));
+        verify(scraperRegistry, times(1)).getScraper(ScrappersEnum.leerCapitulo);
+        verify(scraper, times(1)).getImg(chapterUrl);
+        verify(scraper).getImg(argThat(url -> url.equals(chapterUrl)));
     }
 
     @Test
@@ -536,7 +584,8 @@ public class ScrapperServiceTests {
         // Given
         String chapterUrl = "";
         ScrappersEnum scrapper = ScrappersEnum.leerCapitulo;
-        when(leercapituloScraper.getImg(chapterUrl)).thenReturn(Collections.emptyList());
+        when(scraperRegistry.getScraper(ScrappersEnum.leerCapitulo)).thenReturn(scraper);
+        when(scraper.getImg(chapterUrl)).thenReturn(Collections.emptyList());
 
         // When
         List<ImgModel> result = scrapperService.getImg(scrapper, chapterUrl);
@@ -544,7 +593,8 @@ public class ScrapperServiceTests {
         // Then
         assertNotNull(result);
         assertEquals(0, result.size());
-        verify(leercapituloScraper, times(1)).getImg(chapterUrl);
+        verify(scraperRegistry, times(1)).getScraper(ScrappersEnum.leerCapitulo);
+        verify(scraper, times(1)).getImg(chapterUrl);
     }
 
     @Test
@@ -553,7 +603,8 @@ public class ScrapperServiceTests {
         // Given
         String chapterUrl = null;
         ScrappersEnum scrapper = ScrappersEnum.leerCapitulo;
-        when(leercapituloScraper.getImg(chapterUrl)).thenReturn(Collections.emptyList());
+        when(scraperRegistry.getScraper(ScrappersEnum.leerCapitulo)).thenReturn(scraper);
+        when(scraper.getImg(chapterUrl)).thenReturn(Collections.emptyList());
 
         // When
         List<ImgModel> result = scrapperService.getImg(scrapper, chapterUrl);
@@ -561,7 +612,8 @@ public class ScrapperServiceTests {
         // Then
         assertNotNull(result);
         assertEquals(0, result.size());
-        verify(leercapituloScraper, times(1)).getImg(chapterUrl);
+        verify(scraperRegistry, times(1)).getScraper(ScrappersEnum.leerCapitulo);
+        verify(scraper, times(1)).getImg(chapterUrl);
     }
 
 }

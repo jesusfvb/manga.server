@@ -45,6 +45,11 @@ public class LeercapituloScraper implements Scraper {
   }
 
   @Override
+  public ScrappersEnum getScrapperEnum() {
+    return scrapper;
+  }
+
+  @Override
   public List<MangaModel> getMangasWithNewChapters() {
     long startTime = System.currentTimeMillis();
     log.info("Iniciando getMangasWithNewChapters - Thread: " + Thread.currentThread().getName());
