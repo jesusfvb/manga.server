@@ -2,6 +2,7 @@ package com.manga.server.features.manga.services;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -17,13 +18,13 @@ import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.Example;
 
-import com.manga.server.features.manga.model.MangaModel;
 import com.manga.server.features.manga.model.ListOfMangasWhitNewChapterModel;
+import com.manga.server.features.manga.model.MangaModel;
 import com.manga.server.features.manga.repository.ListOfMangasWhitNewChapterRepository;
 import com.manga.server.shared.enums.ScrappersEnum;
 import com.manga.server.shared.model.UrlModel;
@@ -46,17 +47,15 @@ public class ListOfMangasWhitNewChapterServiceTests {
                 assertTrue(result);
         }
 
-        @SuppressWarnings({ "null", "unchecked" })
         @Test
         @DisplayName("isTimeCheck - Debe retornar true cuando no se encuentra el modelo en la base de datos")
         void testIsTimeCheckWhenModelNotFound() {
-                when(newListMangaRepository.findOne(any(Example.class))).thenReturn(Optional.empty());
+                when(newListMangaRepository.findByScraper(any())).thenReturn(Optional.empty());
 
                 Boolean result = listOfMangasWhitNewChapterService.isTimeCheck(ScrappersEnum.leerCapitulo);
                 assertTrue(result);
         }
 
-        @SuppressWarnings({ "null", "unchecked" })
         @Test
         @DisplayName("isTimeCheck - Debe retornar true cuando el modelo existe pero getDateTime() es null")
         void testIsTimeCheckWhenModelExistsButDateTimeIsNull() {
@@ -65,13 +64,12 @@ public class ListOfMangasWhitNewChapterServiceTests {
                                 .dateTime(null)
                                 .build();
 
-                when(newListMangaRepository.findOne(any(Example.class))).thenReturn(Optional.of(model));
+                when(newListMangaRepository.findByScraper(any())).thenReturn(Optional.of(model));
 
                 Boolean result = listOfMangasWhitNewChapterService.isTimeCheck(ScrappersEnum.leerCapitulo);
                 assertTrue(result);
         }
 
-        @SuppressWarnings({ "null", "unchecked" })
         @Test
         @DisplayName("isTimeCheck - Debe retornar true cuando han pasado más de 30 minutos")
         void testIsTimeCheckWhenMoreThan30MinutesHavePassed() {
@@ -83,13 +81,12 @@ public class ListOfMangasWhitNewChapterServiceTests {
                                 .dateTime(dateTime)
                                 .build();
 
-                when(newListMangaRepository.findOne(any(Example.class))).thenReturn(Optional.of(model));
+                when(newListMangaRepository.findByScraper(any())).thenReturn(Optional.of(model));
 
                 Boolean result = listOfMangasWhitNewChapterService.isTimeCheck(ScrappersEnum.leerCapitulo);
                 assertTrue(result);
         }
 
-        @SuppressWarnings({ "null", "unchecked" })
         @Test
         @DisplayName("isTimeCheck - Debe retornar false cuando NO han pasado más de 30 minutos")
         void testIsTimeCheckWhenLessThan30MinutesHavePassed() {
@@ -101,13 +98,12 @@ public class ListOfMangasWhitNewChapterServiceTests {
                                 .dateTime(dateTime)
                                 .build();
 
-                when(newListMangaRepository.findOne(any(Example.class))).thenReturn(Optional.of(model));
+                when(newListMangaRepository.findByScraper(any())).thenReturn(Optional.of(model));
 
                 Boolean result = listOfMangasWhitNewChapterService.isTimeCheck(ScrappersEnum.leerCapitulo);
                 assertFalse(result);
         }
 
-        @SuppressWarnings({ "null", "unchecked" })
         @Test
         @DisplayName("isTimeCheck - Debe retornar false cuando han pasado exactamente 30 minutos")
         void testIsTimeCheckWhenExactly30MinutesHavePassed() {
@@ -119,7 +115,7 @@ public class ListOfMangasWhitNewChapterServiceTests {
                                 .dateTime(dateTime)
                                 .build();
 
-                when(newListMangaRepository.findOne(any(Example.class))).thenReturn(Optional.of(model));
+                when(newListMangaRepository.findByScraper(any())).thenReturn(Optional.of(model));
 
                 Boolean result = listOfMangasWhitNewChapterService.isTimeCheck(ScrappersEnum.leerCapitulo);
                 assertFalse(result);
@@ -134,18 +130,16 @@ public class ListOfMangasWhitNewChapterServiceTests {
                 assertNull(result);
         }
 
-        @SuppressWarnings({ "null", "unchecked" })
         @Test
         @DisplayName("getLastListNewManga - Debe retornar null cuando no se encuentra el modelo en la base de datos")
         void testGetLastListNewMangaWhenModelNotFound() {
-                when(newListMangaRepository.findOne(any(Example.class))).thenReturn(Optional.empty());
+                when(newListMangaRepository.findByScraper(any())).thenReturn(Optional.empty());
 
                 List<MangaModel> result = listOfMangasWhitNewChapterService
                                 .getLastListNewManga(ScrappersEnum.leerCapitulo);
                 assertNull(result);
         }
 
-        @SuppressWarnings({ "null", "unchecked" })
         @Test
         @DisplayName("getLastListNewManga - Debe retornar la lista de mangas cuando el modelo existe y tiene mangas")
         void testGetLastListNewMangaWhenModelExistsWithMangas() {
@@ -175,7 +169,7 @@ public class ListOfMangasWhitNewChapterServiceTests {
                                 .dateTime(LocalDateTime.now())
                                 .build();
 
-                when(newListMangaRepository.findOne(any(Example.class))).thenReturn(Optional.of(model));
+                when(newListMangaRepository.findByScraper(any())).thenReturn(Optional.of(model));
 
                 List<MangaModel> result = listOfMangasWhitNewChapterService
                                 .getLastListNewManga(ScrappersEnum.leerCapitulo);
@@ -186,7 +180,6 @@ public class ListOfMangasWhitNewChapterServiceTests {
                 assertEquals("Naruto", result.get(1).getName());
         }
 
-        @SuppressWarnings({ "null", "unchecked" })
         @Test
         @DisplayName("getLastListNewManga - Debe retornar lista vacía cuando el modelo existe pero getMangas() retorna lista vacía")
         void testGetLastListNewMangaWhenModelExistsWithEmptyMangas() {
@@ -196,7 +189,7 @@ public class ListOfMangasWhitNewChapterServiceTests {
                                 .dateTime(LocalDateTime.now())
                                 .build();
 
-                when(newListMangaRepository.findOne(any(Example.class))).thenReturn(Optional.of(model));
+                when(newListMangaRepository.findByScraper(any())).thenReturn(Optional.of(model));
 
                 List<MangaModel> result = listOfMangasWhitNewChapterService
                                 .getLastListNewManga(ScrappersEnum.leerCapitulo);
@@ -205,7 +198,6 @@ public class ListOfMangasWhitNewChapterServiceTests {
                 assertTrue(result.isEmpty());
         }
 
-        @SuppressWarnings({ "null", "unchecked" })
         @Test
         @DisplayName("getLastListNewManga - Debe retornar null cuando el modelo existe pero getMangas() retorna null")
         void testGetLastListNewMangaWhenModelExistsButMangasIsNull() {
@@ -215,7 +207,7 @@ public class ListOfMangasWhitNewChapterServiceTests {
                                 .dateTime(LocalDateTime.now())
                                 .build();
 
-                when(newListMangaRepository.findOne(any(Example.class))).thenReturn(Optional.of(model));
+                when(newListMangaRepository.findByScraper(any())).thenReturn(Optional.of(model));
 
                 List<MangaModel> result = listOfMangasWhitNewChapterService
                                 .getLastListNewManga(ScrappersEnum.leerCapitulo);
@@ -224,8 +216,7 @@ public class ListOfMangasWhitNewChapterServiceTests {
         }
 
         // Test save
-
-        @SuppressWarnings({ "null", "unchecked" })
+        @SuppressWarnings({ "null" })
         @Test
         @DisplayName("save - No debe hacer nada cuando scrappersEnum es null")
         void testSaveWithNullScrappersEnum() {
@@ -237,15 +228,15 @@ public class ListOfMangasWhitNewChapterServiceTests {
 
                 listOfMangasWhitNewChapterService.save(mangas, null);
 
-                verify(newListMangaRepository, never()).findOne(any(Example.class));
+                verify(newListMangaRepository, never()).findByScraper(any());
                 verify(newListMangaRepository, never()).save(any(ListOfMangasWhitNewChapterModel.class));
         }
 
-        @SuppressWarnings({ "null", "unchecked" })
+        @SuppressWarnings({ "null" })
         @Test
         @DisplayName("save - Debe convertir mangas null a List.of() y guardar cuando el modelo no existe")
         void testSaveWithNullMangasWhenModelNotExists() {
-                when(newListMangaRepository.findOne(any(Example.class))).thenReturn(Optional.empty());
+                when(newListMangaRepository.findByScraper(any())).thenReturn(Optional.empty());
 
                 listOfMangasWhitNewChapterService.save(null, ScrappersEnum.leerCapitulo);
 
@@ -255,11 +246,11 @@ public class ListOfMangasWhitNewChapterServiceTests {
                                 model.getDateTime() != null));
         }
 
-        @SuppressWarnings({ "null", "unchecked" })
+        @SuppressWarnings({ "null" })
         @Test
         @DisplayName("save - Debe actualizar el modelo existente cuando ya existe en la base de datos")
         void testSaveUpdatesExistingModel() {
-                
+
                 List<MangaModel> existingMangas = List.of(
                                 MangaModel.builder()
                                                 .id("1")
@@ -272,27 +263,37 @@ public class ListOfMangasWhitNewChapterServiceTests {
                                                 .name("New Manga")
                                                 .build());
 
-
-
+                LocalDateTime oldDateTime = LocalDateTime.now().minusHours(2);
                 ListOfMangasWhitNewChapterModel existingModel = ListOfMangasWhitNewChapterModel.builder()
                                 .id("existing-id")
                                 .scraper(ScrappersEnum.leerCapitulo)
                                 .mangas(existingMangas)
-                                .dateTime(LocalDateTime.now().minusHours(2))
+                                .dateTime(oldDateTime)
                                 .build();
 
-                when(newListMangaRepository.findOne(any(Example.class))).thenReturn(Optional.of(existingModel));
+                when(newListMangaRepository.findByScraper(any())).thenReturn(Optional.of(existingModel));
 
+                LocalDateTime beforeSave = LocalDateTime.now();
                 listOfMangasWhitNewChapterService.save(newMangas, ScrappersEnum.leerCapitulo);
+                LocalDateTime afterSave = LocalDateTime.now();
 
-                verify(newListMangaRepository).save(argThat(model -> model.getId().equals("existing-id")
-                                && model.getMangas().equals(newMangas)
-                                && model.getScraper() == ScrappersEnum.leerCapitulo
-                                && existingModel.getDateTime().isBefore(model.getDateTime())
-                               )); 
+                verify(newListMangaRepository).findByScraper(ScrappersEnum.leerCapitulo);
+
+                ArgumentCaptor<ListOfMangasWhitNewChapterModel> captor = ArgumentCaptor
+                                .forClass(ListOfMangasWhitNewChapterModel.class);
+                verify(newListMangaRepository).save(captor.capture());
+
+                ListOfMangasWhitNewChapterModel savedModel = captor.getValue();
+                assertNotNull(savedModel);
+                assertEquals("existing-id", savedModel.getId());
+                assertEquals(newMangas, savedModel.getMangas());
+                assertEquals(ScrappersEnum.leerCapitulo, savedModel.getScraper());
+                assertNotNull(savedModel.getDateTime());
+                // Verificar que la fecha esté entre beforeSave y afterSave
+                assertTrue(!savedModel.getDateTime().isBefore(beforeSave.minusSeconds(1)));
+                assertTrue(!savedModel.getDateTime().isAfter(afterSave.plusSeconds(1)));
         }
 
-        @SuppressWarnings({ "null", "unchecked" })
         @Test
         @DisplayName("save - Debe crear un nuevo modelo cuando no existe en la base de datos")
         void testSaveCreatesNewModelWhenNotExists() {
@@ -307,7 +308,7 @@ public class ListOfMangasWhitNewChapterServiceTests {
                                                 .lastChapter(1100.0)
                                                 .build());
 
-                when(newListMangaRepository.findOne(any(Example.class))).thenReturn(Optional.empty());
+                when(newListMangaRepository.findByScraper(any())).thenReturn(Optional.empty());
 
                 listOfMangasWhitNewChapterService.save(mangas, ScrappersEnum.leerCapitulo);
 
@@ -316,7 +317,7 @@ public class ListOfMangasWhitNewChapterServiceTests {
                                 model.getDateTime() != null));
         }
 
-        @SuppressWarnings({ "null", "unchecked" })
+        @SuppressWarnings({ "null" })
         @Test
         @DisplayName("save - Debe actualizar el modelo existente con lista vacía cuando mangas es null")
         void testSaveUpdatesExistingModelWithEmptyListWhenMangasIsNull() {
@@ -331,7 +332,7 @@ public class ListOfMangasWhitNewChapterServiceTests {
                                 .dateTime(LocalDateTime.now().minusHours(1))
                                 .build();
 
-                when(newListMangaRepository.findOne(any(Example.class))).thenReturn(Optional.of(existingModel));
+                when(newListMangaRepository.findByScraper(any())).thenReturn(Optional.of(existingModel));
 
                 listOfMangasWhitNewChapterService.save(null, ScrappersEnum.leerCapitulo);
 
@@ -342,11 +343,11 @@ public class ListOfMangasWhitNewChapterServiceTests {
                                 model.getDateTime() != null));
         }
 
-        @SuppressWarnings({ "null", "unchecked" })
+        @SuppressWarnings({ "null" })
         @Test
         @DisplayName("save - Debe crear nuevo modelo cuando no existe y mangas es null")
         void testSaveCreatesNewModelWhenNotExistsAndMangasIsNull() {
-                when(newListMangaRepository.findOne(any(Example.class))).thenReturn(Optional.empty());
+                when(newListMangaRepository.findByScraper(any())).thenReturn(Optional.empty());
 
                 listOfMangasWhitNewChapterService.save(null, ScrappersEnum.leerCapitulo);
 

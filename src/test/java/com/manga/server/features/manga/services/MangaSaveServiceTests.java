@@ -18,7 +18,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.Example;
 
 import com.manga.server.features.manga.model.MangaModel;
 import com.manga.server.features.manga.repository.MangaRepository;
@@ -34,19 +33,18 @@ public class MangaSaveServiceTests {
     @Mock
     private MangaRepository mangaRepository;
 
-    // Test saveIfNotExists(MangaModel)
 
-    @SuppressWarnings({ "null", "unchecked" })
+    @SuppressWarnings({ "null" })
     @Test
     @DisplayName("saveIfNotExists(MangaModel) - No debe hacer nada cuando manga es null")
     void testSaveIfNotExistsWithNullManga() {
         mangaSaveService.saveIfNotExists((MangaModel) null);
 
-        verify(mangaRepository, never()).findOne(any(Example.class));
+        verify(mangaRepository, never()).findByNameIgnoreCaseAndUrl(any(), any());
         verify(mangaRepository, never()).save(any(MangaModel.class));
     }
 
-    @SuppressWarnings({ "null", "unchecked" })
+    @SuppressWarnings({ "null" })
     @Test
     @DisplayName("saveIfNotExists(MangaModel) - Debe guardar el manga cuando no existe en la base de datos")
     void testSaveIfNotExistsWhenMangaNotExists() {
@@ -66,12 +64,12 @@ public class MangaSaveServiceTests {
                 .lastChapter(1100.0)
                 .build();
 
-        when(mangaRepository.findOne(any(Example.class))).thenReturn(Optional.empty());
+        when(mangaRepository.findByNameIgnoreCaseAndUrl(any(String.class), any())).thenReturn(Optional.empty());
         when(mangaRepository.save(any(MangaModel.class))).thenReturn(savedManga);
 
         mangaSaveService.saveIfNotExists(manga);
 
-        verify(mangaRepository).findOne(any(Example.class));
+        verify(mangaRepository).findByNameIgnoreCaseAndUrl(any(String.class), any());
         verify(mangaRepository).save(argThat(
                 model -> model.getId().equals("saved-id")
                         && model.getName().equals("One Piece")
@@ -80,7 +78,7 @@ public class MangaSaveServiceTests {
 
     }
 
-    @SuppressWarnings({ "null", "unchecked" })
+    @SuppressWarnings({ "null" })
     @Test
     @DisplayName("saveIfNotExists(MangaModel) - No debe hacer nada cuando el manga ya existe en la base de datos")
     void testSaveIfNotExistsWhenMangaExists() {
@@ -100,15 +98,15 @@ public class MangaSaveServiceTests {
                 .lastChapter(1100.0)
                 .build();
 
-        when(mangaRepository.findOne(any(Example.class))).thenReturn(Optional.of(existingManga));
+        when(mangaRepository.findByNameIgnoreCaseAndUrl(any(String.class), any())).thenReturn(Optional.of(existingManga));
 
         mangaSaveService.saveIfNotExists(manga);
 
-        verify(mangaRepository).findOne(any(Example.class));
+        verify(mangaRepository).findByNameIgnoreCaseAndUrl(any(String.class), any());
         verify(mangaRepository, never()).save(any(MangaModel.class));
     }
 
-    @SuppressWarnings({ "null", "unchecked" })
+    @SuppressWarnings({ "null" })
     @Test
     @DisplayName("saveIfNotExists(MangaModel) - No debe hacer nada cuando el nombre del manga es null")
     void testSaveIfNotExistsWhenMangaNameIsNull() {
@@ -122,11 +120,11 @@ public class MangaSaveServiceTests {
 
         mangaSaveService.saveIfNotExists(manga);
 
-        verify(mangaRepository, never()).findOne(any(Example.class));
+        verify(mangaRepository, never()).findByNameIgnoreCaseAndUrl(any(), any());
         verify(mangaRepository, never()).save(any(MangaModel.class));
     }
 
-    @SuppressWarnings({ "null", "unchecked" })
+    @SuppressWarnings({ "null" })
     @Test
     @DisplayName("saveIfNotExists(MangaModel) - No debe hacer nada cuando la url del manga es null")
     void testSaveIfNotExistsWhenMangaUrlIsNull() {
@@ -138,11 +136,11 @@ public class MangaSaveServiceTests {
 
         mangaSaveService.saveIfNotExists(manga);
 
-        verify(mangaRepository, never()).findOne(any(Example.class));
+        verify(mangaRepository, never()).findByNameIgnoreCaseAndUrl(any(), any());
         verify(mangaRepository, never()).save(any(MangaModel.class));
     }
 
-    @SuppressWarnings({ "null", "unchecked" })
+    @SuppressWarnings({ "null" })
     @Test
     @DisplayName("saveIfNotExists(MangaModel) - Debe guardar lastChapter como 0.0 cuando es null")
     void testSaveIfNotExistsWhenMangaLastChapterIsNull() {
@@ -155,7 +153,7 @@ public class MangaSaveServiceTests {
                 .lastChapter(null)
                 .build();
 
-        when(mangaRepository.findOne(any(Example.class))).thenReturn(Optional.empty());
+        when(mangaRepository.findByNameIgnoreCaseAndUrl(any(String.class), any())).thenReturn(Optional.empty());
         when(mangaRepository.save(any(MangaModel.class))).thenReturn(manga);
 
         mangaSaveService.saveIfNotExists(manga);
@@ -165,27 +163,27 @@ public class MangaSaveServiceTests {
     }
     // Test saveIfNotExists(List<MangaModel>)
 
-    @SuppressWarnings({ "null", "unchecked" })
+    @SuppressWarnings({ "null" })
     @Test
     @DisplayName("saveIfNotExists(List) - No debe hacer nada cuando la lista es null")
     void testSaveIfNotExistsWithNullList() {
         mangaSaveService.saveIfNotExists((List<MangaModel>) null);
 
-        verify(mangaRepository, never()).findOne(any(Example.class));
+        verify(mangaRepository, never()).findByNameIgnoreCaseAndUrl(any(), any());
         verify(mangaRepository, never()).save(any(MangaModel.class));
     }
 
-    @SuppressWarnings({ "null", "unchecked" })
+    @SuppressWarnings({ "null" })
     @Test
     @DisplayName("saveIfNotExists(List) - No debe hacer nada cuando la lista está vacía")
     void testSaveIfNotExistsWithEmptyList() {
         mangaSaveService.saveIfNotExists(List.of());
 
-        verify(mangaRepository, never()).findOne(any(Example.class));
+        verify(mangaRepository, never()).findByNameIgnoreCaseAndUrl(any(), any());
         verify(mangaRepository, never()).save(any(MangaModel.class));
     }
 
-    @SuppressWarnings({ "null", "unchecked" })
+    @SuppressWarnings({ "null" })
     @Test
     @DisplayName("saveIfNotExists(List) - Debe guardar todos los mangas cuando no existen")
     void testSaveIfNotExistsWithListWhenMangasNotExist() {
@@ -219,13 +217,13 @@ public class MangaSaveServiceTests {
                 .url(manga2.getUrl())
                 .build();
 
-        when(mangaRepository.findOne(any(Example.class))).thenReturn(Optional.empty());
+        when(mangaRepository.findByNameIgnoreCaseAndUrl(any(String.class), any())).thenReturn(Optional.empty());
         when(mangaRepository.save(manga1)).thenReturn(savedManga1);
         when(mangaRepository.save(manga2)).thenReturn(savedManga2);
 
         mangaSaveService.saveIfNotExists(mangas);
 
-        verify(mangaRepository, times(2)).findOne(any(Example.class));
+        verify(mangaRepository, times(2)).findByNameIgnoreCaseAndUrl(any(String.class), any());
 
         verify(mangaRepository).save(argThat(
                 model -> model.getId().equals("id-1")
@@ -239,7 +237,7 @@ public class MangaSaveServiceTests {
                         && model.getLastChapter().equals(0.0)));
     }
 
-    @SuppressWarnings({ "null", "unchecked" })
+    @SuppressWarnings({ "null" })
     @Test
     @DisplayName("saveIfNotExists(List) - Debe manejar mangas null en la lista")
     void testSaveIfNotExistsWithListContainingNullManga() {
@@ -259,13 +257,13 @@ public class MangaSaveServiceTests {
                 .url(validManga.getUrl())
                 .build();
 
-        when(mangaRepository.findOne(any(Example.class))).thenReturn(Optional.empty());
+        when(mangaRepository.findByNameIgnoreCaseAndUrl(any(String.class), any())).thenReturn(Optional.empty());
         when(mangaRepository.save(validManga)).thenReturn(savedManga);
 
         mangaSaveService.saveIfNotExists(mangas);
 
         // Solo debe procesar el manga válido
-        verify(mangaRepository, times(1)).findOne(any(Example.class));
+        verify(mangaRepository, times(1)).findByNameIgnoreCaseAndUrl(any(String.class), any());
         verify(mangaRepository).save(argThat(
                 model -> model.getId().equals("saved-id")
                         && model.getName().equals("Valid Manga")

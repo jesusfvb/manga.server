@@ -3,12 +3,12 @@ package com.manga.server.features.manga.services;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
-import org.springframework.data.domain.Example;
 import org.springframework.stereotype.Service;
 
-import com.manga.server.features.manga.model.MangaModel;
 import com.manga.server.features.manga.model.ListOfMangasWhitNewChapterModel;
+import com.manga.server.features.manga.model.MangaModel;
 import com.manga.server.features.manga.repository.ListOfMangasWhitNewChapterRepository;
 import com.manga.server.shared.enums.ScrappersEnum;
 
@@ -24,10 +24,7 @@ public class ListOfMangasWhitNewChapterService {
         if (scrappersEnum == null) {
             return true;
         }
-        var example = ListOfMangasWhitNewChapterModel.builder().scraper(scrappersEnum).build();
-        // scrappersEnum ya está validado arriba, el builder es seguro
-        @SuppressWarnings("null")
-        var newListManga = newListMangaRepository.findOne(Example.of(example));
+        Optional<ListOfMangasWhitNewChapterModel> newListManga = newListMangaRepository.findByScraper(scrappersEnum);
         if (newListManga.isPresent()) {
             var listModel = newListManga.get();
             if (listModel != null && listModel.getDateTime() != null) {
@@ -41,10 +38,7 @@ public class ListOfMangasWhitNewChapterService {
         if (scrappersEnum == null) {
             return null;
         }
-        var example = ListOfMangasWhitNewChapterModel.builder().scraper(scrappersEnum).build();
-        // scrappersEnum ya está validado arriba, el builder es seguro
-        @SuppressWarnings("null")
-        var newListManga = newListMangaRepository.findOne(Example.of(example));
+        Optional<ListOfMangasWhitNewChapterModel> newListManga = newListMangaRepository.findByScraper(scrappersEnum);
         if (newListManga.isPresent()) {
             var listModel = newListManga.get();
             if (listModel != null) {
@@ -61,18 +55,32 @@ public class ListOfMangasWhitNewChapterService {
         if (mangas == null) {
             mangas = List.of();
         }
-        var example = ListOfMangasWhitNewChapterModel.builder().scraper(scrappersEnum).build();
-        // scrappersEnum ya está validado arriba, el builder es seguro
-        @SuppressWarnings("null")
-        var newListManga = newListMangaRepository.findOne(Example.of(example));
 
-        if (newListManga.isPresent() && newListManga.get() != null) {
-            example.setId(newListManga.get().getId());
+        Optional<ListOfMangasWhitNewChapterModel> existingList = newListMangaRepository.findByScraper(scrappersEnum);
+
+        ListOfMangasWhitNewChapterModel listModel;
+        if (existingList.isPresent()) {
+            var existing = existingList.get();
+            if (existing != null) {
+                existing.setDateTime(LocalDateTime.now());
+                existing.setMangas(mangas);
+                listModel = existing;
+            } else {
+                listModel = ListOfMangasWhitNewChapterModel.builder()
+                        .scraper(scrappersEnum)
+                        .dateTime(LocalDateTime.now())
+                        .mangas(mangas)
+                        .build();
+            }
+        } else {
+            listModel = ListOfMangasWhitNewChapterModel.builder()
+                    .scraper(scrappersEnum)
+                    .dateTime(LocalDateTime.now())
+                    .mangas(mangas)
+                    .build();
         }
-        example.setDateTime(LocalDateTime.now());
-        example.setMangas(mangas);
-        newListMangaRepository.save(example);
 
+        newListMangaRepository.save(listModel);
     }
 
     private boolean isMoreThanMinutes(LocalDateTime date) {

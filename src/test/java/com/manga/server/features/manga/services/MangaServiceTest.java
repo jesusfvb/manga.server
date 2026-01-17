@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -24,7 +23,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.Example;
 
 import com.manga.server.features.manga.model.MangaModel;
 import com.manga.server.features.manga.repository.MangaRepository;
@@ -184,7 +182,6 @@ class MangaServiceTest {
         verify(listOfMangasWhitNewChapterService, times(1)).getLastListNewManga(scrapper);
     }
 
-    @SuppressWarnings({ "null", "unchecked" })
     @Test
     @DisplayName("searchManga - Debe retornar mangas de la base de datos cuando encuentra resultados")
     void testSearchMangaFoundInDatabase() {
@@ -192,7 +189,7 @@ class MangaServiceTest {
         String query = "One";
         // Más de 3 resultados para que no busque en el scrapper
         List<MangaModel> dbResults = Arrays.asList(mangaModel1, mangaModel2, mangaModel1, mangaModel2);
-        when(mangaRepository.findAll(any(Example.class))).thenReturn(dbResults);
+        when(mangaRepository.findByNameContainingIgnoreCase(query)).thenReturn(dbResults);
 
         // When
         List<MangaModel> result = mangaService.searchManga(query);
@@ -200,11 +197,10 @@ class MangaServiceTest {
         // Then
         assertNotNull(result);
         assertEquals(4, result.size());
-        verify(mangaRepository, times(1)).findAll(any(Example.class));
+        verify(mangaRepository, times(1)).findByNameContainingIgnoreCase(query);
         verify(scrapperService, never()).searchManga(any(ScrappersEnum.class), anyString());
     }
 
-    @SuppressWarnings({ "null", "unchecked" })
     @Test
     @DisplayName("searchManga - Debe buscar en scrapper cuando hay pocos resultados en BD")
     void testSearchMangaWithScrapper() {
@@ -218,7 +214,7 @@ class MangaServiceTest {
                 .build();
         List<MangaModel> scrapperResults = Arrays.asList(scrapperManga);
 
-        when(mangaRepository.findAll(any(Example.class))).thenReturn(dbResults);
+        when(mangaRepository.findByNameContainingIgnoreCase(query)).thenReturn(dbResults);
         when(scrapperService.searchManga(ScrappersEnum.leerCapitulo, query)).thenReturn(scrapperResults);
         // mangaSaveService.saveIfNotExists es void, no necesita mock
 
@@ -227,11 +223,11 @@ class MangaServiceTest {
 
         // Then
         assertNotNull(result);
+        verify(mangaRepository, times(1)).findByNameContainingIgnoreCase(query);
         verify(scrapperService, times(1)).searchManga(ScrappersEnum.leerCapitulo, query);
         verify(mangaSaveService, times(1)).saveIfNotExists(any(MangaModel.class));
     }
 
-    @SuppressWarnings({ "null", "unchecked" })
     @Test
     @DisplayName("searchManga - No debe buscar en scrapper cuando hay suficientes resultados en BD")
     void testSearchMangaNotUseScrapper() {
@@ -239,7 +235,7 @@ class MangaServiceTest {
         String query = "One";
         // 4 resultados en BD (más de 3)
         List<MangaModel> dbResults = Arrays.asList(mangaModel1, mangaModel2, mangaModel1, mangaModel2);
-        when(mangaRepository.findAll(any(Example.class))).thenReturn(dbResults);
+        when(mangaRepository.findByNameContainingIgnoreCase(query)).thenReturn(dbResults);
 
         // When
         List<MangaModel> result = mangaService.searchManga(query);
@@ -247,11 +243,10 @@ class MangaServiceTest {
         // Then
         assertNotNull(result);
         assertEquals(4, result.size());
-        verify(mangaRepository, times(1)).findAll(any(Example.class));
+        verify(mangaRepository, times(1)).findByNameContainingIgnoreCase(query);
         verify(scrapperService, never()).searchManga(any(), anyString());
     }
 
-    @SuppressWarnings({ "null", "unchecked" })
     @Test
     @DisplayName("searchManga - No debe agregar mangas duplicados del scrapper")
     void testSearchMangaAvoidDuplicates() {
@@ -261,7 +256,7 @@ class MangaServiceTest {
         // El scrapper devuelve el mismo manga que ya está en BD
         List<MangaModel> scrapperResults = Arrays.asList(mangaModel1);
 
-        when(mangaRepository.findAll(any(Example.class))).thenReturn(dbResults);
+        when(mangaRepository.findByNameContainingIgnoreCase(query)).thenReturn(dbResults);
         when(scrapperService.searchManga(ScrappersEnum.leerCapitulo, query)).thenReturn(scrapperResults);
 
         // When
@@ -270,8 +265,9 @@ class MangaServiceTest {
         // Then
         assertNotNull(result);
         assertEquals(1, result.size()); // No se debe duplicar
+        verify(mangaRepository, times(1)).findByNameContainingIgnoreCase(query);
         verify(scrapperService, times(1)).searchManga(ScrappersEnum.leerCapitulo, query);
-        verify(mangaRepository, never()).save(any(MangaModel.class)); // No debe guardar duplicado
+        verify(mangaSaveService, never()).saveIfNotExists(any(MangaModel.class)); // No debe guardar duplicado
     }
 }
 

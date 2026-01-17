@@ -2,8 +2,6 @@ package com.manga.server.features.manga.services;
 
 import java.util.List;
 
-import org.springframework.data.domain.Example;
-import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.stereotype.Service;
 
 import com.manga.server.features.manga.model.MangaModel;
@@ -56,13 +54,7 @@ public class MangaService {
       return List.of();
     }
 
-    ExampleMatcher matcher = ExampleMatcher.matching().withMatcher("name",
-        ExampleMatcher.GenericPropertyMatchers.contains().ignoreCase());
-
-    // query ya está validado arriba, el builder es seguro
-    @SuppressWarnings("null")
-    var example = Example.of(MangaModel.builder().name(query).build(), matcher);
-    var mangas = mangaRepository.findAll(example);
+    var mangas = mangaRepository.findByNameContainingIgnoreCase(query);
     var logMessage = "Is search for: data base";
 
     // TODO Actualizar este numero en un futuro
@@ -70,8 +62,8 @@ public class MangaService {
       var mangasScrapper = scrapperService.searchManga(ScrappersEnum.leerCapitulo, query);
       if (mangasScrapper != null) {
         for (var magaScraper : mangasScrapper) {
-          if (magaScraper != null && mangas.stream().noneMatch(m -> 
-              m != null && m.getName() != null && m.getName().equals(magaScraper.getName()))) {
+          if (magaScraper != null && mangas.stream()
+              .noneMatch(m -> m != null && m.getName() != null && m.getName().equals(magaScraper.getName()))) {
             mangaSaveService.saveIfNotExists(magaScraper);
             mangas.add(magaScraper);
             logMessage = "Is search for:" + scrapperService.toString();

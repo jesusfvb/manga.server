@@ -6,7 +6,6 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.data.domain.Example;
 import org.springframework.stereotype.Service;
 
 import com.manga.server.features.chapter.models.ImgModel;
@@ -36,15 +35,9 @@ public class ImgService {
             return List.of();
         }
 
-        // chapterId ya está validado arriba, así que no puede ser null aquí
-        var exampleModel = ImgModel.builder().chapterId(chapterId).build();
-        // El builder es seguro, los campos null son manejados correctamente por Spring
-        // Data
-        @SuppressWarnings("null")
-        var example = Example.of(exampleModel);
-        var imgs = repository.findAll(example);
+        var imgs = repository.findByChapterIdOrderByNumberAsc(chapterId);
 
-        if (imgs.isEmpty()) {
+        if (imgs == null || imgs.isEmpty()) {
             var chapter = chapterService.getChapterById(chapterId);
             if (chapter == null) {
                 log.warn("No se encontró el capítulo con ID: {}", chapterId);
@@ -68,23 +61,18 @@ public class ImgService {
                     }
                 });
                 imgs = repository.saveAll(scrapedImgs);
+                // Ordenar después de guardar ya que saveAll no garantiza orden
+                if (imgs != null && !imgs.isEmpty()) {
+                    imgs.sort(Comparator.comparingInt(ImgModel::getNumber));
+                }
             } else {
                 log.warn("No se pudieron obtener imágenes del capítulo con ID: {}", chapterId);
                 return List.of();
             }
         }
-
-        if (imgs != null && !imgs.isEmpty()) {
-            imgs.sort(Comparator.comparingInt(ImgModel::getNumber));
-        }
         return imgs != null ? imgs : List.of();
     }
 
-    /**
-     * Precarga imágenes de los capítulos especificados de forma asíncrona.
-     * 
-     * @param chapterIds Lista de IDs de capítulos a precargar
-     */
     public void preloadImages(List<String> chapterIds) {
         imgPreloadService.preloadImages(chapterIds);
     }

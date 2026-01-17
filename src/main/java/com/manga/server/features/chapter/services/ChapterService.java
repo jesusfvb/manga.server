@@ -5,7 +5,6 @@ import java.util.Comparator;
 import java.util.List;
 
 import org.springframework.context.annotation.Lazy;
-import org.springframework.data.domain.Example;
 import org.springframework.stereotype.Service;
 
 import com.manga.server.features.chapter.models.ChapterModel;
@@ -34,12 +33,9 @@ public class ChapterService {
         }
 
         // TODO hacer que de aqui un tiempo se actualice la base de datos
-        // mangaId ya está validado arriba, el builder es seguro
-        @SuppressWarnings("null")
-        var example = Example.of(ChapterModel.builder().mangaId(mangaId).build());
-        var chapters = chapterRepository.findAll(example);
+        var chapters = chapterRepository.findByMangaIdOrderByNumberAsc(mangaId);
         var logMessage = "Is chapter for DataBase";
-        if (chapters.isEmpty()) {
+        if (chapters == null || chapters.isEmpty()) {
             MangaModel manga = mangaService.getMangaById(mangaId);
             if (manga == null || manga.getUrl() == null) {
                 log.warning("No se encontró el manga con ID: " + mangaId + " o no tiene URL");
@@ -56,13 +52,14 @@ public class ChapterService {
                     }
                 });
                 chapters = chapterRepository.saveAll(scrapedChapters);
+                // Ordenar después de guardar ya que saveAll no garantiza orden
+                if (chapters != null && !chapters.isEmpty()) {
+                    chapters.sort(Comparator.comparingDouble(ChapterModel::getNumber));
+                }
                 logMessage = "Is chapter for Scrapper";
             }
         }
         log.info(logMessage);
-        if (chapters != null && !chapters.isEmpty()) {
-            chapters.sort(Comparator.comparingDouble(ChapterModel::getNumber));
-        }
         // imgService.preLoadImages(chapters);
         return chapters != null ? chapters : List.of();
     }
@@ -80,11 +77,8 @@ public class ChapterService {
             return 0.0;
         }
 
-        // mangaId ya está validado arriba, el builder es seguro
-        @SuppressWarnings("null")
-        var example = Example.of(ChapterModel.builder().mangaId(mangaId).build());
-        var chapters = chapterRepository.findAll(example);
-        if (chapters.isEmpty()) {
+        var chapters = chapterRepository.findByMangaIdOrderByNumberAsc(mangaId);
+        if (chapters == null || chapters.isEmpty()) {
             chapters = getChapters(mangaId);
         }
 
