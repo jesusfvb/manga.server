@@ -14,7 +14,7 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @CrossOrigin("*")
 @RequiredArgsConstructor
-@RequestMapping("/")
+@RequestMapping("/manga")
 public class MangaController {
 
   final MangaService mangaService;
