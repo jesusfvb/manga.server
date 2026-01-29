@@ -20,7 +20,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.manga.server.core.filtres.RateLimitFilter;
-
+import com.manga.server.features.manga.controller.MangaControllerV1;
 import com.manga.server.features.manga.dtos.MangaDTO;
 import com.manga.server.features.manga.mapper.MangaMapper;
 import com.manga.server.features.manga.model.MangaModel;
