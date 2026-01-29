@@ -28,7 +28,7 @@ import com.manga.server.features.manga.services.MangaService;
 import com.manga.server.shared.enums.ScrappersEnum;
 import com.manga.server.shared.model.UrlModel;
 
-@WebMvcTest(MangaController.class)
+@WebMvcTest(MangaControllerV1.class)
 @Import(RateLimitFilter.class)
 class MangaControllerTest {
 

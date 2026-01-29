@@ -15,10 +15,10 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/chapter")
+@RequestMapping("/api/v1/chapter")
 @CrossOrigin("*")
 @AllArgsConstructor
-public class ChapterController {
+public class ChapterControllerV1 {
 
   final ChapterService chapterService;
   final ChapterMapper chapterMapper;

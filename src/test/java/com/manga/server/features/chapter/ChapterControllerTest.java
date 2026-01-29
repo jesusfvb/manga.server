@@ -36,7 +36,7 @@ import com.manga.server.features.chapter.services.ImgService;
 import com.manga.server.shared.model.UrlModel;
 
 @ExtendWith(SpringExtension.class)
-@WebMvcTest(ChapterController.class)
+@WebMvcTest(ChapterControllerV1.class)
 @Import(RateLimitFilter.class)
 class ChapterControllerTest {
 
@@ -254,7 +254,8 @@ class ChapterControllerTest {
                                 .param("mangaId", "1"))
                                 .andExpect(status().isTooManyRequests())
                                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                                .andExpect(jsonPath("$.error").value("Rate limit excedido. Máximo 5 requests por minuto por endpoint."));
+                                .andExpect(jsonPath("$.error").value(
+                                                "Rate limit excedido. Máximo 5 requests por minuto por endpoint."));
         }
 
         @SuppressWarnings("null")
@@ -287,7 +288,8 @@ class ChapterControllerTest {
                                 .param("chapterId", "1"))
                                 .andExpect(status().isTooManyRequests())
                                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                                .andExpect(jsonPath("$.error").value("Rate limit excedido. Máximo 5 requests por minuto por endpoint."));
+                                .andExpect(jsonPath("$.error").value(
+                                                "Rate limit excedido. Máximo 5 requests por minuto por endpoint."));
         }
 
         @SuppressWarnings("null")
@@ -306,7 +308,8 @@ class ChapterControllerTest {
                                 .param("chapterIds", "1", "2"))
                                 .andExpect(status().isTooManyRequests())
                                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                                .andExpect(jsonPath("$.error").value("Rate limit excedido. Máximo 5 requests por minuto por endpoint."));
+                                .andExpect(jsonPath("$.error").value(
+                                                "Rate limit excedido. Máximo 5 requests por minuto por endpoint."));
         }
 
         @SuppressWarnings("null")
