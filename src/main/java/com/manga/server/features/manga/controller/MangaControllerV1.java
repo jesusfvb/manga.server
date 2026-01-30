@@ -1,22 +1,17 @@
 package com.manga.server.features.manga.controller;
 
-import java.util.List;
-
+import com.manga.server.core.page.PageResponse;
+import com.manga.server.features.manga.dtos.MangaResponse;
+import com.manga.server.features.manga.dtos.MangaWithNewChaptersResponse;
+import com.manga.server.features.manga.mapper.MangaMapper;
+import com.manga.server.features.manga.services.MangaService;
+import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
-import com.manga.server.features.manga.dtos.MangaDTO;
-import com.manga.server.features.manga.mapper.MangaMapper;
-import com.manga.server.features.manga.model.MangaModel;
-import com.manga.server.features.manga.services.MangaService;
-
-import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @CrossOrigin("*")
@@ -24,13 +19,23 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping(value = "/api/v1/mangas", produces = MediaType.APPLICATION_JSON_VALUE)
 public class MangaControllerV1 {
 
-  final MangaService mangaService;
-  final MangaMapper mangaMapper;
+    final MangaService mangaService;
+    final MangaMapper mangaMapper;
 
-  @GetMapping()
-  public ResponseEntity<List<MangaDTO>> getMangas(@ParameterObject @ModelAttribute MangaQuery query) {
-    List<MangaModel> mangas = mangaService.mangasWithNewChapters();
-    return ResponseEntity.ok((mangaMapper.mangasToMangaDTOs(mangas)));
-  }
+    @GetMapping()
+    public ResponseEntity<PageResponse<MangaResponse>> getMangas(
+            @ParameterObject @ModelAttribute MangaQuery query,
+            @PageableDefault(size = 10) Pageable pageable
+    ) {
+        var mangas = mangaService.getMangas(query, pageable);
+        return ResponseEntity.ok(null);
+    }
+
+    @GetMapping("/new-chapters")
+    public ResponseEntity<PageResponse<MangaWithNewChaptersResponse>> getMangasWhitNewChapters(
+            Pageable pageable
+    ) {
+        return ResponseEntity.ok(null);
+    }
 
 }
