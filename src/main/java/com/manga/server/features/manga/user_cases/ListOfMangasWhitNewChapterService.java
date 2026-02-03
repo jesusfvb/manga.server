@@ -1,4 +1,4 @@
-package com.manga.server.features.manga.services;
+package com.manga.server.features.manga.user_cases;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -27,7 +27,7 @@ public class ListOfMangasWhitNewChapterService {
         Optional<ListOfMangasWhitNewChapterModel> newListManga = newListMangaRepository.findByScraper(scrappersEnum);
         if (newListManga.isPresent()) {
             var listModel = newListManga.get();
-            if (listModel != null && listModel.getDateTime() != null) {
+            if (listModel.getDateTime() != null) {
                 return isMoreThanMinutes(listModel.getDateTime());
             }
         }
@@ -41,9 +41,7 @@ public class ListOfMangasWhitNewChapterService {
         Optional<ListOfMangasWhitNewChapterModel> newListManga = newListMangaRepository.findByScraper(scrappersEnum);
         if (newListManga.isPresent()) {
             var listModel = newListManga.get();
-            if (listModel != null) {
-                return listModel.getMangas();
-            }
+            return listModel.getMangas();
         }
         return null;
     }
@@ -61,17 +59,9 @@ public class ListOfMangasWhitNewChapterService {
         ListOfMangasWhitNewChapterModel listModel;
         if (existingList.isPresent()) {
             var existing = existingList.get();
-            if (existing != null) {
-                existing.setDateTime(LocalDateTime.now());
-                existing.setMangas(mangas);
-                listModel = existing;
-            } else {
-                listModel = ListOfMangasWhitNewChapterModel.builder()
-                        .scraper(scrappersEnum)
-                        .dateTime(LocalDateTime.now())
-                        .mangas(mangas)
-                        .build();
-            }
+            existing.setDateTime(LocalDateTime.now());
+            existing.setMangas(mangas);
+            listModel = existing;
         } else {
             listModel = ListOfMangasWhitNewChapterModel.builder()
                     .scraper(scrappersEnum)

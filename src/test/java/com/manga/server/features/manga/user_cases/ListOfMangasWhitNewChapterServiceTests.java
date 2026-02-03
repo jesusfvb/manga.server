@@ -1,4 +1,4 @@
-package com.manga.server.features.manga.services;
+package com.manga.server.features.manga.user_cases;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
