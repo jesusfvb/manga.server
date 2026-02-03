@@ -1,4 +1,4 @@
-package com.manga.server.features.manga.services;
+package com.manga.server.features.manga.user_cases;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;

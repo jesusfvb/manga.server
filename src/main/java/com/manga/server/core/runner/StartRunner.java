@@ -3,7 +3,7 @@ package com.manga.server.core.runner;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
-import com.manga.server.features.manga.services.MangaService;
+import com.manga.server.features.manga.user_cases.MangaService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;

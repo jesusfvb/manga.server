@@ -1,4 +1,4 @@
-package com.manga.server.features.manga.services;
+package com.manga.server.features.manga.user_cases;
 
 import java.util.List;
 
