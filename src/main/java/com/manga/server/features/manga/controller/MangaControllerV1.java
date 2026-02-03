@@ -1,10 +1,10 @@
 package com.manga.server.features.manga.controller;
 
 import com.manga.server.core.page.PageResponse;
-import com.manga.server.features.manga.dtos.MangaResponse;
-import com.manga.server.features.manga.dtos.MangaWithNewChaptersResponse;
 import com.manga.server.features.manga.mapper.MangaMapper;
-import com.manga.server.features.manga.services.MangaService;
+import com.manga.server.features.manga.responses.MangaResponse;
+import com.manga.server.features.manga.user_cases.GetMangasUserCase;
+import com.manga.server.features.manga.user_cases.MangaService;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
@@ -19,23 +19,22 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping(value = "/api/v1/mangas", produces = MediaType.APPLICATION_JSON_VALUE)
 public class MangaControllerV1 {
 
-    final MangaService mangaService;
+    private final GetMangasUserCase getMangasUserCase;
     final MangaMapper mangaMapper;
 
     @GetMapping()
     public ResponseEntity<PageResponse<MangaResponse>> getMangas(
             @ParameterObject @ModelAttribute MangaQuery query,
-            @PageableDefault(size = 10) Pageable pageable
+            @ParameterObject @PageableDefault(size = 10) Pageable pageable
     ) {
-        var mangas = mangaService.getMangas(query, pageable);
-        return ResponseEntity.ok(null);
-    }
-
-    @GetMapping("/new-chapters")
-    public ResponseEntity<PageResponse<MangaWithNewChaptersResponse>> getMangasWhitNewChapters(
-            Pageable pageable
-    ) {
-        return ResponseEntity.ok(null);
+        var mangasPage = getMangasUserCase.execute(query, pageable);
+        return ResponseEntity.ok().body(PageResponse.<MangaResponse>builder()
+                .content(mangasPage.getContent().stream().map(mangaMapper::mangaToMangaResponse).toList())
+                .pageNumber(mangasPage.getNumber())
+                .pageSize(mangasPage.getSize())
+                .totalElements(mangasPage.getTotalElements())
+                .totalPages(mangasPage.getTotalPages())
+                .build());
     }
 
 }

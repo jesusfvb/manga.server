@@ -1,11 +1,12 @@
 package com.manga.server.core.page;
 
-import io.swagger.v3.oas.annotations.media.Schema;
-import org.springframework.data.domain.Page;
-
 import java.util.List;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Builder;
+
 @Schema(name = "Page")
+@Builder
 public record PageResponse<T>(
         List<T> content,
         int pageNumber,
@@ -14,5 +15,4 @@ public record PageResponse<T>(
         int totalPages,
         boolean last,
         boolean first
-) {
-}
+    ) {}
