@@ -1,4 +1,4 @@
-package com.manga.server.features.manga.dtos;
+package com.manga.server.features.manga.responses;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
