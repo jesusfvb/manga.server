@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 import com.manga.server.features.chapter.models.ChapterModel;
 import com.manga.server.features.chapter.repository.ChapterRepository;
 import com.manga.server.features.manga.model.MangaModel;
-import com.manga.server.features.manga.services.MangaService;
+import com.manga.server.features.manga.user_cases.MangaService;
 import com.manga.server.features.scrapper.services.ScrapperService;
 
 import lombok.RequiredArgsConstructor;
