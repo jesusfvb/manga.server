@@ -18,7 +18,7 @@ public class SaveMangasUseCase {
     public void execute(List<MangaModel> mangas) {
 
         if (mangas == null || mangas.isEmpty()) {
-            return;
+            return ;
         }
 
         for (MangaModel manga : mangas) {
