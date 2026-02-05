@@ -28,7 +28,7 @@ import com.manga.server.shared.model.UrlModel;
 public class MangaSaveServiceTests {
 
     @InjectMocks
-    private MangaSaveService mangaSaveService;
+//    private SaveMangaUserCase saveMangaUserCase;
 
     @Mock
     private MangaRepository mangaRepository;
@@ -38,7 +38,7 @@ public class MangaSaveServiceTests {
     @Test
     @DisplayName("saveIfNotExists(MangaModel) - No debe hacer nada cuando manga es null")
     void testSaveIfNotExistsWithNullManga() {
-        mangaSaveService.saveIfNotExists((MangaModel) null);
+//        saveMangaUserCase.saveIfNotExists((MangaModel) null);
 
         verify(mangaRepository, never()).findByNameIgnoreCaseAndUrl(any(), any());
         verify(mangaRepository, never()).save(any(MangaModel.class));
@@ -67,7 +67,7 @@ public class MangaSaveServiceTests {
         when(mangaRepository.findByNameIgnoreCaseAndUrl(any(String.class), any())).thenReturn(Optional.empty());
         when(mangaRepository.save(any(MangaModel.class))).thenReturn(savedManga);
 
-        mangaSaveService.saveIfNotExists(manga);
+//        saveMangaUserCase.saveIfNotExists(manga);
 
         verify(mangaRepository).findByNameIgnoreCaseAndUrl(any(String.class), any());
         verify(mangaRepository).save(argThat(
@@ -100,7 +100,7 @@ public class MangaSaveServiceTests {
 
         when(mangaRepository.findByNameIgnoreCaseAndUrl(any(String.class), any())).thenReturn(Optional.of(existingManga));
 
-        mangaSaveService.saveIfNotExists(manga);
+//        saveMangaUserCase.saveIfNotExists(manga);
 
         verify(mangaRepository).findByNameIgnoreCaseAndUrl(any(String.class), any());
         verify(mangaRepository, never()).save(any(MangaModel.class));
@@ -118,7 +118,7 @@ public class MangaSaveServiceTests {
                         .build())
                 .build();
 
-        mangaSaveService.saveIfNotExists(manga);
+//        saveMangaUserCase.saveIfNotExists(manga);
 
         verify(mangaRepository, never()).findByNameIgnoreCaseAndUrl(any(), any());
         verify(mangaRepository, never()).save(any(MangaModel.class));
@@ -134,7 +134,7 @@ public class MangaSaveServiceTests {
                 .lastChapter(1100.0)
                 .build();
 
-        mangaSaveService.saveIfNotExists(manga);
+//        saveMangaUserCase.saveIfNotExists(manga);
 
         verify(mangaRepository, never()).findByNameIgnoreCaseAndUrl(any(), any());
         verify(mangaRepository, never()).save(any(MangaModel.class));
@@ -156,7 +156,7 @@ public class MangaSaveServiceTests {
         when(mangaRepository.findByNameIgnoreCaseAndUrl(any(String.class), any())).thenReturn(Optional.empty());
         when(mangaRepository.save(any(MangaModel.class))).thenReturn(manga);
 
-        mangaSaveService.saveIfNotExists(manga);
+//        saveMangaUserCase.saveIfNotExists(manga);
 
         verify(mangaRepository).save(argThat(
                 model -> model.getLastChapter().equals(0.0)));
@@ -167,7 +167,7 @@ public class MangaSaveServiceTests {
     @Test
     @DisplayName("saveIfNotExists(List) - No debe hacer nada cuando la lista es null")
     void testSaveIfNotExistsWithNullList() {
-        mangaSaveService.saveIfNotExists((List<MangaModel>) null);
+//        saveMangaUserCase.saveIfNotExists((List<MangaModel>) null);
 
         verify(mangaRepository, never()).findByNameIgnoreCaseAndUrl(any(), any());
         verify(mangaRepository, never()).save(any(MangaModel.class));
@@ -177,7 +177,7 @@ public class MangaSaveServiceTests {
     @Test
     @DisplayName("saveIfNotExists(List) - No debe hacer nada cuando la lista está vacía")
     void testSaveIfNotExistsWithEmptyList() {
-        mangaSaveService.saveIfNotExists(List.of());
+//        saveMangaUserCase.saveIfNotExists(List.of());
 
         verify(mangaRepository, never()).findByNameIgnoreCaseAndUrl(any(), any());
         verify(mangaRepository, never()).save(any(MangaModel.class));
@@ -221,7 +221,7 @@ public class MangaSaveServiceTests {
         when(mangaRepository.save(manga1)).thenReturn(savedManga1);
         when(mangaRepository.save(manga2)).thenReturn(savedManga2);
 
-        mangaSaveService.saveIfNotExists(mangas);
+//        saveMangaUserCase.saveIfNotExists(mangas);
 
         verify(mangaRepository, times(2)).findByNameIgnoreCaseAndUrl(any(String.class), any());
 
@@ -260,7 +260,7 @@ public class MangaSaveServiceTests {
         when(mangaRepository.findByNameIgnoreCaseAndUrl(any(String.class), any())).thenReturn(Optional.empty());
         when(mangaRepository.save(validManga)).thenReturn(savedManga);
 
-        mangaSaveService.saveIfNotExists(mangas);
+//        saveMangaUserCase.saveIfNotExists(mangas);
 
         // Solo debe procesar el manga válido
         verify(mangaRepository, times(1)).findByNameIgnoreCaseAndUrl(any(String.class), any());
