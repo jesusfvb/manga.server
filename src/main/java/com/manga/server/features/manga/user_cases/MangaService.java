@@ -24,11 +24,6 @@ public class MangaService {
     private final MangaRepository mangaRepository;
 
 //    private final SaveMangaUserCase saveMangaUserCase;
-    private final MangaUpdateService mangaUpdateService;
-
-    public void starApp() {
-        mangaUpdateService.updateMangasWithNewChapters();
-    }
 
     public List<MangaModel> getMangasByIds(List<String> ids) {
         if (ids == null || ids.isEmpty()) {
