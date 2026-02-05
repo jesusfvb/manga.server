@@ -1,6 +1,6 @@
 package com.manga.server.features.manga.user_cases;
 
-import com.manga.server.features.manga.controller.MangaQuery;
+import com.manga.server.features.manga.controller.query.MangaQuery;
 import com.manga.server.features.manga.model.MangaModel;
 import com.manga.server.features.manga.repository.getmangas.GetMangaRepository;
 import lombok.AllArgsConstructor;

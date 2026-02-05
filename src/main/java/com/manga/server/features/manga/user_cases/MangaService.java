@@ -2,7 +2,7 @@ package com.manga.server.features.manga.user_cases;
 
 import java.util.List;
 
-import com.manga.server.features.manga.controller.MangaQuery;
+import com.manga.server.features.manga.controller.query.MangaQuery;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;

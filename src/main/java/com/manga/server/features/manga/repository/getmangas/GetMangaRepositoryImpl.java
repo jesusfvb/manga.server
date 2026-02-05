@@ -1,7 +1,7 @@
 package com.manga.server.features.manga.repository.getmangas;
 
-import com.manga.server.features.manga.controller.MangaFilter;
-import com.manga.server.features.manga.controller.MangaQuery;
+import com.manga.server.features.manga.controller.query.MangaFilter;
+import com.manga.server.features.manga.controller.query.MangaQuery;
 import com.manga.server.features.manga.model.MangaModel;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
