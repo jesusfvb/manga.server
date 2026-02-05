@@ -1,7 +1,7 @@
 package com.manga.server.shared.enums;
 
 public enum ScrappersEnum {
-    leerCapitulo("https://www.leercapitulo.re");
+    leerCapitulo("https://www.leercapitulo.co");
    
 
     private String url;
