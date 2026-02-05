@@ -21,7 +21,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.manga.server.features.chapter.models.ChapterModel;
 import com.manga.server.features.chapter.repository.ChapterRepository;
 import com.manga.server.features.manga.model.MangaModel;
-import com.manga.server.features.manga.user_cases.MangaService;
 import com.manga.server.features.scrapper.services.ScrapperService;
 import com.manga.server.shared.enums.ScrappersEnum;
 import com.manga.server.shared.model.UrlModel;
@@ -31,9 +30,6 @@ public class ChapterServiceTests {
 
         @InjectMocks
         private ChapterService chapterService;
-
-        @Mock
-        private MangaService mangaService;
 
         @Mock
         private ScrapperService scrapperService;
@@ -58,7 +54,7 @@ public class ChapterServiceTests {
         void testGetChaptersNoChaptersInDatabaseAndNoMangaInDatabase() {
 
                 when(chapterRepository.findByMangaIdOrderByNumberAsc(anyString())).thenReturn(List.of());
-                when(mangaService.getMangaById(any(String.class))).thenReturn(null);
+//                when(mangaService.getMangaById(any(String.class))).thenReturn(null);
 
                 var chapters = chapterService.getChapters("1");
                 assertEquals(0, chapters.size());
@@ -68,10 +64,10 @@ public class ChapterServiceTests {
         @DisplayName("getChapters - Debe de retornar array vació cuando no allá capítulos en la base de datos y no allá encontrado nada en el scrapper")
         void testGetChaptersNoChaptersInDatabaseAndNoChaptersInScrapper() {
                 when(chapterRepository.findByMangaIdOrderByNumberAsc(anyString())).thenReturn(List.of());
-                when(mangaService.getMangaById(any(String.class)))
-                                .thenReturn(MangaModel.builder().id("1").name("One Piece").url(UrlModel.builder()
-                                                .url("https://example.com/one-piece")
-                                                .scrapper(ScrappersEnum.leerCapitulo).build()).build());
+//                when(mangaService.getMangaById(any(String.class)))
+//                                .thenReturn(MangaModel.builder().id("1").name("One Piece").url(UrlModel.builder()
+//                                                .url("https://example.com/one-piece")
+//                                                .scrapper(ScrappersEnum.leerCapitulo).build()).build());
                 when(scrapperService.getChapters(any(UrlModel.class))).thenReturn(List.of());
                 var chapters = chapterService.getChapters("1");
                 assertEquals(0, chapters.size());
@@ -113,10 +109,10 @@ public class ChapterServiceTests {
 
                 when(chapterRepository.findByMangaIdOrderByNumberAsc(anyString())).thenReturn(List.of());
 
-                when(mangaService.getMangaById(any(String.class)))
-                                .thenReturn(MangaModel.builder().id("1").name("One Piece").url(UrlModel.builder()
-                                                .url("https://example.com/one-piece")
-                                                .scrapper(ScrappersEnum.leerCapitulo).build()).build());
+//                when(mangaService.getMangaById(any(String.class)))
+//                                .thenReturn(MangaModel.builder().id("1").name("One Piece").url(UrlModel.builder()
+//                                                .url("https://example.com/one-piece")
+//                                                .scrapper(ScrappersEnum.leerCapitulo).build()).build());
 
                 when(scrapperService.getChapters(any(UrlModel.class))).thenReturn(chapters);
                 when(chapterRepository.saveAll(any(List.class))).thenReturn(chapters);
@@ -200,7 +196,7 @@ public class ChapterServiceTests {
         @DisplayName("getLastChapterNumber - Debe retornar 0.0 cuando no hay capítulos en la base de datos y getChapters retorna vacío")
         void testGetLastChapterNumberNoChaptersInDatabaseAndGetChaptersReturnsEmpty() {
                 when(chapterRepository.findByMangaIdOrderByNumberAsc(anyString())).thenReturn(List.of());
-                when(mangaService.getMangaById(any(String.class))).thenReturn(null);
+//                when(mangaService.getMangaById(any(String.class))).thenReturn(null);
 
                 var result = chapterService.getLastChapterNumber("manga-1");
                 assertEquals(0.0, result);
@@ -239,10 +235,10 @@ public class ChapterServiceTests {
                                                 .scrapper(ScrappersEnum.leerCapitulo).build()).build()));
 
                 when(chapterRepository.findByMangaIdOrderByNumberAsc(anyString())).thenReturn(List.of());
-                when(mangaService.getMangaById(any(String.class)))
-                                .thenReturn(MangaModel.builder().id("manga-1").name("One Piece").url(UrlModel.builder()
-                                                .url("https://example.com/one-piece")
-                                                .scrapper(ScrappersEnum.leerCapitulo).build()).build());
+//                when(mangaService.getMangaById(any(String.class)))
+//                                .thenReturn(MangaModel.builder().id("manga-1").name("One Piece").url(UrlModel.builder()
+//                                                .url("https://example.com/one-piece")
+//                                                .scrapper(ScrappersEnum.leerCapitulo).build()).build());
                 when(scrapperService.getChapters(any(UrlModel.class))).thenReturn(chapters);
                 when(chapterRepository.saveAll(any(List.class))).thenReturn(chapters);
 
