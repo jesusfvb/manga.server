@@ -25,8 +25,8 @@ public class ScrapperService {
   }
 
 
-  public List<MangaModel> searchManga(ScrappersEnum scrapper, String query) {
-    Scraper scraper = scraperRegistry.getScraper(scrapper);
+  public List<MangaModel> searchManga( String query) {
+    Scraper scraper = scraperRegistry.getScraper(ScrappersEnum.leerCapitulo);
     return scraper.searchMangas(query);
   }
 

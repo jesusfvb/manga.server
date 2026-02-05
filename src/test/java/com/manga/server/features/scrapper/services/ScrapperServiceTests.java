@@ -134,7 +134,7 @@ public class ScrapperServiceTests {
         when(scraper.searchMangas(query)).thenReturn(mangaModels);
 
         // When
-        List<MangaModel> result = scrapperService.searchManga(ScrappersEnum.leerCapitulo, query);
+        List<MangaModel> result = scrapperService.searchManga( query);
 
         // Then
         assertNotNull(result);
@@ -154,7 +154,7 @@ public class ScrapperServiceTests {
         when(scraper.searchMangas(query)).thenReturn(null);
 
         // When
-        List<MangaModel> result = scrapperService.searchManga(ScrappersEnum.leerCapitulo, query);
+        List<MangaModel> result = scrapperService.searchManga(query);
 
         // Then
         assertNull(result);
@@ -171,7 +171,7 @@ public class ScrapperServiceTests {
         when(scraper.searchMangas(query)).thenReturn(Collections.emptyList());
 
         // When
-        List<MangaModel> result = scrapperService.searchManga(ScrappersEnum.leerCapitulo, query);
+        List<MangaModel> result = scrapperService.searchManga( query);
 
         // Then
         assertNotNull(result);
@@ -190,7 +190,7 @@ public class ScrapperServiceTests {
         when(scraper.searchMangas(query)).thenReturn(singleManga);
 
         // When
-        List<MangaModel> result = scrapperService.searchManga(ScrappersEnum.leerCapitulo, query);
+        List<MangaModel> result = scrapperService.searchManga( query);
 
         // Then
         assertNotNull(result);
@@ -209,7 +209,7 @@ public class ScrapperServiceTests {
         when(scraper.searchMangas(query)).thenReturn(mangaModels);
 
         // When
-        scrapperService.searchManga(ScrappersEnum.leerCapitulo, query);
+        scrapperService.searchManga( query);
 
         // Then
         verify(scraperRegistry, times(1)).getScraper(ScrappersEnum.leerCapitulo);
@@ -225,7 +225,7 @@ public class ScrapperServiceTests {
         when(scraper.searchMangas(query)).thenReturn(Collections.emptyList());
 
         // When
-        List<MangaModel> result = scrapperService.searchManga(ScrappersEnum.leerCapitulo, query);
+        List<MangaModel> result = scrapperService.searchManga( query);
 
         // Then
         assertNotNull(result);
@@ -243,7 +243,7 @@ public class ScrapperServiceTests {
         when(scraper.searchMangas(query)).thenReturn(Collections.emptyList());
 
         // When
-        List<MangaModel> result = scrapperService.searchManga(ScrappersEnum.leerCapitulo, query);
+        List<MangaModel> result = scrapperService.searchManga( query);
 
         // Then
         assertNotNull(result);
