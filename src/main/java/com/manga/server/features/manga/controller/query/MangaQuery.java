@@ -1,10 +1,9 @@
-package com.manga.server.features.manga.controller;
+package com.manga.server.features.manga.controller.query;
 
 import java.util.List;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.web.bind.annotation.ModelAttribute;
 
 @Setter
 @Getter

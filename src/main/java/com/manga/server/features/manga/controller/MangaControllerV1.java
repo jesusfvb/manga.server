@@ -1,10 +1,10 @@
 package com.manga.server.features.manga.controller;
 
 import com.manga.server.core.page.PageResponse;
+import com.manga.server.features.manga.controller.query.MangaQuery;
 import com.manga.server.features.manga.mapper.MangaMapper;
 import com.manga.server.features.manga.responses.MangaResponse;
 import com.manga.server.features.manga.user_cases.GetMangasUserCase;
-import com.manga.server.features.manga.user_cases.MangaService;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
