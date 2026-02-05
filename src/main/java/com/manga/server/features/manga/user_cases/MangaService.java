@@ -22,8 +22,8 @@ public class MangaService {
 
     private final ScrapperService scrapperService;
     private final MangaRepository mangaRepository;
-    private final ListOfMangasWhitNewChapterService listOfMangasWhitNewChapterService;
-    private final MangaSaveService mangaSaveService;
+
+//    private final SaveMangaUserCase saveMangaUserCase;
     private final MangaUpdateService mangaUpdateService;
 
     public void starApp() {
@@ -45,12 +45,6 @@ public class MangaService {
         return mangaRepository.findById(mangaId).orElse(null);
     }
 
-    public List<MangaModel> mangasWithNewChapters() {
-        mangaUpdateService.updateMangasWithNewChapters();
-        var scrapper = ScrappersEnum.leerCapitulo;
-        var mangasWhitNewChapters = listOfMangasWhitNewChapterService.getLastListNewManga(scrapper);
-        return mangasWhitNewChapters != null ? mangasWhitNewChapters : List.of();
-    }
 
     public List<MangaModel> searchManga(String query) {
         if (query == null || query.isEmpty()) {
@@ -67,7 +61,7 @@ public class MangaService {
                 for (var magaScraper : mangasScrapper) {
                     if (magaScraper != null && mangas.stream()
                             .noneMatch(m -> m != null && m.getName() != null && m.getName().equals(magaScraper.getName()))) {
-                        mangaSaveService.saveIfNotExists(magaScraper);
+//                        saveMangaUserCase.saveIfNotExists(magaScraper);
                         mangas.add(magaScraper);
                         logMessage = "Is search for:" + scrapperService.toString();
                     }

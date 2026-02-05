@@ -19,8 +19,7 @@ import lombok.extern.java.Log;
 public class MangaUpdateService {
 
     private final ScrapperService scrapperService;
-    private final ListOfMangasWhitNewChapterService listOfMangasWhitNewChapterService;
-    private final MangaSaveService mangaSaveService;
+//    private final SaveMangaUserCase saveMangaUserCase;
 
     @Qualifier("globalExecutor")
     private final Executor executor;
@@ -54,18 +53,18 @@ public class MangaUpdateService {
             var scrapper = ScrappersEnum.leerCapitulo;
             log.info("Ejecutando actualización de mangas con nuevos capítulos");
 
-            if (listOfMangasWhitNewChapterService.isTimeCheck(scrapper)) {
-                var mangasWhitNewChapters = scrapperService.getMangasWithNewChapters();
-                if (mangasWhitNewChapters != null && !mangasWhitNewChapters.isEmpty()) {
-                    mangaSaveService.saveIfNotExists(mangasWhitNewChapters);
-                    listOfMangasWhitNewChapterService.save(mangasWhitNewChapters, scrapper);
-                    log.info("Actualización completada: " + mangasWhitNewChapters.size() + " mangas procesados");
-                } else {
-                    log.warning("No se obtuvieron mangas del scrapper");
-                }
-            } else {
-                log.info("No se ha ejecutado la actualización porque ya se ejecutó en las últimas 30 minutos");
-            }
+//            if (listOfMangasWhitNewChapterService.isTimeCheck(scrapper)) {
+//                var mangasWhitNewChapters = scrapperService.getMangasWithNewChapters();
+//                if (mangasWhitNewChapters != null && !mangasWhitNewChapters.isEmpty()) {
+//                    mangaSaveService.saveIfNotExists(mangasWhitNewChapters);
+//                    listOfMangasWhitNewChapterService.save(mangasWhitNewChapters, scrapper);
+//                    log.info("Actualización completada: " + mangasWhitNewChapters.size() + " mangas procesados");
+//                } else {
+//                    log.warning("No se obtuvieron mangas del scrapper");
+//                }
+//            } else {
+//                log.info("No se ha ejecutado la actualización porque ya se ejecutó en las últimas 30 minutos");
+//            }
         } catch (Exception e) {
             log.severe("Error en processUpdate: " + e.getMessage());
             e.printStackTrace();

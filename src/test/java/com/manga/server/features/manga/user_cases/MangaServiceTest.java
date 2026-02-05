@@ -39,13 +39,13 @@ class MangaServiceTest {
     @Mock
     private MangaRepository mangaRepository;
 
-    @Mock
-    private ListOfMangasWhitNewChapterService listOfMangasWhitNewChapterService;
+//    @Mock
+//    private ListOfMangasWhitNewChapterService listOfMangasWhitNewChapterService;
 
     @Mock
-    private MangaSaveService mangaSaveService;
+//    private SaveMangaUserCase saveMangaUserCase;
 
-    @Mock
+//    @Mock
     private MangaUpdateService mangaUpdateService;
 
     @InjectMocks
@@ -147,40 +147,6 @@ class MangaServiceTest {
         verify(mangaRepository, times(1)).findById(mangaId);
     }
 
-    @Test
-    @DisplayName("mangasWithNewChapters - Debe retornar lista de mangas con nuevos capítulos")
-    void testMangasWithNewChapters() {
-        // Given
-        ScrappersEnum scrapper = ScrappersEnum.leerCapitulo;
-        when(listOfMangasWhitNewChapterService.getLastListNewManga(scrapper)).thenReturn(mangaModels);
-        // No hacer nada cuando se llame a updateMangasWithNewChapters (void method)
-
-        // When
-        List<MangaModel> result = mangaService.mangasWithNewChapters();
-
-        // Then
-        assertNotNull(result);
-        assertEquals(2, result.size());
-        verify(mangaUpdateService, times(1)).updateMangasWithNewChapters();
-        verify(listOfMangasWhitNewChapterService, times(1)).getLastListNewManga(scrapper);
-    }
-
-    @Test
-    @DisplayName("mangasWithNewChapters - Debe retornar lista vacía cuando no hay lista disponible")
-    void testMangasWithNewChaptersNull() {
-        // Given
-        ScrappersEnum scrapper = ScrappersEnum.leerCapitulo;
-        when(listOfMangasWhitNewChapterService.getLastListNewManga(scrapper)).thenReturn(null);
-
-        // When
-        List<MangaModel> result = mangaService.mangasWithNewChapters();
-
-        // Then
-        assertNotNull(result);
-        assertEquals(0, result.size());
-        verify(mangaUpdateService, times(1)).updateMangasWithNewChapters();
-        verify(listOfMangasWhitNewChapterService, times(1)).getLastListNewManga(scrapper);
-    }
 
     @Test
     @DisplayName("searchManga - Debe retornar mangas de la base de datos cuando encuentra resultados")
@@ -225,7 +191,7 @@ class MangaServiceTest {
         assertNotNull(result);
         verify(mangaRepository, times(1)).findByNameContainingIgnoreCase(query);
         verify(scrapperService, times(1)).searchManga(ScrappersEnum.leerCapitulo, query);
-        verify(mangaSaveService, times(1)).saveIfNotExists(any(MangaModel.class));
+//        verify(saveMangaUserCase, times(1)).saveIfNotExists(any(MangaModel.class));
     }
 
     @Test
@@ -267,7 +233,7 @@ class MangaServiceTest {
         assertEquals(1, result.size()); // No se debe duplicar
         verify(mangaRepository, times(1)).findByNameContainingIgnoreCase(query);
         verify(scrapperService, times(1)).searchManga(ScrappersEnum.leerCapitulo, query);
-        verify(mangaSaveService, never()).saveIfNotExists(any(MangaModel.class)); // No debe guardar duplicado
+//        verify(saveMangaUserCase, never()).saveIfNotExists(any(MangaModel.class)); // No debe guardar duplicado
     }
 }
 

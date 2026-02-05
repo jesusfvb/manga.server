@@ -33,13 +33,11 @@ public class MangaUpdateServiceTests {
     @Mock
     private ScrapperService scrapperService;
 
-    @Mock
-    private ListOfMangasWhitNewChapterService listOfMangasWhitNewChapterService;
 
     @Mock
-    private MangaSaveService mangaSaveService;
+//    private SaveMangaUserCase saveMangaUserCase;
 
-    @Mock
+//    @Mock
     private Executor executor;
 
     @InjectMocks
@@ -85,7 +83,7 @@ public class MangaUpdateServiceTests {
     @DisplayName("updateMangasWithNewChapters - Debe ejecutar correctamente cuando hay mangas nuevos")
     void testUpdateMangasWithNewChaptersSuccess() throws InterruptedException {
         // Given
-        when(listOfMangasWhitNewChapterService.isTimeCheck(ScrappersEnum.leerCapitulo)).thenReturn(true);
+//        when(listOfMangasWhitNewChapterService.isTimeCheck(ScrappersEnum.leerCapitulo)).thenReturn(true);
         when(scrapperService.getMangasWithNewChapters()).thenReturn(mangaModels);
 
         // When
@@ -96,10 +94,10 @@ public class MangaUpdateServiceTests {
 
         // Then
         verify(executor, times(1)).execute(any(Runnable.class));
-        verify(listOfMangasWhitNewChapterService, times(1)).isTimeCheck(ScrappersEnum.leerCapitulo);
+//        verify(listOfMangasWhitNewChapterService, times(1)).isTimeCheck(ScrappersEnum.leerCapitulo);
         verify(scrapperService, times(1)).getMangasWithNewChapters();
-        verify(mangaSaveService, times(1)).saveIfNotExists(mangaModels);
-        verify(listOfMangasWhitNewChapterService, times(1)).save(mangaModels, ScrappersEnum.leerCapitulo);
+//        verify(saveMangaUserCase, times(1)).saveIfNotExists(mangaModels);
+//        verify(listOfMangasWhitNewChapterService, times(1)).save(mangaModels, ScrappersEnum.leerCapitulo);
     }
 
     @Test
@@ -126,7 +124,7 @@ public class MangaUpdateServiceTests {
     @DisplayName("updateMangasWithNewChapters - No debe procesar si isTimeCheck retorna false")
     void testUpdateMangasWithNewChaptersTimeCheckFalse() throws InterruptedException {
         // Given
-        when(listOfMangasWhitNewChapterService.isTimeCheck(ScrappersEnum.leerCapitulo)).thenReturn(false);
+//        when(listOfMangasWhitNewChapterService.isTimeCheck(ScrappersEnum.leerCapitulo)).thenReturn(false);
 
         // When
         mangaUpdateService.updateMangasWithNewChapters();
@@ -136,17 +134,17 @@ public class MangaUpdateServiceTests {
 
         // Then
         verify(executor, times(1)).execute(any(Runnable.class));
-        verify(listOfMangasWhitNewChapterService, times(1)).isTimeCheck(ScrappersEnum.leerCapitulo);
+//        verify(listOfMangasWhitNewChapterService, times(1)).isTimeCheck(ScrappersEnum.leerCapitulo);
         verify(scrapperService, never()).getMangasWithNewChapters();
-        verify(mangaSaveService, never()).saveIfNotExists(anyList());
-        verify(listOfMangasWhitNewChapterService, never()).save(anyList(), any(ScrappersEnum.class));
+//        verify(saveMangaUserCase, never()).saveIfNotExists(anyList());
+//        verify(listOfMangasWhitNewChapterService, never()).save(anyList(), any(ScrappersEnum.class));
     }
 
     @Test
     @DisplayName("updateMangasWithNewChapters - No debe procesar si getMangasWithNewChapters retorna null")
     void testUpdateMangasWithNewChaptersNullMangas() throws InterruptedException {
         // Given
-        when(listOfMangasWhitNewChapterService.isTimeCheck(ScrappersEnum.leerCapitulo)).thenReturn(true);
+//        when(listOfMangasWhitNewChapterService.isTimeCheck(ScrappersEnum.leerCapitulo)).thenReturn(true);
         when(scrapperService.getMangasWithNewChapters()).thenReturn(null);
 
         // When
@@ -157,17 +155,17 @@ public class MangaUpdateServiceTests {
 
         // Then
         verify(executor, times(1)).execute(any(Runnable.class));
-        verify(listOfMangasWhitNewChapterService, times(1)).isTimeCheck(ScrappersEnum.leerCapitulo);
+//        verify(listOfMangasWhitNewChapterService, times(1)).isTimeCheck(ScrappersEnum.leerCapitulo);
         verify(scrapperService, times(1)).getMangasWithNewChapters();
-        verify(mangaSaveService, never()).saveIfNotExists(anyList());
-        verify(listOfMangasWhitNewChapterService, never()).save(anyList(), any(ScrappersEnum.class));
+//        verify(saveMangaUserCase, never()).saveIfNotExists(anyList());
+//        verify(listOfMangasWhitNewChapterService, never()).save(anyList(), any(ScrappersEnum.class));
     }
 
     @Test
     @DisplayName("updateMangasWithNewChapters - No debe procesar si getMangasWithNewChapters retorna lista vacía")
     void testUpdateMangasWithNewChaptersEmptyList() throws InterruptedException {
         // Given
-        when(listOfMangasWhitNewChapterService.isTimeCheck(ScrappersEnum.leerCapitulo)).thenReturn(true);
+//        when(listOfMangasWhitNewChapterService.isTimeCheck(ScrappersEnum.leerCapitulo)).thenReturn(true);
         when(scrapperService.getMangasWithNewChapters()).thenReturn(Collections.emptyList());
 
         // When
@@ -178,10 +176,10 @@ public class MangaUpdateServiceTests {
 
         // Then
         verify(executor, times(1)).execute(any(Runnable.class));
-        verify(listOfMangasWhitNewChapterService, times(1)).isTimeCheck(ScrappersEnum.leerCapitulo);
+//        verify(listOfMangasWhitNewChapterService, times(1)).isTimeCheck(ScrappersEnum.leerCapitulo);
         verify(scrapperService, times(1)).getMangasWithNewChapters();
-        verify(mangaSaveService, never()).saveIfNotExists(anyList());
-        verify(listOfMangasWhitNewChapterService, never()).save(anyList(), any(ScrappersEnum.class));
+//        verify(saveMangaUserCase, never()).saveIfNotExists(anyList());
+//        verify(listOfMangasWhitNewChapterService, never()).save(anyList(), any(ScrappersEnum.class));
     }
 
 }
