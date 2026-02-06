@@ -1,15 +1,12 @@
 package com.manga.server.features.chapter.services;
 
-import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
 
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import com.manga.server.features.chapter.models.ChapterModel;
 import com.manga.server.features.chapter.repository.ChapterRepository;
-import com.manga.server.features.manga.model.MangaModel;
 import com.manga.server.features.scrapper.services.ScrapperService;
 
 import lombok.RequiredArgsConstructor;

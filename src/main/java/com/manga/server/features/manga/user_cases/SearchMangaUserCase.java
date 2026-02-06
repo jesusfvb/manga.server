@@ -1,19 +1,20 @@
 package com.manga.server.features.manga.user_cases;
 
-import com.manga.server.features.manga.comparator.MangaComparator;
-import com.manga.server.features.manga.model.MangaModel;
-import com.manga.server.features.scrapper.services.ScrapperService;
-import lombok.AllArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Service;
-
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+
+import com.manga.server.features.manga.comparator.MangaComparator;
+import com.manga.server.features.manga.model.MangaModel;
+import com.manga.server.features.scrapper.services.ScrapperService;
+
+import lombok.AllArgsConstructor;
 
 
 @Service

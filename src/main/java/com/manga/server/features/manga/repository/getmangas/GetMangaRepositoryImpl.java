@@ -1,10 +1,9 @@
 package com.manga.server.features.manga.repository.getmangas;
 
-import com.manga.server.features.manga.enums.MangaFilter;
-import com.manga.server.features.manga.controller.query.MangaQuery;
-import com.manga.server.features.manga.model.MangaModel;
-import com.manga.server.shared.regex.RegexUtils;
-import lombok.AllArgsConstructor;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -12,10 +11,12 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 
-import java.util.Date;
-import java.util.regex.Pattern;
-import java.util.ArrayList;
-import java.util.List;
+import com.manga.server.features.manga.controller.query.MangaQuery;
+import com.manga.server.features.manga.enums.MangaFilter;
+import com.manga.server.features.manga.model.MangaModel;
+import com.manga.server.shared.regex.RegexUtils;
+
+import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
 public class GetMangaRepositoryImpl implements GetMangaRepository {
