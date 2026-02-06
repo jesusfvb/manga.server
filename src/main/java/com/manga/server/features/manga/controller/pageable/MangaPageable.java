@@ -1,6 +1,7 @@
 package com.manga.server.features.manga.controller.pageable;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.manga.server.features.manga.enums.MangaSortField;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
