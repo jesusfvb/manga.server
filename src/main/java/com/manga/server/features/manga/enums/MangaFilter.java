@@ -1,4 +1,4 @@
-package com.manga.server.features.manga.controller.query;
+package com.manga.server.features.manga.enums;
 
 public enum MangaFilter {
     LAST_UPDATED,
