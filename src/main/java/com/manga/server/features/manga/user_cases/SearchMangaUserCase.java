@@ -1,5 +1,6 @@
 package com.manga.server.features.manga.user_cases;
 
+import com.manga.server.features.manga.comparator.MangaComparator;
 import com.manga.server.features.manga.model.MangaModel;
 import com.manga.server.features.scrapper.services.ScrapperService;
 import lombok.AllArgsConstructor;
@@ -47,11 +48,19 @@ public class SearchMangaUserCase {
         }
         List<MangaModel> combined = new ArrayList<>(map.values());
 
+        combined.sort(MangaComparator.of(pageable));
+
+        int start = (int) pageable.getOffset();
+        int end = Math.min(start + pageable.getPageSize(), combined.size());
+
+        List<MangaModel> pageContent = combined.subList(start, end);
+
         return new PageImpl<>(
-                combined,
-                PageRequest.of(pageable.getPageNumber(), pageable.getPageSize()),
+                pageContent,
+                pageable,
                 combined.size()
         );
+
     }
 
 }
