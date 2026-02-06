@@ -3,6 +3,7 @@ package com.manga.server.features.manga.repository.getmangas;
 import com.manga.server.features.manga.enums.MangaFilter;
 import com.manga.server.features.manga.controller.query.MangaQuery;
 import com.manga.server.features.manga.model.MangaModel;
+import com.manga.server.shared.regex.RegexUtils;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -11,6 +12,8 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 
+import java.util.Date;
+import java.util.regex.Pattern;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,40 +22,60 @@ public class GetMangaRepositoryImpl implements GetMangaRepository {
 
     private final MongoTemplate mongoTemplate;
 
-
     @Override
     public Page<MangaModel> findAll(MangaQuery query, Pageable pageable) {
 
-        List<Criteria> criteriaList = new ArrayList<>();
+        List<Criteria> criteria = new ArrayList<>();
 
-        if( query.getIds() != null && !query.getIds().isEmpty() ) {
-            criteriaList.add(Criteria.where("id").in(query.getIds()));
+        addIdFilter(query, criteria);
+        addSearchFilter(query, criteria);
+        addLastUpdatedFilter(query, criteria);
+
+        Query mongoQuery = new Query();
+        if (!criteria.isEmpty()) {
+            mongoQuery.addCriteria(
+                    new Criteria().andOperator(criteria.toArray(new Criteria[0]))
+            );
         }
 
-        if(query.getSearch() != null && !query.getSearch().isEmpty()){
-            criteriaList.add(Criteria.where("name").regex(".*" + query.getSearch() + ".*", "i"));
-        }
+        mongoQuery.with(pageable);
 
-        if(query.getFilter() != null){
-            if (query.getFilter() == MangaFilter.LAST_UPDATED) {
-                long cutoff = System.currentTimeMillis() - 24L * 60 * 60 * 1000;
-                criteriaList.add(Criteria.where("lastUpdated").gte(new java.util.Date(cutoff)));
-            }
-        }
+        List<MangaModel> result =
+                mongoTemplate.find(mongoQuery, MangaModel.class);
 
-        Query mangaQuery = new Query();
-        if (!criteriaList.isEmpty()) {
-            mangaQuery.addCriteria(new Criteria().andOperator(criteriaList));
-        }
-
-        mangaQuery.with(pageable);
-
-        List<MangaModel> mangaModelList = mongoTemplate.find(mangaQuery, MangaModel.class);
         long total =
                 mongoTemplate.count(
-                        Query.of(mangaQuery).limit(-1).skip(-1),
+                        Query.of(mongoQuery).limit(-1).skip(-1),
                         MangaModel.class
                 );
-        return new PageImpl<>(mangaModelList, pageable, total);
+
+        return new PageImpl<>(result, pageable, total);
+    }
+
+    private void addIdFilter(MangaQuery query, List<Criteria> criteria) {
+        if (query.getIds() != null && !query.getIds().isEmpty()) {
+            criteria.add(
+                    Criteria.where("id").in(query.getIds())
+            );
+        }
+    }
+
+    private void addSearchFilter(MangaQuery query, List<Criteria> criteria) {
+        if (query.getSearch() != null && !query.getSearch().isBlank()) {
+            String regex = RegexUtils.accentInsensitive(query.getSearch());
+            criteria.add(
+                    Criteria.where("name").regex(regex, "i")
+            );
+        }
+    }
+
+    private void addLastUpdatedFilter(MangaQuery query, List<Criteria> criteria) {
+        if (query.getFilter() == MangaFilter.LAST_UPDATED) {
+            long cutoff = System.currentTimeMillis() - 86_400_000;
+            criteria.add(
+                    Criteria.where("lastUpdated")
+                            .gte(new Date(cutoff))
+            );
+        }
     }
 }

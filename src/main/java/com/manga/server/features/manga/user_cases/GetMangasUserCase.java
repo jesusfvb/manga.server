@@ -34,6 +34,6 @@ public class GetMangasUserCase {
     private boolean sizeLestThat(Page<MangaModel> mangas) {
         if (mangas == null) return false;
         mangas.getContent();
-        return mangas.getContent().isEmpty() ||  mangas.getTotalElements() <= 5;
+        return mangas.getContent().isEmpty() ||  mangas.getTotalElements() <= 1;
     }
 }
