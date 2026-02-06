@@ -27,7 +27,7 @@ public class MangaComparator implements Comparator<MangaModel> {
                 this.sortField = MangaSortField.TITLE;
                 this.direction = Sort.Direction.ASC;
             } else {
-                this.sortField = MangaSortField.valueOf(order.getProperty().toUpperCase());
+                this.sortField = MangaSortField.fromFieldName(order.getProperty().toUpperCase());
                 this.direction = order.getDirection();
             }
         }

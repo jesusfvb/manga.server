@@ -28,8 +28,8 @@ public class MangaPageable {
     @Schema(defaultValue = "TITLE")
     private MangaSortField sortField =MangaSortField.TITLE;
 
-    @Schema(defaultValue = "DESC")
-    private Sort.Direction direction = Sort.Direction.DESC;
+    @Schema(defaultValue = "ASC")
+    private Sort.Direction direction = Sort.Direction.ASC;
 
     @JsonIgnore
     private static final int MAX_SIZE = 50;
@@ -43,6 +43,6 @@ public class MangaPageable {
         return PageRequest.of(
                 safePage,
                 safeSize,
-                Sort.by(direction, sortField.name())
+                Sort.by(direction, sortField.getFieldName())
         );}
 }
