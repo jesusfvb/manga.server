@@ -4,11 +4,11 @@ import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
 
-import com.manga.server.features.chapter.services.ChapterService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
+import com.manga.server.features.chapter.user_cases.ChapterService;
 import com.manga.server.features.images.models.ImgModel;
 import com.manga.server.features.images.repocitory.ImgRepository;
 import com.manga.server.features.scrapper.services.ScrapperService;

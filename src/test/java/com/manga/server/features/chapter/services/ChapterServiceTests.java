@@ -21,6 +21,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.manga.server.features.chapter.models.ChapterModel;
 import com.manga.server.features.chapter.repository.ChapterRepository;
+import com.manga.server.features.chapter.user_cases.ChapterService;
 import com.manga.server.features.scrapper.services.ScrapperService;
 import com.manga.server.shared.enums.ScrappersEnum;
 import com.manga.server.shared.model.UrlModel;

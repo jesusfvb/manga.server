@@ -1,4 +1,4 @@
-package com.manga.server.features.chapter.services;
+package com.manga.server.features.chapter.user_cases;
 
 import java.util.Comparator;
 import java.util.List;
