@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.manga.server.features.chapter.dtos.ChapterDTO;
+import com.manga.server.features.chapter.requests.ChapterDTO;
 import com.manga.server.features.chapter.mappers.ChapterMapper;
 import com.manga.server.features.chapter.mappers.ImgMapper;
 import com.manga.server.features.chapter.services.ChapterService;
