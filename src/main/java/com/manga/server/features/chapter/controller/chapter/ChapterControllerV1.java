@@ -2,6 +2,7 @@ package com.manga.server.features.chapter.controller.chapter;
 
 import java.util.List;
 
+import com.manga.server.features.chapter.controller.chapter.querty.ChapterQuery;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.CrossOrigin;
