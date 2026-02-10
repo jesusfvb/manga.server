@@ -34,6 +34,6 @@ public class ChapterPageable {
         return PageRequest.of(
                 safePage,
                 safeSize,
-                Sort.by(direction)
+                Sort.by(direction, "number")
         );}
 }

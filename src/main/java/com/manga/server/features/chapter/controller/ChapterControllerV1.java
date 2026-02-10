@@ -33,7 +33,7 @@ public class ChapterControllerV1 {
             @ParameterObject @ModelAttribute ChapterQuery query,
             @ParameterObject ChapterPageable pageable) {
 
-        var chapters = getChapterUserCase.execute(mangaId, pageable.toPageable());
+        var chapters = getChapterUserCase.execute(mangaId,query, pageable.toPageable());
 
         return ResponseEntity.ok(
                 PageResponse.<ChapterResponse>builder()
