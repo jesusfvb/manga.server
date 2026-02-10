@@ -13,6 +13,6 @@ public class SyncMangasUseCase {
 
     public void execute() {
     var mangasWhitNewChapter = scrapperService.getMangasWithNewChapters();
-    saveMangasUseCase.execute(mangasWhitNewChapter);
+    saveMangasUseCase.execute(mangasWhitNewChapter,true);
     }
 }

@@ -1,5 +1,6 @@
 package com.manga.server.features.manga.user_cases;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -16,6 +17,10 @@ public class SaveMangasUseCase {
     private final MangaRepository mangaRepository;
 
     public void execute(List<MangaModel> mangas) {
+        execute(mangas, false);
+    }
+
+    public void execute(List<MangaModel> mangas,boolean updateDate) {
 
         if (mangas == null || mangas.isEmpty()) {
             return ;
@@ -34,9 +39,17 @@ public class SaveMangasUseCase {
                     );
 
             if (existing.isEmpty()) {
+                if(updateDate){
+                    manga.setLastUpdated(LocalDateTime.now());
+                }
                 MangaModel saved = mangaRepository.save(manga);
                 manga.setId(saved.getId());
             } else {
+                if (updateDate) {
+                    existing.get().setLastUpdated(LocalDateTime.now());
+                    mangaRepository.save(existing.get());
+                    manga.setLastUpdated(existing.get().getLastUpdated());
+                }
                 manga.setId(existing.get().getId());
             }
         }
