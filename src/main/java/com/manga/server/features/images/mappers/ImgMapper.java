@@ -6,7 +6,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.springframework.stereotype.Service;
 
-import com.manga.server.features.images.responces.ImgDTO;
+import com.manga.server.features.images.responses.ImgDTO;
 import com.manga.server.features.images.models.ImgModel;
 
 @Service

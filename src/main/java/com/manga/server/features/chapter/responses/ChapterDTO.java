@@ -1,4 +1,4 @@
-package com.manga.server.features.chapter.requests;
+package com.manga.server.features.chapter.responses;
 
 public record ChapterDTO(String id, Double number) {
 }

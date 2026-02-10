@@ -5,7 +5,7 @@ import java.util.List;
 import org.mapstruct.Mapper;
 import org.springframework.stereotype.Service;
 
-import com.manga.server.features.chapter.requests.ChapterDTO;
+import com.manga.server.features.chapter.responses.ChapterDTO;
 import com.manga.server.features.chapter.models.ChapterModel;
 
 @Service
