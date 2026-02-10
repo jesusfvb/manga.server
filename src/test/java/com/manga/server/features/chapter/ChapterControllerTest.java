@@ -25,8 +25,8 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import com.manga.server.core.filtres.RateLimitFilter;
 import com.manga.server.features.chapter.controller.chapter.ChapterControllerV1;
-import com.manga.server.features.chapter.dtos.ChapterDTO;
-import com.manga.server.features.chapter.dtos.ImgDTO;
+import com.manga.server.features.chapter.requests.ChapterDTO;
+import com.manga.server.features.chapter.requests.ImgDTO;
 import com.manga.server.features.chapter.mappers.ChapterMapper;
 import com.manga.server.features.chapter.mappers.ImgMapper;
 import com.manga.server.features.chapter.models.ChapterModel;
