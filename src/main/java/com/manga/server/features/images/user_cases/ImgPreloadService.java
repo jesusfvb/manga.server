@@ -1,4 +1,4 @@
-package com.manga.server.features.chapter.services;
+package com.manga.server.features.images.user_cases;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;

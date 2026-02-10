@@ -15,7 +15,7 @@ import com.manga.server.core.browser.JsoupWrapper;
 import com.manga.server.core.browser.PlaywrightManager;
 import com.manga.server.core.browser.RestClientWrapper;
 import com.manga.server.features.chapter.models.ChapterModel;
-import com.manga.server.features.chapter.models.ImgModel;
+import com.manga.server.features.images.models.ImgModel;
 import com.manga.server.features.manga.model.MangaModel;
 import com.manga.server.features.scrapper.scrapers.Scraper;
 import com.manga.server.features.scrapper.scrapers.leercapitulo.dtos.LeerCapituloSearchDTO;

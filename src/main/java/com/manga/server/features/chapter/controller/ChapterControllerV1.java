@@ -14,9 +14,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.manga.server.features.chapter.requests.ChapterDTO;
 import com.manga.server.features.chapter.mappers.ChapterMapper;
-import com.manga.server.features.chapter.mappers.ImgMapper;
+import com.manga.server.features.images.mappers.ImgMapper;
 import com.manga.server.features.chapter.services.ChapterService;
-import com.manga.server.features.chapter.services.ImgService;
+import com.manga.server.features.images.user_cases.ImgService;
 
 import lombok.AllArgsConstructor;
 

@@ -3,7 +3,7 @@ package com.manga.server.features.scrapper.scrapers;
 import java.util.List;
 
 import com.manga.server.features.chapter.models.ChapterModel;
-import com.manga.server.features.chapter.models.ImgModel;
+import com.manga.server.features.images.models.ImgModel;
 import com.manga.server.features.manga.model.MangaModel;
 import com.manga.server.shared.enums.ScrappersEnum;
 

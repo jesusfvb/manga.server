@@ -1,4 +1,4 @@
-package com.manga.server.features.chapter.controller.querty;
+package com.manga.server.features.images.controller.querty;
 
 import java.util.List;
 

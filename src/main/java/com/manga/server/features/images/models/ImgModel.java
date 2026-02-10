@@ -1,4 +1,4 @@
-package com.manga.server.features.chapter.models;
+package com.manga.server.features.images.models;
 
 import java.time.LocalDateTime;
 

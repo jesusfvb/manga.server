@@ -1,4 +1,4 @@
-package com.manga.server.features.chapter.services;
+package com.manga.server.features.images.user_cases;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -9,6 +9,7 @@ import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.manga.server.features.chapter.services.ChapterService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,8 +18,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.manga.server.features.chapter.models.ChapterModel;
-import com.manga.server.features.chapter.models.ImgModel;
-import com.manga.server.features.chapter.repository.ImgRepository;
+import com.manga.server.features.images.models.ImgModel;
+import com.manga.server.features.images.repocitory.ImgRepository;
 import com.manga.server.features.scrapper.services.ScrapperService;
 import com.manga.server.shared.enums.ScrappersEnum;
 import com.manga.server.shared.model.UrlModel;
@@ -47,14 +48,14 @@ public class ImgServiceTests {
         @DisplayName("getImg - Debe retornar lista vacía cuando chapterId es null")
         void testGetImgWithNullChapterId() {
                 var result = imgService.getImg(null);
-                assertEquals(0, result.size());
+                Assertions.assertEquals(0, result.size());
         }
 
         @Test
         @DisplayName("getImg - Debe retornar lista vacía cuando chapterId está vacío")
         void testGetImgWithEmptyChapterId() {
                 var result = imgService.getImg("");
-                assertEquals(0, result.size());
+                Assertions.assertEquals(0, result.size());
         }
 
         @Test
@@ -80,23 +81,23 @@ public class ImgServiceTests {
                                                                 .build())
                                                 .build()));
 
-                when(imgRepository.findByChapterIdOrderByNumberAsc(anyString())).thenReturn(imgs);
+                Mockito.when(imgRepository.findByChapterIdOrderByNumberAsc(ArgumentMatchers.anyString())).thenReturn(imgs);
 
                 var result = imgService.getImg("chapter-1");
 
-                assertEquals(2, result.size());
-                assertEquals(imgs.get(0).getId(), result.get(0).getId());
-                assertEquals(imgs.get(0).getNumber(), result.get(0).getNumber());
+                Assertions.assertEquals(2, result.size());
+                Assertions.assertEquals(imgs.get(0).getId(), result.get(0).getId());
+                Assertions.assertEquals(imgs.get(0).getNumber(), result.get(0).getNumber());
         }
 
         @Test
         @DisplayName("getImg - Debe retornar lista vacía cuando no hay imágenes en la base de datos y el capítulo no existe")
         void testGetImgNoImagesInDatabaseAndChapterNotFound() {
-                when(imgRepository.findByChapterIdOrderByNumberAsc(anyString())).thenReturn(List.of());
-                when(chapterService.getChapterById(any(String.class))).thenReturn(null);
+                Mockito.when(imgRepository.findByChapterIdOrderByNumberAsc(ArgumentMatchers.anyString())).thenReturn(List.of());
+                Mockito.when(chapterService.getChapterById(ArgumentMatchers.any(String.class))).thenReturn(null);
 
                 var result = imgService.getImg("non-existent-chapter");
-                assertEquals(0, result.size());
+                Assertions.assertEquals(0, result.size());
         }
 
         @Test
@@ -108,13 +109,13 @@ public class ImgServiceTests {
                                 .url(null)
                                 .build();
 
-                when(imgRepository.findByChapterIdOrderByNumberAsc(anyString())).thenReturn(List.of());
-                when(chapterService.getChapterById(any(String.class))).thenReturn(chapter);
+                Mockito.when(imgRepository.findByChapterIdOrderByNumberAsc(ArgumentMatchers.anyString())).thenReturn(List.of());
+                Mockito.when(chapterService.getChapterById(ArgumentMatchers.any(String.class))).thenReturn(chapter);
 
                 // El código actual tiene un bug: no valida que chapter.getUrl() sea null antes
                 // de llamar a getFullUrl()
                 // Por lo tanto, este test espera que se lance NullPointerException
-                assertThrows(NullPointerException.class, () -> {
+                Assertions.assertThrows(NullPointerException.class, () -> {
                         imgService.getImg("chapter-1");
                 });
         }
@@ -131,12 +132,12 @@ public class ImgServiceTests {
                                                 .build())
                                 .build();
 
-                when(imgRepository.findByChapterIdOrderByNumberAsc(anyString())).thenReturn(List.of());
-                when(chapterService.getChapterById(any(String.class))).thenReturn(chapter);
-                when(scrapperService.getImg(any(ScrappersEnum.class), any(String.class))).thenReturn(List.of());
+                Mockito.when(imgRepository.findByChapterIdOrderByNumberAsc(ArgumentMatchers.anyString())).thenReturn(List.of());
+                Mockito.when(chapterService.getChapterById(ArgumentMatchers.any(String.class))).thenReturn(chapter);
+                Mockito.when(scrapperService.getImg(ArgumentMatchers.any(ScrappersEnum.class), ArgumentMatchers.any(String.class))).thenReturn(List.of());
 
                 var result = imgService.getImg("chapter-1");
-                assertEquals(0, result.size());
+                Assertions.assertEquals(0, result.size());
         }
 
         @SuppressWarnings({ "null", "unchecked" })
@@ -170,18 +171,18 @@ public class ImgServiceTests {
                                                                 .build())
                                                 .build()));
 
-                when(imgRepository.findByChapterIdOrderByNumberAsc(anyString())).thenReturn(List.of());
-                when(chapterService.getChapterById(any(String.class))).thenReturn(chapter);
-                when(scrapperService.getImg(any(ScrappersEnum.class), any(String.class))).thenReturn(scrapedImgs);
-                when(imgRepository.saveAll(any(List.class))).thenReturn(scrapedImgs);
+                Mockito.when(imgRepository.findByChapterIdOrderByNumberAsc(ArgumentMatchers.anyString())).thenReturn(List.of());
+                Mockito.when(chapterService.getChapterById(ArgumentMatchers.any(String.class))).thenReturn(chapter);
+                Mockito.when(scrapperService.getImg(ArgumentMatchers.any(ScrappersEnum.class), ArgumentMatchers.any(String.class))).thenReturn(scrapedImgs);
+                Mockito.when(imgRepository.saveAll(ArgumentMatchers.any(List.class))).thenReturn(scrapedImgs);
 
                 var result = imgService.getImg("chapter-1");
 
-                assertEquals(2, result.size());
-                assertEquals("chapter-1", result.get(0).getChapterId());
-                assertEquals("chapter-1", result.get(1).getChapterId());
-                assertEquals(1, result.get(0).getNumber());
-                assertEquals(2, result.get(1).getNumber());
+                Assertions.assertEquals(2, result.size());
+                Assertions.assertEquals("chapter-1", result.get(0).getChapterId());
+                Assertions.assertEquals("chapter-1", result.get(1).getChapterId());
+                Assertions.assertEquals(1, result.get(0).getNumber());
+                Assertions.assertEquals(2, result.get(1).getNumber());
         }
 
         @Test
@@ -217,13 +218,13 @@ public class ImgServiceTests {
                                                                 .build())
                                                 .build()));
 
-                when(imgRepository.findByChapterIdOrderByNumberAsc(anyString())).thenReturn(imgs);
+                Mockito.when(imgRepository.findByChapterIdOrderByNumberAsc(ArgumentMatchers.anyString())).thenReturn(imgs);
 
                 var result = imgService.getImg("chapter-1");
 
-                assertEquals(3, result.size());
-                assertEquals(1, result.get(0).getNumber());
-                assertEquals(2, result.get(1).getNumber());
-                assertEquals(3, result.get(2).getNumber());
+                Assertions.assertEquals(3, result.size());
+                Assertions.assertEquals(1, result.get(0).getNumber());
+                Assertions.assertEquals(2, result.get(1).getNumber());
+                Assertions.assertEquals(3, result.get(2).getNumber());
         }
 }

@@ -1,4 +1,4 @@
-package com.manga.server.features.chapter.services;
+package com.manga.server.features.images.user_cases;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -64,8 +64,8 @@ public class ImgPreloadServiceTests {
             latch.countDown();
         }).start();
         
-        assertTrue(latch.await(2, TimeUnit.SECONDS));
-        verify(imgService, never()).getImg(any(String.class));
+        Assertions.assertTrue(latch.await(2, TimeUnit.SECONDS));
+        Mockito.verify(imgService, Mockito.never()).getImg(ArgumentMatchers.any(String.class));
     }
 
     @Test
@@ -74,10 +74,10 @@ public class ImgPreloadServiceTests {
         List<String> chapterIds = new ArrayList<>(Arrays.asList("valid-1", null, "", "valid-2", "  ", "valid-3"));
         
         // Usar lenient para permitir llamadas con diferentes argumentos
-        lenient().when(imgService.getImg("valid-1")).thenReturn(List.of());
-        lenient().when(imgService.getImg("valid-2")).thenReturn(List.of());
-        lenient().when(imgService.getImg("valid-3")).thenReturn(List.of());
-        lenient().when(imgService.getImg("  ")).thenReturn(List.of());
+        Mockito.lenient().when(imgService.getImg("valid-1")).thenReturn(List.of());
+        Mockito.lenient().when(imgService.getImg("valid-2")).thenReturn(List.of());
+        Mockito.lenient().when(imgService.getImg("valid-3")).thenReturn(List.of());
+        Mockito.lenient().when(imgService.getImg("  ")).thenReturn(List.of());
         
         CountDownLatch latch = new CountDownLatch(1);
         
@@ -92,14 +92,14 @@ public class ImgPreloadServiceTests {
             latch.countDown();
         }).start();
         
-        assertTrue(latch.await(3, TimeUnit.SECONDS));
+        Assertions.assertTrue(latch.await(3, TimeUnit.SECONDS));
         
         // Verificar que se llamó con los IDs válidos (el código no filtra strings con solo espacios)
-        verify(imgService, timeout(2000).atLeastOnce()).getImg("valid-1");
-        verify(imgService, timeout(2000).atLeastOnce()).getImg("valid-2");
-        verify(imgService, timeout(2000).atLeastOnce()).getImg("valid-3");
-        verify(imgService, never()).getImg(null);
-        verify(imgService, never()).getImg("");
+        Mockito.verify(imgService, Mockito.timeout(2000).atLeastOnce()).getImg("valid-1");
+        Mockito.verify(imgService, Mockito.timeout(2000).atLeastOnce()).getImg("valid-2");
+        Mockito.verify(imgService, Mockito.timeout(2000).atLeastOnce()).getImg("valid-3");
+        Mockito.verify(imgService, Mockito.never()).getImg(null);
+        Mockito.verify(imgService, Mockito.never()).getImg("");
     }
 
     @Test
@@ -107,8 +107,8 @@ public class ImgPreloadServiceTests {
     void testPreloadImagesWithValidChapterIds() throws InterruptedException {
         List<String> chapterIds = List.of("chapter-1", "chapter-2");
         
-        when(imgService.getImg("chapter-1")).thenReturn(List.of());
-        when(imgService.getImg("chapter-2")).thenReturn(List.of());
+        Mockito.when(imgService.getImg("chapter-1")).thenReturn(List.of());
+        Mockito.when(imgService.getImg("chapter-2")).thenReturn(List.of());
         
         CountDownLatch latch = new CountDownLatch(1);
         
@@ -123,11 +123,11 @@ public class ImgPreloadServiceTests {
             latch.countDown();
         }).start();
         
-        assertTrue(latch.await(3, TimeUnit.SECONDS));
+        Assertions.assertTrue(latch.await(3, TimeUnit.SECONDS));
         
         // Verificar que se llamó a getImg para cada capítulo
-        verify(imgService, timeout(2000).atLeastOnce()).getImg("chapter-1");
-        verify(imgService, timeout(2000).atLeastOnce()).getImg("chapter-2");
+        Mockito.verify(imgService, Mockito.timeout(2000).atLeastOnce()).getImg("chapter-1");
+        Mockito.verify(imgService, Mockito.timeout(2000).atLeastOnce()).getImg("chapter-2");
     }
 
     @Test
@@ -136,12 +136,12 @@ public class ImgPreloadServiceTests {
         List<String> firstBatch = List.of("chapter-1");
         List<String> secondBatch = List.of("chapter-2");
         
-        when(imgService.getImg("chapter-1")).thenAnswer(invocation -> {
+        Mockito.when(imgService.getImg("chapter-1")).thenAnswer(invocation -> {
             // Simular procesamiento lento
             Thread.sleep(500);
             return List.of();
         });
-        when(imgService.getImg("chapter-2")).thenReturn(List.of());
+        Mockito.when(imgService.getImg("chapter-2")).thenReturn(List.of());
         
         CountDownLatch latch = new CountDownLatch(1);
         
@@ -166,11 +166,11 @@ public class ImgPreloadServiceTests {
             latch.countDown();
         }).start();
         
-        assertTrue(latch.await(3, TimeUnit.SECONDS));
+        Assertions.assertTrue(latch.await(3, TimeUnit.SECONDS));
         
         // Ambos deberían procesarse eventualmente
-        verify(imgService, timeout(2000).atLeastOnce()).getImg("chapter-1");
-        verify(imgService, timeout(2000).atLeastOnce()).getImg("chapter-2");
+        Mockito.verify(imgService, Mockito.timeout(2000).atLeastOnce()).getImg("chapter-1");
+        Mockito.verify(imgService, Mockito.timeout(2000).atLeastOnce()).getImg("chapter-2");
     }
 
     @Test
@@ -178,9 +178,9 @@ public class ImgPreloadServiceTests {
     void testPreloadImagesHandlesErrorsGracefully() throws InterruptedException {
         List<String> chapterIds = List.of("chapter-1", "chapter-2", "chapter-3");
         
-        when(imgService.getImg("chapter-1")).thenReturn(List.of());
-        when(imgService.getImg("chapter-2")).thenThrow(new RuntimeException("Error simulado"));
-        when(imgService.getImg("chapter-3")).thenReturn(List.of());
+        Mockito.when(imgService.getImg("chapter-1")).thenReturn(List.of());
+        Mockito.when(imgService.getImg("chapter-2")).thenThrow(new RuntimeException("Error simulado"));
+        Mockito.when(imgService.getImg("chapter-3")).thenReturn(List.of());
         
         CountDownLatch latch = new CountDownLatch(1);
         
@@ -195,12 +195,12 @@ public class ImgPreloadServiceTests {
             latch.countDown();
         }).start();
         
-        assertTrue(latch.await(3, TimeUnit.SECONDS));
+        Assertions.assertTrue(latch.await(3, TimeUnit.SECONDS));
         
         // Verificar que se intentó procesar todos los capítulos
-        verify(imgService, timeout(2000).atLeastOnce()).getImg("chapter-1");
-        verify(imgService, timeout(2000).atLeastOnce()).getImg("chapter-2");
-        verify(imgService, timeout(2000).atLeastOnce()).getImg("chapter-3");
+        Mockito.verify(imgService, Mockito.timeout(2000).atLeastOnce()).getImg("chapter-1");
+        Mockito.verify(imgService, Mockito.timeout(2000).atLeastOnce()).getImg("chapter-2");
+        Mockito.verify(imgService, Mockito.timeout(2000).atLeastOnce()).getImg("chapter-3");
     }
 
     @Test
@@ -209,7 +209,7 @@ public class ImgPreloadServiceTests {
         List<String> firstBatch = List.of("chapter-1", "chapter-2");
         List<String> secondBatch = List.of("chapter-3", "chapter-4");
         
-        when(imgService.getImg(any(String.class))).thenReturn(List.of());
+        Mockito.when(imgService.getImg(ArgumentMatchers.any(String.class))).thenReturn(List.of());
         
         CountDownLatch latch = new CountDownLatch(1);
         
@@ -233,13 +233,13 @@ public class ImgPreloadServiceTests {
             latch.countDown();
         }).start();
         
-        assertTrue(latch.await(3, TimeUnit.SECONDS));
+        Assertions.assertTrue(latch.await(3, TimeUnit.SECONDS));
         
         // Verificar que todos los capítulos fueron procesados
-        verify(imgService, timeout(2000).atLeastOnce()).getImg("chapter-1");
-        verify(imgService, timeout(2000).atLeastOnce()).getImg("chapter-2");
-        verify(imgService, timeout(2000).atLeastOnce()).getImg("chapter-3");
-        verify(imgService, timeout(2000).atLeastOnce()).getImg("chapter-4");
+        Mockito.verify(imgService, Mockito.timeout(2000).atLeastOnce()).getImg("chapter-1");
+        Mockito.verify(imgService, Mockito.timeout(2000).atLeastOnce()).getImg("chapter-2");
+        Mockito.verify(imgService, Mockito.timeout(2000).atLeastOnce()).getImg("chapter-3");
+        Mockito.verify(imgService, Mockito.timeout(2000).atLeastOnce()).getImg("chapter-4");
     }
 }
 
