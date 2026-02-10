@@ -1,11 +1,11 @@
 package com.manga.server.features.chapter.controller;
 
-import java.util.List;
-
+import com.manga.server.core.page.PageResponse;
 import com.manga.server.features.chapter.controller.pageable.ChapterPageable;
 import com.manga.server.features.chapter.controller.querty.ChapterQuery;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -14,11 +14,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.manga.server.features.chapter.responses.ChapterResponse;
-import com.manga.server.features.chapter.user_cases.ChapterService;
+import com.manga.server.features.chapter.user_cases.GetChapterUserCase;
 import com.manga.server.features.chapter.mappers.ChapterMapper;
-import com.manga.server.features.images.mappers.ImgMapper;
-import com.manga.server.features.images.user_cases.ImgService;
-
 import lombok.AllArgsConstructor;
 
 @RestController
@@ -27,19 +24,27 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 public class ChapterControllerV1 {
 
-    final ChapterService chapterService;
+    final GetChapterUserCase getChapterUserCase;
     final ChapterMapper chapterMapper;
 
-    final ImgService imgService;
-    final ImgMapper imgMapper;
-
     @GetMapping("/mangas/{mangaId}/chapters")
-    List<ChapterResponse> getChapters(
+    ResponseEntity<PageResponse<ChapterResponse>> getChapters(
             @PathVariable String mangaId,
             @ParameterObject @ModelAttribute ChapterQuery query,
-            @ParameterObject ChapterPageable pageable
-    ) {
-        return chapterMapper.chaptersToChapterDTOs(chapterService.getChapters(mangaId));
+            @ParameterObject ChapterPageable pageable) {
+
+        var chapters = getChapterUserCase.execute(mangaId, pageable.toPageable());
+
+        return ResponseEntity.ok(
+                PageResponse.<ChapterResponse>builder()
+                        .content(chapters.get().map(chapterMapper::toChapterResponse).toList())
+                        .pageNumber(chapters.getNumber())
+                        .pageSize(chapters.getSize())
+                        .totalElements(chapters.getTotalElements())
+                        .totalPages(chapters.getTotalPages())
+                        .first(chapters.isFirst())
+                        .last(chapters.isLast())
+                        .build());
     }
 
 }
