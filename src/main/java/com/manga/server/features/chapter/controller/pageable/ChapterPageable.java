@@ -1,19 +1,15 @@
 package com.manga.server.features.chapter.controller.pageable;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.manga.server.features.manga.enums.MangaSortField;
-import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.Getter;
-import lombok.Setter;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
-/**
- * Clase que encapsula los parámetros de paginación y ordenamiento para Manga.
- * Proporciona una interfaz para configurar la búsqueda de mangas con propiedades
- * filtrables y ordenables a través del Swagger/OpenAPI.
- */
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Getter;
+import lombok.Setter;
+
 @Getter
 @Setter
 public class ChapterPageable {
