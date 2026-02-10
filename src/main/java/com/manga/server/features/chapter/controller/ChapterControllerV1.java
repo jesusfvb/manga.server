@@ -1,8 +1,8 @@
-package com.manga.server.features.chapter.controller.chapter;
+package com.manga.server.features.chapter.controller;
 
 import java.util.List;
 
-import com.manga.server.features.chapter.controller.chapter.querty.ChapterQuery;
+import com.manga.server.features.chapter.controller.querty.ChapterQuery;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.CrossOrigin;

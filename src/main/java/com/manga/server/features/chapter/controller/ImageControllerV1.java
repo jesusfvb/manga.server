@@ -1,5 +1,7 @@
-package com.manga.server.features.chapter.controller.image;
+package com.manga.server.features.chapter.controller;
 
+import com.manga.server.features.chapter.controller.querty.ImageQuery;
+import com.manga.server.features.chapter.requests.ImagePreloadRequest;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;

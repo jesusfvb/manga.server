@@ -1,4 +1,4 @@
-package com.manga.server.features.chapter.controller.image;
+package com.manga.server.features.chapter.requests;
 
 import java.util.List;
 
