@@ -2,6 +2,7 @@ package com.manga.server.features.chapter.controller;
 
 import java.util.List;
 
+import com.manga.server.features.chapter.controller.pageable.ChapterPageable;
 import com.manga.server.features.chapter.controller.querty.ChapterQuery;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.http.MediaType;
@@ -12,7 +13,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.manga.server.features.chapter.responses.ChapterDTO;
+import com.manga.server.features.chapter.responses.ChapterResponse;
 import com.manga.server.features.chapter.mappers.ChapterMapper;
 import com.manga.server.features.images.mappers.ImgMapper;
 import com.manga.server.features.chapter.services.ChapterService;
@@ -26,27 +27,19 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 public class ChapterControllerV1 {
 
-  final ChapterService chapterService;
-  final ChapterMapper chapterMapper;
+    final ChapterService chapterService;
+    final ChapterMapper chapterMapper;
 
-  final ImgService imgService;
-  final ImgMapper imgMapper;
+    final ImgService imgService;
+    final ImgMapper imgMapper;
 
-  @GetMapping("/mangas/{mangaId}/chapters")
-  List<ChapterDTO> getChapters(@PathVariable String mangaId, @ParameterObject @ModelAttribute ChapterQuery query) {
-    return chapterMapper.chaptersToChapterDTOs(chapterService.getChapters(mangaId));
-  }
+    @GetMapping("/mangas/{mangaId}/chapters")
+    List<ChapterResponse> getChapters(
+            @PathVariable String mangaId,
+            @ParameterObject @ModelAttribute ChapterQuery query,
+            @ParameterObject ChapterPageable pageable
+    ) {
+        return chapterMapper.chaptersToChapterDTOs(chapterService.getChapters(mangaId));
+    }
 
-  // @GetMapping("/img")
-  // public List<ImgDTO> getImg(@RequestParam String chapterId) {
-  // var images = imgService.getImg(chapterId);
-  // return imgMapper.imgModelsToImgDTOs(images);
-  // }
-
-  // @GetMapping("/img/preload")
-  // public ResponseEntity<Void> preloadImages(@RequestParam List<String>
-  // chapterIds) {
-  // imgService.preloadImages(chapterIds);
-  // return ResponseEntity.ok().build();
-  // }
 }
