@@ -1,12 +1,13 @@
 package com.manga.server.core.page;
 
-import org.mapstruct.Mapper;
 import org.springframework.data.domain.Page;
+import org.springframework.stereotype.Service;
 
-@Mapper(componentModel = "spring")
-public interface PageResponseMapper {
 
-    default <T> PageResponse<T> toPageResponse(Page<T> page) {
+@Service
+public class PageResponseMapper {
+
+    public static <T> PageResponse<T> toPageResponse(Page<T> page) {
         return PageResponse.<T>builder()
                 .content(page.getContent())
                 .pageNumber(page.getNumber())
