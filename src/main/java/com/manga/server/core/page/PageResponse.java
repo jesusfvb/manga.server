@@ -15,7 +15,7 @@ import java.util.List;
 @Builder
 public class PageResponse<T> {
 
-    @Schema(type = "array",implementation = Object.class)
+    @Schema( type = "array", implementation = List.class)
     private List<T> content;
     private int pageNumber;
     private int pageSize;
