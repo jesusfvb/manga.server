@@ -1,7 +1,5 @@
 package com.manga.server.features.images.controller;
 
-import com.manga.server.features.images.controller.querty.ImageQuery;
-import com.manga.server.features.images.requests.ImagePreloadRequest;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -10,8 +8,8 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+
+import com.manga.server.features.images.controller.querty.ImageQuery;
 
 @RestController
 @RequestMapping(value = "/api/v1/", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -22,9 +20,5 @@ public class ImageControllerV1 {
         return ResponseEntity.ok().build();
     }
 
-    @PostMapping("images/preload")
-    public ResponseEntity<Void> postMethodName(@RequestBody ImagePreloadRequest request) {
-        return ResponseEntity.accepted().build();
-    }
 
 }
