@@ -1,27 +1,17 @@
 package com.manga.server.features.scrapper.scrapers.leercapitulo;
 
-import java.io.IOException;
-import java.time.LocalDateTime;
-import java.util.Comparator;
-import java.util.LinkedList;
 import java.util.List;
 
-import org.jsoup.nodes.Document;
-import org.jsoup.select.Elements;
 import org.springframework.stereotype.Service;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.manga.server.core.browser.JsoupWrapper;
-import com.manga.server.core.browser.PlaywrightManager;
-import com.manga.server.core.browser.RestClientWrapper;
 import com.manga.server.features.chapter.models.ChapterModel;
 import com.manga.server.features.images.models.ImgModel;
 import com.manga.server.features.manga.model.MangaModel;
 import com.manga.server.features.scrapper.scrapers.Scraper;
-import com.manga.server.features.scrapper.scrapers.leercapitulo.dtos.LeerCapituloSearchDTO;
+import com.manga.server.features.scrapper.scrapers.leercapitulo.helpers.ChaptersScraperHelper;
+import com.manga.server.features.scrapper.scrapers.leercapitulo.helpers.ImagesScraperHelper;
+import com.manga.server.features.scrapper.scrapers.leercapitulo.helpers.MangasScraperHelper;
 import com.manga.server.shared.enums.ScrappersEnum;
-import com.manga.server.shared.model.UrlModel;
-import com.microsoft.playwright.ElementHandle;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
@@ -31,13 +21,11 @@ import lombok.extern.java.Log;
 @RequiredArgsConstructor
 public class LeercapituloScraper implements Scraper {
 
-  private final PlaywrightManager playwrightManager;
+  private final MangasScraperHelper mangasScraperHelper;
+  private final ChaptersScraperHelper chaptersScraperHelper;
+  private final ImagesScraperHelper imagesScraperHelper;
 
-  private final JsoupWrapper jsoupWrapper;
-
-  private final RestClientWrapper restClientWrapper;
-
-  private final ScrappersEnum scrapper = ScrappersEnum.leerCapitulo;
+  private static final ScrappersEnum scrapper = ScrappersEnum.leerCapitulo;
 
   @Override
   public String baseURl() {
@@ -51,271 +39,26 @@ public class LeercapituloScraper implements Scraper {
 
   @Override
   public List<MangaModel> getMangasWithNewChapters() {
-    long startTime = System.currentTimeMillis();
-    log.info("Iniciando getMangasWithNewChapters - Thread: " + Thread.currentThread().getName());
-
-    List<MangaModel> mangas = new LinkedList<>();
-    String baseUrl = baseURl();
-
-    try {
-      log.info("Conectando a la URL base: " + baseUrl);
-      Document document = jsoupWrapper.getDocument(baseUrl);
-      log.info("Conexión exitosa a " + baseUrl);
-
-      String selector = "div.media.mainpage-manga";
-      log.fine("Buscando elementos con selector: " + selector);
-      Elements elements = document.select(selector);
-      log.info("Elementos encontrados: " + elements.size());
-
-      int processedCount = 0;
-      int errorCount = 0;
-
-      for (var element : elements) {
-        try {
-          String name = element.select("div.media-body > a > h4.manga-newest").text();
-          String url = element.select("div.media-body > a").first().attr("href");
-          String thumbnail = element.select("div.media-left.cover-manga > a > img.media-object.lozad").attr("data-src");
-          String lastChapterText = element
-              .select("div.media-body > div.row > div.col-xs-11 > div.hotup-list > span:first-child > a.xanh")
-              .text().replace("Capitulo", "").trim();
-
-          log.fine("Procesando manga - Nombre: " + name + ", URL: " + url + ", Último capítulo: " + lastChapterText);
-
-          if (name == null || name.isEmpty()) {
-            log.warning("Manga sin nombre encontrado, omitiendo");
-            errorCount++;
-            continue;
-          }
-
-          if (url == null || url.isEmpty()) {
-            log.warning("Manga '" + name + "' sin URL, omitiendo");
-            errorCount++;
-            continue;
-          }
-
-          try {
-            double lastChapter = Double.parseDouble(lastChapterText);
-            MangaModel manga = MangaModel.builder()
-                .name(name)
-                .url(UrlModel.builder().url(url).scrapper(ScrappersEnum.leerCapitulo).build())
-                .thumbnail(UrlModel.builder().url(thumbnail).scrapper(ScrappersEnum.leerCapitulo).build())
-                .lastChapter(lastChapter)
-                .build();
-
-            mangas.add(manga);
-            log.fine("Manga agregado: " + name + " (Capítulo " + lastChapter + ")");
-
-            // Construir detalles del manga
-            log.fine("Construyendo detalles para manga: " + name);
-            buildManga(manga);
-            processedCount++;
-
-          } catch (NumberFormatException e) {
-            log.warning("Error al parsear último capítulo '" + lastChapterText + "' para manga '" + name + "': "
-                + e.getMessage());
-            errorCount++;
-          }
-
-        } catch (Exception e) {
-          log.warning("Error al procesar elemento de manga: " + e.getMessage());
-          errorCount++;
-        }
-      }
-
-      long duration = System.currentTimeMillis() - startTime;
-      log.info(String.format(
-          "getMangasWithNewChapters completado - Mangas procesados: %d, Errores: %d, Total: %d, Duración: %d ms",
-          processedCount, errorCount, mangas.size(), duration));
-
-    } catch (IOException e) {
-      long duration = System.currentTimeMillis() - startTime;
-      log.severe("Error de IO en getMangasWithNewChapters después de " + duration + " ms: " + e.getMessage());
-      e.printStackTrace();
-    } catch (Exception e) {
-      long duration = System.currentTimeMillis() - startTime;
-      log.severe("Error inesperado en getMangasWithNewChapters después de " + duration + " ms: " + e.getMessage());
-      e.printStackTrace();
-    }
-
-    log.info("Finalizando getMangasWithNewChapters - Retornando " + mangas.size() + " mangas");
-    return mangas;
+    log.info("Orquestando extracción de mangas con nuevos capítulos");
+    return mangasScraperHelper.extractMangasWithNewChapters(baseURl());
   }
 
   @Override
   public List<MangaModel> searchMangas(String query) {
-    if (query == null || query.isEmpty()) {
-      return List.of();
-    }
-    List<MangaModel> mangas = new LinkedList<>();
-
-    try {
-      String uri = baseURl() + "/search-autocomplete?term=" + query;
-      List<LeerCapituloSearchDTO> list = restClientWrapper.get(uri, new TypeReference<List<LeerCapituloSearchDTO>>() {
-      });
-
-      list.forEach(manga -> {
-        if (manga.link() == null || manga.link().isEmpty() || manga.label() == null || manga.label().isEmpty()
-            || manga.thumbnail() == null || manga.thumbnail().isEmpty() || manga.value() == null
-            || manga.value().isEmpty()) {
-          return;
-        }
-        var mangaModel = MangaModel.builder().name(manga.label()).url(
-            UrlModel.builder().url(manga.link()).scrapper(ScrappersEnum.leerCapitulo).build())
-            .thumbnail(UrlModel.builder().url(manga.thumbnail()).scrapper(ScrappersEnum.leerCapitulo).build())
-            .build();
-        buildManga(mangaModel);
-        mangas.add(mangaModel);
-      });
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-    return mangas;
+    log.info("Orquestando búsqueda de mangas con query: " + query);
+    return mangasScraperHelper.searchMangas(query, baseURl());
   }
 
   @Override
   public List<ChapterModel> getChapters(String url) {
-    if (!url.contains(baseURl()))
-      url = baseURl() + url;
-    try {
-      Document document = jsoupWrapper.getDocument(url);
-      var chapters = document.select("#examples > div > div > ul > li > div > h4 > a");
-      List<ChapterModel> chapterModels = new LinkedList<>();
-      for (var chapter : chapters) {
-        String chapterUrl = chapter.attr("href");
-        String number = chapter.text().split(" ")[1];
-
-        if (number.contains(":")) {
-          number = number.split(":")[0];
-        }
-        chapterModels.add(ChapterModel.builder()
-            .url(UrlModel.builder().url(chapterUrl).scrapper(ScrappersEnum.leerCapitulo).build())
-            .number(Double.parseDouble(number))
-            .mangaId(url)
-            .lastUpdated(LocalDateTime.now())
-            .build());
-      }
-      return chapterModels;
-
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
-    return null;
+    log.info("Orquestando extracción de capítulos de: " + url);
+    return chaptersScraperHelper.extractChapters(url, baseURl());
   }
 
   @Override
   public List<ImgModel> getImg(String url) {
-    long startTime = System.currentTimeMillis();
-    log.info("Iniciando getImg - URL: " + url + ", Thread: " + Thread.currentThread().getName());
-
-    final String finalUrl = url.contains(baseURl()) ? url : baseURl() + url;
-    final String selector = ".comic_wraCon > a";
-    final String initScript = "localStorage.setItem('display_mode', '1')";
-
-    List<ImgModel> imgModels = new LinkedList<>();
-
-    try {
-      imgModels = playwrightManager.querySelectorAll(finalUrl, selector, initScript, this::imgMapper);
-      log.info("Imágenes encontradas: " + imgModels.size());
-
-      long duration = System.currentTimeMillis() - startTime;
-      log.info(String.format("getImg completado - Imágenes procesadas: %d, Duración: %d ms",
-          imgModels.size(), duration));
-
-    } catch (IllegalStateException e) {
-      long duration = System.currentTimeMillis() - startTime;
-      if (e.getMessage() != null && e.getMessage().contains("state should be: open")) {
-        log.severe(String.format(
-            "ERROR: Contexto de Playwright cerrado o en estado inválido después de %d ms - URL: %s, Thread: %s, Mensaje: %s",
-            duration, finalUrl, Thread.currentThread().getName(), e.getMessage()));
-        e.printStackTrace();
-      } else {
-        log.severe("ERROR: Estado ilegal en getImg después de " + duration + " ms - URL: " + finalUrl + ", Mensaje: "
-            + e.getMessage());
-        e.printStackTrace();
-      }
-    } catch (Exception e) {
-      long duration = System.currentTimeMillis() - startTime;
-      log.severe(
-          String.format("Error inesperado en getImg después de %d ms - URL: %s, Thread: %s, Tipo: %s, Mensaje: %s",
-              duration, finalUrl, Thread.currentThread().getName(), e.getClass().getSimpleName(), e.getMessage()));
-      e.printStackTrace();
-    }
-
-    if (imgModels.size() >= 1) {
-      log.fine("Ordenando " + imgModels.size() + " imágenes por número");
-      imgModels.sort(Comparator.comparingInt(ImgModel::getNumber));
-    }
-
-    log.info("Finalizando getImg - Retornando " + imgModels.size() + " imágenes para URL: " + finalUrl);
-    return imgModels;
-  }
-
-  protected ImgModel imgMapper(ElementHandle element) {
-    try {
-      ElementHandle imgElement = element.querySelector("img");
-      if (imgElement == null) {
-        return null;
-      }
-
-      String img = imgElement.getAttribute("data-src");
-      if (img == null || img.isEmpty()) {
-        return null;
-      }
-
-      String number = element.getAttribute("name");
-      if (number == null || number.isEmpty()) {
-        return null;
-      }
-
-      return ImgModel.builder().number(Integer.parseInt(number)).scrapper(ScrappersEnum.leerCapitulo)
-          .url(UrlModel.builder().url(img).scrapper(ScrappersEnum.leerCapitulo).build())
-          .lastUpdated(LocalDateTime.now())
-          .build();
-    } catch (Exception e) {
-      e.printStackTrace();
-      return null;
-    }
-  }
-
-  private void buildManga(MangaModel mangaModel) {
-    var url = mangaModel.getUrl().getUrl();
-    if (!url.contains(baseURl()))
-      url = baseURl() + url;
-    try {
-      Document document = jsoupWrapper.getDocument(url);
-      var description = getMangaDescription(document);
-
-      mangaModel.setDescription(description);
-      if (mangaModel.getLastChapter() == null) {
-        var lastChapter = getLastChapter(document);
-        mangaModel.setLastChapter(lastChapter);
-      }
-    } catch (IOException e) {
-
-    }
-  }
-
-  private String getMangaDescription(Document document) {
-    try {
-      return document.select("#example2").text();
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-    return null;
-  }
-
-  private Double getLastChapter(Document document) {
-    try {
-      var chapter = document.selectFirst("#examples > div > div > ul > li:nth-child(1) > div > h4 > a");
-      String number = chapter.text().split(" ")[1];
-      if (number.contains(":")) {
-        number = number.split(":")[0];
-      }
-      return Double.parseDouble(number);
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-    return null;
+    log.info("Orquestando extracción de imágenes de: " + url);
+    return imagesScraperHelper.extractImages(url, baseURl());
   }
 
 }
