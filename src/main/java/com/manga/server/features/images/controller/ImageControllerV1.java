@@ -33,7 +33,7 @@ public class ImageControllerV1 {
             @ParameterObject @ModelAttribute ImageQuery query,
             @ParameterObject ImagePageable pageable) {
 
-        var imagesPage = getImagesUseCase.execute(chapterId, pageable.toPageable());
+        var imagesPage = getImagesUseCase.execute(chapterId, query, pageable.toPageable());
         var imageResponses = imagesPage.map(imgMapper::imgModelToImageResponse);
 
         return ResponseEntity.ok(new ImagePageResponse(

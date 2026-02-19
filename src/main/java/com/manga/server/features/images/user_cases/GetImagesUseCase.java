@@ -8,6 +8,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.manga.server.features.images.comparator.ImageComparator;
+import com.manga.server.features.images.controller.querty.ImageQuery;
 import com.manga.server.features.images.models.ImgModel;
 import com.manga.server.features.images.repocitory.ImgRepository;
 
@@ -22,29 +23,49 @@ public class GetImagesUseCase {
     private final ImgRepository repository;
     private final SyncImagesUseCase syncImagesUseCase;
 
-    public Page<ImgModel> execute(String chapterId, Pageable pageable) {
+    public Page<ImgModel> execute(String chapterId, ImageQuery query, Pageable pageable) {
         if (chapterId == null || chapterId.isEmpty()) {
             log.warn("GetImagesUseCase ejecutado con chapterId nulo o vacío");
             return Page.empty(pageable);
         }
 
-        log.info("Obteniendo imágenes paginadas para chapterId: {}", chapterId);
+        boolean isUnpaged = Boolean.TRUE.equals(query.getUnpaged());
+        log.info("Obteniendo imágenes {} para chapterId: {}",
+            isUnpaged ? "SIN PAGINAR" : "paginadas", chapterId);
 
-        Page<ImgModel> images = repository.findByChapterId(chapterId, pageable);
+        Page<ImgModel> images = isUnpaged
+            ? getUnpagedFromRepository(chapterId)
+            : repository.findByChapterId(chapterId, pageable);
 
         if (images.isEmpty()) {
             log.info("No se encontraron imágenes en BD, sincronizando con scraper");
-            var syncImages = syncImagesUseCase.execute(chapterId);
-
-            syncImages.sort(ImageComparator.of(pageable));
-
-            int start = (int) pageable.getOffset();
-            int end = Math.min(start + pageable.getPageSize(), syncImages.size());
-            var pageContent = start >= end ? List.<ImgModel>of() : syncImages.subList(start, end);
-
-            return new PageImpl<>(pageContent, pageable, syncImages.size());
+            List<ImgModel> syncedImages = syncImagesUseCase.execute(chapterId);
+            return buildPageFromList(syncedImages, pageable, isUnpaged);
         }
 
         return images;
     }
+
+    private Page<ImgModel> getUnpagedFromRepository(String chapterId) {
+        return repository.findByChapterId(chapterId, Pageable.unpaged());
+    }
+
+    private Page<ImgModel> buildPageFromList(List<ImgModel> images, Pageable pageable, boolean unpaged) {
+        if (images.isEmpty()) {
+            return Page.empty(pageable);
+        }
+
+        images.sort(ImageComparator.of(pageable));
+
+        if (unpaged) {
+            return new PageImpl<>(images, Pageable.unpaged(), images.size());
+        }
+
+        int start = (int) pageable.getOffset();
+        int end = Math.min(start + pageable.getPageSize(), images.size());
+        List<ImgModel> pageContent = start >= end ? List.of() : images.subList(start, end);
+
+        return new PageImpl<>(pageContent, pageable, images.size());
+    }
 }
+
