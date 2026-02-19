@@ -33,21 +33,20 @@ public class GetImagesUseCase {
         log.info("Obteniendo imágenes {} para chapterId: {}",
             isUnpaged ? "SIN PAGINAR" : "paginadas", chapterId);
 
-        Page<ImgModel> images = isUnpaged
-            ? getUnpagedFromRepository(chapterId)
-            : repository.findByChapterId(chapterId, pageable);
+        // Cuando unpaged=true, usar Pageable.unpaged() pero conservar el Sort del pageable original
+        Pageable queryPageable = isUnpaged
+            ? Pageable.unpaged(pageable.getSort())
+            : pageable;
+
+        Page<ImgModel> images = repository.findByChapterId(chapterId, queryPageable);
 
         if (images.isEmpty()) {
             log.info("No se encontraron imágenes en BD, sincronizando con scraper");
             List<ImgModel> syncedImages = syncImagesUseCase.execute(chapterId);
-            return buildPageFromList(syncedImages, pageable, isUnpaged);
+            return buildPageFromList(syncedImages, queryPageable, isUnpaged);
         }
 
         return images;
-    }
-
-    private Page<ImgModel> getUnpagedFromRepository(String chapterId) {
-        return repository.findByChapterId(chapterId, Pageable.unpaged());
     }
 
     private Page<ImgModel> buildPageFromList(List<ImgModel> images, Pageable pageable, boolean unpaged) {
@@ -58,7 +57,7 @@ public class GetImagesUseCase {
         images.sort(ImageComparator.of(pageable));
 
         if (unpaged) {
-            return new PageImpl<>(images, Pageable.unpaged(), images.size());
+            return new PageImpl<>(images, Pageable.unpaged(pageable.getSort()), images.size());
         }
 
         int start = (int) pageable.getOffset();
@@ -68,4 +67,3 @@ public class GetImagesUseCase {
         return new PageImpl<>(pageContent, pageable, images.size());
     }
 }
-
