@@ -1,0 +1,41 @@
+package com.manga.server.features.images.controller.pageable;
+
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
+public class ImagePageable {
+    @Schema(defaultValue = "0")
+    private Integer page = 0;
+
+    @Schema(defaultValue = "10", maximum = "100", minimum = "0")
+    private Integer size = 10;
+
+    @Schema(defaultValue = "ASC")
+    private Sort.Direction direction = Sort.Direction.ASC;
+
+    @JsonIgnore
+    private static final int MAX_SIZE = 100;
+
+    public Pageable toPageable() {
+        int safePage = page != null && page >= 0 ? page : 0;
+        int safeSize = size != null && size > 0
+                ? Math.min(size, MAX_SIZE)
+                : 10;
+
+        return PageRequest.of(
+                safePage,
+                safeSize,
+                Sort.by(direction, "number")
+        );
+    }
+}
+

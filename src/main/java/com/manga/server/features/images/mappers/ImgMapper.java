@@ -2,19 +2,17 @@ package com.manga.server.features.images.mappers;
 
 import java.util.List;
 
+import com.manga.server.features.images.responses.ImageResponse;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.springframework.stereotype.Service;
 
 import com.manga.server.features.images.models.ImgModel;
-import com.manga.server.features.images.responses.ImgDTO;
 
-@Service
 @Mapper(componentModel = "spring")
 public interface ImgMapper {
 
-    @Mapping(target = "url", source = "img.url.url")
-    public ImgDTO imgModelToImgDTO(ImgModel img);
+    @Mapping(target = "url", source = "url.url")
+    ImageResponse imgModelToImageResponse(ImgModel img);
 
-    public List<ImgDTO> imgModelsToImgDTOs(List<ImgModel> imgList);
+    List<ImageResponse> imgModelsToImgDTOs(List<ImgModel> imgList);
 }
