@@ -1,75 +1,76 @@
-# Manga Cómoda - Servidor
+# Manga Cómoda - Server
 
 
-**Versión en inglés**: Ver [README_EN.md](README_EN.md) para la descripción del proyecto en inglés.
+**Spanish version**: See [README_ES.md](README_ES.md) for the project description in Spanish.
 
 ---
 
 
-Servidor backend desarrollado con Spring Boot que gestiona la información de mangas, rastrea nuevos capítulos automáticamente y proporciona una API REST para consultar datos de mangas, capítulos e imágenes.
+Backend server developed with Spring Boot that manages manga information, automatically tracks new chapters, and provides a REST API to query manga, chapter, and image data.
 
-## Descripción
+## Description
 
-Este proyecto es el componente servidor de **Manga Cómoda**, una aplicación que permite gestionar y rastrear mangas desde diferentes fuentes. El servidor utiliza técnicas de web scraping para obtener información actualizada de mangas y almacena los datos en MongoDB.
+This project is the server component of **Manga Cómoda**, an application that allows managing and tracking mangas from different sources. The server uses web scraping techniques to obtain updated manga information and stores data in MongoDB.
 
-### Características principales
+### Main Features
 
-- **Rastreo automático de nuevos capítulos**: El sistema verifica periódicamente si hay nuevos capítulos disponibles para los mangas registrados
-- **Web scraping**: Extrae información de mangas desde sitios web especializados (actualmente soporta LeerCapitulo)
-- **API REST**: Endpoints para buscar mangas, obtener capítulos y acceder a imágenes
-- **Búsqueda inteligente**: Busca mangas tanto en la base de datos local como en sitios web externos
-- **Almacenamiento persistente**: Utiliza MongoDB para almacenar información de mangas, capítulos e imágenes
-- **Procesamiento asíncrono**: Utiliza ejecución asíncrona para tareas de scraping y actualización
+- **Automatic new chapter tracking**: The system periodically checks for new chapters available for registered mangas
+- **Web scraping**: Extracts manga information from specialized websites (currently supports LeerCapitulo)
+- **REST API**: Endpoints to search mangas, get chapters, and access images
+- **Smart search**: Searches mangas both in the local database and external websites
+- **Persistent storage**: Uses MongoDB to store manga, chapter, and image information
+- **Asynchronous processing**: Uses asynchronous execution for scraping and update tasks
 
-### Tecnologías utilizadas
+### Technologies Used
 
-- **Spring Boot 3.5.4**: Framework principal
-- **Java 21**: Lenguaje de programación
-- **MongoDB**: Base de datos NoSQL
-- **Playwright**: Para automatización de navegadores y scraping avanzado
-- **JSoup**: Para parsing de HTML
-- **MapStruct**: Para mapeo de objetos DTO
-- **Lombok**: Para reducir código boilerplate
+- **Spring Boot 3.5.4**: Main framework
+- **Java 21**: Programming language
+- **MongoDB**: NoSQL database
+- **Playwright**: For browser automation and advanced scraping
+- **JSoup**: For HTML parsing
+- **MapStruct**: For DTO object mapping
+- **Lombok**: To reduce boilerplate code
 
-### Estructura del proyecto
+### Project Structure
 
 ```
 src/main/java/com/manga/server/
-├── core/                    # Configuraciones y componentes principales
-│   ├── browser/            # Gestión de navegadores (Playwright)
-│   ├── config/             # Configuraciones de Spring
-│   └── filtres/            # Filtros de aplicación
+├── core/                    # Main configurations and components
+│   ├── browser/            # Browser management (Playwright)
+│   ├── config/             # Spring configurations
+│   └── filtres/            # Application filters
 ├── features/
-│   ├── chapter/            # Gestión de capítulos e imágenes
-│   ├── manga/              # Gestión de mangas
-│   └── scrapper/           # Servicios de web scraping
-└── ServerApplication.java  # Clase principal
+│   ├── chapter/            # Chapter and image management
+│   ├── manga/              # Manga management
+│   └── scrapper/           # Web scraping services
+└── ServerApplication.java  # Main class
 ```
 
-### Endpoints principales
+### Main Endpoints
 
-- `GET /` - Obtiene la lista de mangas con nuevos capítulos
-- `GET /search?query={busqueda}` - Busca mangas por nombre
-- `GET /ids?ids={id1,id2,...}` - Obtiene mangas por sus IDs
-- `GET /chapter?mangaId={id}` - Obtiene los capítulos de un manga
-- `GET /chapter/img?chapterId={id}` - Obtiene las imágenes de un capítulo
+- `GET /` - Gets the list of mangas with new chapters
+- `GET /search?query={search}` - Searches mangas by name
+- `GET /ids?ids={id1,id2,...}` - Gets mangas by their IDs
+- `GET /chapter?mangaId={id}` - Gets chapters of a manga
+- `GET /chapter/img?chapterId={id}` - Gets images of a chapter
 
-### Requisitos
+### Requirements
 
-- Java 21 o superior
-- Maven 3.6 o superior
-- MongoDB (en ejecución)
+- Java 21 or higher
+- Maven 3.6 or higher
+- MongoDB (running)
 
-### Configuración
+### Configuration
 
-1. Clona el repositorio
-2. Configura MongoDB en `application.properties`
-3. Ejecuta `mvn clean install`
-4. Inicia la aplicación con `mvn spring-boot:run`
+1. Clone the repository
+2. Configure MongoDB in `application.properties`
+3. Run `mvn clean install`
+4. Start the application with `mvn spring-boot:run`
 
-### Desarrollo
+### Development
 
-El proyecto utiliza:
-- JUnit para pruebas unitarias
-- MapStruct para mapeo automático de DTOs
-- Lombok para reducir código repetitivo
+The project uses:
+- JUnit for unit testing
+- MapStruct for automatic DTO mapping
+- Lombok to reduce repetitive code
+
